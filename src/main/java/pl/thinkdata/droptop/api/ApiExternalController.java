@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.api;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,36 +15,74 @@ public class ApiExternalController {
     public static final String EXTERNAL_OPERATION_INVOKE_RESULT = "ExternalOperationInvokeResult";
     public static final String RESULT = "Result";
     private final WebClient webClient;
+    private String platonUser;
+    private String platonPassword;
+    private String platonApiMethodGetStocks;
 
-    public ApiExternalController(WebClient.Builder webClientBuilder) {
+    public ApiExternalController(WebClient.Builder webClientBuilder,
+                                 @Value("${platon.api.user}") String platonUser,
+                                 @Value("${platon.api.password}") String platonPassword,
+                                 @Value("${platon.api.method.getstocks}") String platonApiMethodGetStocks) {
         this.webClient = webClientBuilder.baseUrl("https://test.platon.com.pl").build();
+        this.platonUser = platonUser;
+        this.platonPassword = platonPassword;
+        this.platonApiMethodGetStocks = platonApiMethodGetStocks;
     }
 
-    @GetMapping(value = "/stocks", produces = MediaType.APPLICATION_XML_VALUE)
+    private String prepareOperationInfo(String nameMethod, String companyGuid, String user, String password, String transactionId) {
+        String operationInfo =
+            "<ExternalOperationInfo>" +
+                "<OperationIdent>" + nameMethod + "</OperationIdent>" +
+                "<CompanyGuid>" + companyGuid + "</CompanyGuid>" +
+                "<TransactionIdent>" + transactionId + "</TransactionIdent>" +
+                "<UserName>" + user + "</UserName>" +
+                "<Password>" + password + "</Password>" +
+            "</ExternalOperationInfo>";
+        return encodeBase64(operationInfo);
+    }
+
+    @GetMapping(value = "/stocks", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getStock() {
-        String soapXml = """
-    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
-        <s:Body>
-            <ExternalOperationInvoke xmlns="http://commersoft.pl/PostMan.Transfer">
-                <OperationInfo>PEV4dGVybmFsT3BlcmF0aW9uSW5mbz48T3BlcmF0aW9uSWRlbnQ+Z2V0U3RvY2tzPC9PcGVyYXRpb25JZGVudD48Q29tcGFueUd1aWQ+MmQ3YTMwOTctZDlkMS00MTQwLWEwMjQtMmM4MDU0NzExZGQ3PC9Db21wYW55R3VpZD48VHJhbnNhY3Rpb25JZGVudD5mOTZhOWUyMC00OGU4LTQxMjYtYjFmMi1kYmZhMWFjMzVjYjQ8L1RyYW5zYWN0aW9uSWRlbnQ+PFVzZXJOYW1lPnBsYXRvbl90ZXN0PC9Vc2VyTmFtZT48UGFzc3dvcmQ+UGxhdG9uVGVzdDEhPC9QYXNzd29yZD48L0V4dGVybmFsT3BlcmF0aW9uSW5mbz4=</OperationInfo>
-                <OperationParams>PEV4dGVybmFsT3BlcmF0aW9uUGFyYW1zPjxQYXJhbXM+UEVWNGNHOXlkRDQ4VUdGblpWTnBlbVUrTVRBd1BDOVFZV2RsVTJsNlpUNDhVR0ZuWlU1dlBqRThMMUJoWjJWT2J6NDhiR0Z6ZEVOb1lXNW5aV1JFWVhSbFBqSXdNak10TURFdE1EZFVNVEU2TkRBNk1ETXVOVE00T0RZMlBDOXNZWE4wUTJoaGJtZGxaRVJoZEdVK1BDOUZlSEJ2Y25RKzwvUGFyYW1zPjwvRXh0ZXJuYWxPcGVyYXRpb25QYXJhbXM+</OperationParams>
-            </ExternalOperationInvoke>
-        </s:Body>
-    </s:Envelope>
-    """;
+        String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, "123");
+        String soapXml =
+                """
+                    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"> +
+                    <s:Body>
+                        <ExternalOperationInvoke xmlns="http://commersoft.pl/PostMan.Transfer">
+                        <OperationInfo>" + operationInfo + "</OperationInfo>"
+                        <OperationParams>PEV4dGVybmFsT3BlcmF0aW9uUGFyYW1zPjxQYXJhbXM+UEVWNGNHOXlkRDQ4VUdGblpWTnBlbVUrTVRBd1BDOVFZV2RsVTJsNlpUNDhVR0ZuWlU1dlBqRThMMUJoWjJWT2J6NDhiR0Z6ZEVOb1lXNW5aV1JFWVhSbFBqSXdNak10TURFdE1EZFVNVEU2TkRBNk1ETXVOVE00T0RZMlBDOXNZWE4wUTJoaGJtZGxaRVJoZEdVK1BDOUZlSEJ2Y25RKzwvUGFyYW1zPjwvRXh0ZXJuYWxPcGVyYXRpb25QYXJhbXM+</OperationParams>
+                        </ExternalOperationInvoke>
+                    </s:Body>
+                </s:Envelope>
+                """;
+
+        String soapXmlTemple =
+                """
+                    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+                    <s:Body>
+                        <ExternalOperationInvoke xmlns="http://commersoft.pl/PostMan.Transfer">
+                        <OperationInfo>%s</OperationInfo>
+                        <OperationParams>PEV4dGVybmFsT3BlcmF0aW9uUGFyYW1zPjxQYXJhbXM+UEVWNGNHOXlkRDQ4VUdGblpWTnBlbVUrTVRBd1BDOVFZV2RsVTJsNlpUNDhVR0ZuWlU1dlBqRThMMUJoWjJWT2J6NDhiR0Z6ZEVOb1lXNW5aV1JFWVhSbFBqSXdNak10TURFdE1EZFVNVEU2TkRBNk1ETXVOVE00T0RZMlBDOXNZWE4wUTJoaGJtZGxaRVJoZEdVK1BDOUZlSEJ2Y25RKzwvUGFyYW1zPjwvRXh0ZXJuYWxPcGVyYXRpb25QYXJhbXM+</OperationParams>
+                        </ExternalOperationInvoke>
+                    </s:Body>
+                </s:Envelope>
+                """;
+
+        String soapXml2 = String.format(soapXmlTemple, operationInfo);
 
         try {
             ResponseEntity<String> response = webClient.post()
                     .uri("/csConnector/CommS_WCF_TransferService.svc")
                     .header("Content-Type", "text/xml")
                     .header("SOAPAction", "http://commersoft.pl/PostMan.Transfer/ICommS_WCF_TransferService/ExternalOperationInvoke")
-                    .bodyValue(soapXml)
+                    .bodyValue(soapXml2)
                     .retrieve()
                     .toEntity(String.class)
                     .block();
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 String responseBody = response.getBody();
+                System.out.println(responseBody);
                 String wynik = null;
                 String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
 
@@ -63,16 +102,26 @@ public class ApiExternalController {
             }
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return "⚠️ Błąd połączenia: " + e.getMessage();
         }
     }
 
-    private static String decodeBase64(String base64String) {
+    private static String decodeBase64(String toDecode) {
         try {
-            byte[] decodedBytes = Base64.getDecoder().decode(base64String);
+            byte[] decodedBytes = Base64.getDecoder().decode(toDecode);
             return new String(decodedBytes);
         } catch (IllegalArgumentException e) {
             System.err.println("Błąd dekodowania Base64: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static String encodeBase64(String toEncode) {
+        try {
+            return Base64.getEncoder().encodeToString(toEncode.getBytes());
+        } catch (IllegalArgumentException e) {
+            System.err.println("Błąd enkodowania Base64: " + e.getMessage());
             return null;
         }
     }
