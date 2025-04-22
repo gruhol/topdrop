@@ -11,6 +11,8 @@ import java.util.Base64;
 @RestController
 public class ApiExternalController {
 
+    public static final String EXTERNAL_OPERATION_INVOKE_RESULT = "ExternalOperationInvokeResult";
+    public static final String RESULT = "Result";
     private final WebClient webClient;
 
     public ApiExternalController(WebClient.Builder webClientBuilder) {
@@ -41,38 +43,14 @@ public class ApiExternalController {
                     .block();
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
-
                 String responseBody = response.getBody();
-                System.out.println("Response przed dekodowaniem:");
-                System.out.println();
-
                 String wynik = null;
-                // Wyciągnięcie wewnętrznego Base64 z tagu <Result>
-                String innerBase64 = extractInnerBase64(responseBody);
-
-                System.out.println();
-                System.out.println("Sam wynik Result przed rozkodowaniem:");
-                System.out.println();
-                System.out.println(innerBase64);
+                String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
 
                 if (innerBase64 != null) {
-                    // Drugie dekodowanie
                     String secondLevelDecoded = decodeBase64(innerBase64);
-                    System.out.println();
-                    System.out.println("Sam wynik zadekodowany");
-                    System.out.println();
-                    System.out.println(secondLevelDecoded);
-                    String hashresult = extractInnerBase64v2(secondLevelDecoded);
-
-                    System.out.println("Wynik result przed zdekowowaniem");
-                    System.out.println();
-                    System.out.println(hashresult);
-                    System.out.println();
-                    System.out.println("Ostateczny wynik");
-                    System.out.println();
-
+                    String hashresult = extractXMLByTag(secondLevelDecoded, RESULT);
                     wynik = decodeBase64(hashresult);
-                    System.out.println(wynik.toString());
                 }
 
                 return wynik;
@@ -99,29 +77,13 @@ public class ApiExternalController {
         }
     }
 
-    private static String extractInnerBase64(String xml) {
-        // Ulepszone parsowanie XML
+    private static String extractXMLByTag(String xml, String tag) {
         try {
-            int start = xml.indexOf("<ExternalOperationInvokeResult>") + "<ExternalOperationInvokeResult>".length();
-            int end = xml.indexOf("</ExternalOperationInvokeResult>");
-            System.out.println(xml);
+            int start = xml.indexOf("<" + tag + ">") + ("<" + tag + ">").length();
+            int end = xml.indexOf("</" + tag + ">");
             return xml.substring(start, end).trim();
         } catch (Exception e) {
-            System.err.println("Błąd parsowania XML: " + e.getMessage());
+            return null;
         }
-        return null;
-    }
-
-    private static String extractInnerBase64v2(String xml) {
-        // Ulepszone parsowanie XML
-        try {
-            int start = xml.indexOf("<Result>") + "<Result>".length();
-            int end = xml.indexOf("</Result>");
-            System.out.println(xml);
-            return xml.substring(start, end).trim();
-        } catch (Exception e) {
-            System.err.println("Błąd parsowania XML: " + e.getMessage());
-        }
-        return null;
     }
 }
