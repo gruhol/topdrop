@@ -6,7 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
 import java.util.Base64;
 
 @RestController
@@ -43,37 +49,26 @@ public class ApiExternalController {
 
     @GetMapping(value = "/stocks", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getStock() {
-        String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, "123");
-        String soapXml =
-                """
-                    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"> +
-                    <s:Body>
-                        <ExternalOperationInvoke xmlns="http://commersoft.pl/PostMan.Transfer">
-                        <OperationInfo>" + operationInfo + "</OperationInfo>"
-                        <OperationParams>PEV4dGVybmFsT3BlcmF0aW9uUGFyYW1zPjxQYXJhbXM+UEVWNGNHOXlkRDQ4VUdGblpWTnBlbVUrTVRBd1BDOVFZV2RsVTJsNlpUNDhVR0ZuWlU1dlBqRThMMUJoWjJWT2J6NDhiR0Z6ZEVOb1lXNW5aV1JFWVhSbFBqSXdNak10TURFdE1EZFVNVEU2TkRBNk1ETXVOVE00T0RZMlBDOXNZWE4wUTJoaGJtZGxaRVJoZEdVK1BDOUZlSEJ2Y25RKzwvUGFyYW1zPjwvRXh0ZXJuYWxPcGVyYXRpb25QYXJhbXM+</OperationParams>
-                        </ExternalOperationInvoke>
-                    </s:Body>
-                </s:Envelope>
-                """;
+        String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, "00000000-0000-2025-0426-000000000001"); //00000000-0000-2025-0426-000000000001
 
         String soapXmlTemple =
                 """
-                    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
-                    <s:Body>
-                        <ExternalOperationInvoke xmlns="http://commersoft.pl/PostMan.Transfer">
-                        <OperationInfo>%s</OperationInfo>
-                        <OperationParams>PEV4dGVybmFsT3BlcmF0aW9uUGFyYW1zPjxQYXJhbXM+UEVWNGNHOXlkRDQ4VUdGblpWTnBlbVUrTVRBd1BDOVFZV2RsVTJsNlpUNDhVR0ZuWlU1dlBqRThMMUJoWjJWT2J6NDhiR0Z6ZEVOb1lXNW5aV1JFWVhSbFBqSXdNak10TURFdE1EZFVNVEU2TkRBNk1ETXVOVE00T0RZMlBDOXNZWE4wUTJoaGJtZGxaRVJoZEdVK1BDOUZlSEJ2Y25RKzwvUGFyYW1zPjwvRXh0ZXJuYWxPcGVyYXRpb25QYXJhbXM+</OperationParams>
-                        </ExternalOperationInvoke>
-                    </s:Body>
-                </s:Envelope>
-                """;
+        <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+            <s:Body>
+                <ExternalOperationInvoke xmlns="http://commersoft.pl/PostMan.Transfer">
+                    <OperationInfo>%s</OperationInfo>
+                    <OperationParams>PEV4dGVybmFsT3BlcmF0aW9uUGFyYW1zPjxQYXJhbXM+UEVWNGNHOXlkRDQ4VUdGblpWTnBlbVUrTVRBd1BDOVFZV2RsVTJsNlpUNDhVR0ZuWlU1dlBqRThMMUJoWjJWT2J6NDhiR0Z6ZEVOb1lXNW5aV1JFWVhSbFBqSXdNak10TURFdE1EZFVNVEU2TkRBNk1ETXVOVE00T0RZMlBDOXNZWE4wUTJoaGJtZGxaRVJoZEdVK1BDOUZlSEJ2Y25RKzwvUGFyYW1zPjwvRXh0ZXJuYWxPcGVyYXRpb25QYXJhbXM+</OperationParams>
+                </ExternalOperationInvoke>
+            </s:Body>
+        </s:Envelope>
+        """;
 
         String soapXml2 = String.format(soapXmlTemple, operationInfo);
 
         try {
             ResponseEntity<String> response = webClient.post()
                     .uri("/csConnector/CommS_WCF_TransferService.svc")
-                    .header("Content-Type", "text/xml")
+                    .header("Content-Type", "text/xml; charset=utf-8")
                     .header("SOAPAction", "http://commersoft.pl/PostMan.Transfer/ICommS_WCF_TransferService/ExternalOperationInvoke")
                     .bodyValue(soapXml2)
                     .retrieve()
@@ -82,7 +77,6 @@ public class ApiExternalController {
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 String responseBody = response.getBody();
-                System.out.println(responseBody);
                 String wynik = null;
                 String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
 
@@ -96,14 +90,21 @@ public class ApiExternalController {
 
 
             } else if (response != null) {
-                return "❌ Inny status: " + response.getStatusCode() + "\nOdpowiedź:\n" + response.getBody();
+                return "Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody();
             } else {
-                return "❌ Brak odpowiedzi z serwera.";
+                return "Response not found";
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return "⚠️ Błąd połączenia: " + e.getMessage();
+            if (e instanceof WebClientResponseException webClientException) {
+                String responseBody = webClientException.getResponseBodyAsString();
+                String soapMessage = extractXMLByTag(responseBody, "Message");
+                if (soapMessage != null) {
+                    return "SOAP messange error: " + soapMessage;
+                }
+            }
+
+            return "Error connection: " + e.getMessage();
         }
     }
 
@@ -126,13 +127,20 @@ public class ApiExternalController {
         }
     }
 
-    private static String extractXMLByTag(String xml, String tag) {
+    private static String extractXMLByTag(String xml, String tagName) {
         try {
-            int start = xml.indexOf("<" + tag + ">") + ("<" + tag + ">").length();
-            int end = xml.indexOf("</" + tag + ">");
-            return xml.substring(start, end).trim();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new ByteArrayInputStream(xml.getBytes()));
+
+            NodeList nodes = document.getElementsByTagName(tagName);
+            if (nodes.getLength() > 0) {
+                return nodes.item(0).getTextContent().trim();
+            }
         } catch (Exception e) {
-            return null;
+            System.err.println("Błąd parsowania XML: " + e.getMessage());
         }
+        return null;
     }
 }
