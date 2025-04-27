@@ -13,6 +13,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
 import java.util.Base64;
 
 @RestController
@@ -49,21 +50,24 @@ public class ApiExternalController {
 
     @GetMapping(value = "/stocks", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getStock() {
+        LocalDateTime tempDate = LocalDateTime.of(2024, 1, 1, 12, 1, 22, 222 );
+
         String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, "00000000-0000-2025-0426-000000000001"); //00000000-0000-2025-0426-000000000001
+        String parameters = prepareParameters("100","1", tempDate);
 
         String soapXmlTemple =
-                """
+        """
         <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
             <s:Body>
                 <ExternalOperationInvoke xmlns="http://commersoft.pl/PostMan.Transfer">
                     <OperationInfo>%s</OperationInfo>
-                    <OperationParams>PEV4dGVybmFsT3BlcmF0aW9uUGFyYW1zPjxQYXJhbXM+UEVWNGNHOXlkRDQ4VUdGblpWTnBlbVUrTVRBd1BDOVFZV2RsVTJsNlpUNDhVR0ZuWlU1dlBqRThMMUJoWjJWT2J6NDhiR0Z6ZEVOb1lXNW5aV1JFWVhSbFBqSXdNak10TURFdE1EZFVNVEU2TkRBNk1ETXVOVE00T0RZMlBDOXNZWE4wUTJoaGJtZGxaRVJoZEdVK1BDOUZlSEJ2Y25RKzwvUGFyYW1zPjwvRXh0ZXJuYWxPcGVyYXRpb25QYXJhbXM+</OperationParams>
+                    <OperationParams>%s</OperationParams>
                 </ExternalOperationInvoke>
             </s:Body>
         </s:Envelope>
         """;
 
-        String soapXml2 = String.format(soapXmlTemple, operationInfo);
+        String soapXml2 = String.format(soapXmlTemple, operationInfo, parameters);
 
         try {
             ResponseEntity<String> response = webClient.post()
@@ -77,16 +81,16 @@ public class ApiExternalController {
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 String responseBody = response.getBody();
-                String wynik = null;
+                String result = null;
                 String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
 
                 if (innerBase64 != null) {
                     String secondLevelDecoded = decodeBase64(innerBase64);
                     String hashresult = extractXMLByTag(secondLevelDecoded, RESULT);
-                    wynik = decodeBase64(hashresult);
+                    result = decodeBase64(hashresult);
                 }
 
-                return wynik;
+                return result;
 
 
             } else if (response != null) {
@@ -106,6 +110,26 @@ public class ApiExternalController {
 
             return "Error connection: " + e.getMessage();
         }
+    }
+
+    private String prepareParameters(String pageSize, String pageNo, LocalDateTime lastChangedDate) {
+        String parametersTemplate = """
+                            <Export>
+                            <PageSize>%s</PageSize>
+                            <PageNo>%s</PageNo>
+                            <lastChangedDate>%s</lastChangedDate>
+                            </Export>
+                            """;
+        String parameters = String.format(parametersTemplate, pageSize, pageNo, lastChangedDate.toString());
+
+        String externalOperationParamsTemplate = """
+                    <ExternalOperationParams>
+                        <Params>%s</Params>
+                    </ExternalOperationParams>
+                    """;
+
+        String externalOperationParams = String.format(externalOperationParamsTemplate, encodeBase64(parameters));
+        return encodeBase64(externalOperationParams);
     }
 
     private static String decodeBase64(String toDecode) {
