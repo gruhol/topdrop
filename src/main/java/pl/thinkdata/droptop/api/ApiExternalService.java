@@ -49,7 +49,7 @@ public class ApiExternalService {
         this.platonApiMethodGetPublications = platonApiMethodGetPublications;
     }
 
-    public PlatonResponse getStocks(GetStocksDto getStocksDto) {
+    public PlatonResponse createPlatonResponse(GetStocksDto getStocksDto) {
         String orderId = getTransactionId(getStocksDto.getTransactionNumber());
         String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, orderId); //00000000-0000-2025-0426-000000000001
         String parameters = prepareGetStockParameters(getStocksDto.getPageSize(),getStocksDto.getPageNo(), getStocksDto.getLastChangeDate());
@@ -88,9 +88,9 @@ public class ApiExternalService {
                         .build();
 
             } else if (response != null) {
-                return getStocks("Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody());
+                return createPlatonResponse("Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody());
             } else {
-                return getStocks("Response not found");
+                return createPlatonResponse("Response not found");
             }
 
         } catch (Exception e) {
@@ -98,10 +98,10 @@ public class ApiExternalService {
                 String responseBody = webClientException.getResponseBodyAsString();
                 String soapMessage = extractXMLByTag(responseBody, "Message");
                 if (soapMessage != null) {
-                    return getStocks("SOAP messange error: " + soapMessage);
+                    return createPlatonResponse("SOAP messange error: " + soapMessage);
                 }
             }
-            return getStocks("Error connection: " + e.getMessage());
+            return createPlatonResponse("Error connection: " + e.getMessage());
         }
     }
 
@@ -144,9 +144,9 @@ public class ApiExternalService {
                         .build();
 
             } else if (response != null) {
-                return getStocks("Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody());
+                return createPlatonResponse("Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody());
             } else {
-                return getStocks("Response not found");
+                return createPlatonResponse("Response not found");
             }
 
         } catch (Exception e) {
@@ -154,14 +154,14 @@ public class ApiExternalService {
                 String responseBody = webClientException.getResponseBodyAsString();
                 String soapMessage = extractXMLByTag(responseBody, "Message");
                 if (soapMessage != null) {
-                    return getStocks("SOAP messange error: " + soapMessage);
+                    return createPlatonResponse("SOAP messange error: " + soapMessage);
                 }
             }
-            return getStocks("Error connection: " + e.getMessage());
+            return createPlatonResponse("Error connection: " + e.getMessage());
         }
     }
 
-    private PlatonResponse getStocks(String message) {
+    private PlatonResponse createPlatonResponse(String message) {
         return PlatonResponse.builder()
                 .message(message)
                 .build();

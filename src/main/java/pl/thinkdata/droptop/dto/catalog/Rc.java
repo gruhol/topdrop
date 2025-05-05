@@ -6,6 +6,8 @@ import lombok.Setter;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,4 +19,8 @@ public class Rc {
 
     @XmlElement(name = "URLOkladkaLink")
     private String urlCoverBookLink;
+
+    @XmlElementWrapper(name = "PRODUCTS")
+    @XmlElement(name = "rp")
+    private List<Product> products;
 }

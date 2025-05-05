@@ -25,7 +25,7 @@ public class PlatonApiController {
                 .lastChangeDate(LocalDateTime.of(2024,01,01, 12, 11, 2, 33))
                 .transactionNumber(1)
                 .build();
-        PlatonResponse data = apiExternalService.getStocks(getStocksDto);
+        PlatonResponse data = apiExternalService.createPlatonResponse(getStocksDto);
         model.addAttribute("data", data);
         return "Test";
     }
