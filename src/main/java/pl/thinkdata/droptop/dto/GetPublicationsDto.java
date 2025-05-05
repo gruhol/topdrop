@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class GetStocksDto {
+public class GetPublicationsDto {
     private String pageSize;
     private String pageNo;
     private LocalDateTime lastChangeDate;

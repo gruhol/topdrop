@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.dto;
+package pl.thinkdata.droptop.dto.catalog;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlElement;
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Summary {
+public class CatalogResponseSummary {
 
     @XmlElement(name = "PageSize")
     private int pageSize;

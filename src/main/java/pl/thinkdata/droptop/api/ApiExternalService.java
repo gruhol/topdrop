@@ -7,9 +7,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import pl.thinkdata.droptop.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.dto.GetStocksDto;
-import pl.thinkdata.droptop.dto.Header;
-import pl.thinkdata.droptop.dto.Stock;
+import pl.thinkdata.droptop.dto.PlatonResponse;
+import pl.thinkdata.droptop.dto.catalog.Catalog;
+import pl.thinkdata.droptop.dto.stock.Stock;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -33,19 +35,22 @@ public class ApiExternalService {
     private String platonUser;
     private String platonPassword;
     private String platonApiMethodGetStocks;
+    private String platonApiMethodGetPublications;
 
     public ApiExternalService(WebClient.Builder webClientBuilder,
                               @Value("${platon.api.user}") String platonUser,
                               @Value("${platon.api.password}") String platonPassword,
-                              @Value("${platon.api.method.getstocks}") String platonApiMethodGetStocks) {
+                              @Value("${platon.api.method.getstocks}") String platonApiMethodGetStocks,
+                              @Value("${platon.api.method.getpublications}") String platonApiMethodGetPublications) {
         this.webClient = webClientBuilder.baseUrl("https://test.platon.com.pl").build();
         this.platonUser = platonUser;
         this.platonPassword = platonPassword;
         this.platonApiMethodGetStocks = platonApiMethodGetStocks;
+        this.platonApiMethodGetPublications = platonApiMethodGetPublications;
     }
 
-    public Stock getStock(GetStocksDto getStocksDto) {
-        String orderId = getOrderId(getStocksDto.getOrderNumber());
+    public PlatonResponse getStocks(GetStocksDto getStocksDto) {
+        String orderId = getTransactionId(getStocksDto.getTransactionNumber());
         String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, orderId); //00000000-0000-2025-0426-000000000001
         String parameters = prepareGetStockParameters(getStocksDto.getPageSize(),getStocksDto.getPageNo(), getStocksDto.getLastChangeDate());
         String request = prepareRequest(operationInfo, parameters);
@@ -73,15 +78,19 @@ public class ApiExternalService {
                     String hashresult = extractXMLByTag(secondLevelDecoded, RESULT);
                     result = decodeBase64(hashresult);
                     StringReader reader = new StringReader(result);
-                    return (Stock) unmarshaller.unmarshal(reader);
+                    return PlatonResponse.builder()
+                            .stock((Stock) unmarshaller.unmarshal(reader))
+                            .build();
                 }
                 StringReader reader = new StringReader(result);
-                return (Stock) unmarshaller.unmarshal(reader);
+                return PlatonResponse.builder()
+                        .stock((Stock) unmarshaller.unmarshal(reader))
+                        .build();
 
             } else if (response != null) {
-                return getStock("Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody());
+                return getStocks("Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody());
             } else {
-                return getStock("Response not found");
+                return getStocks("Response not found");
             }
 
         } catch (Exception e) {
@@ -89,22 +98,76 @@ public class ApiExternalService {
                 String responseBody = webClientException.getResponseBodyAsString();
                 String soapMessage = extractXMLByTag(responseBody, "Message");
                 if (soapMessage != null) {
-                    return getStock("SOAP messange error: " + soapMessage);
+                    return getStocks("SOAP messange error: " + soapMessage);
                 }
             }
-            return getStock("Error connection: " + e.getMessage());
+            return getStocks("Error connection: " + e.getMessage());
         }
     }
 
-    private Stock getStock(String message) {
-        Stock stock = new Stock();
-        Header header = new Header();
-        header.setResponseDate(message);
-        stock.setHeader(header);
-        return stock;
+    public PlatonResponse getPublications(GetPublicationsDto dto) {
+        String transactionId = getTransactionId(dto.getTransactionNumber());
+        String operationInfo = prepareOperationInfo("getPublications", platonApiMethodGetPublications, platonUser, platonPassword, transactionId);
+        String parameters = prepareGetStockParameters(dto.getPageSize(),dto.getPageNo(), dto.getLastChangeDate());
+        String request = prepareRequest(operationInfo, parameters);
+
+        try {
+            ResponseEntity<String> response = webClient.post()
+                    .uri("/csConnector/CommS_WCF_TransferService.svc")
+                    .header("Content-Type", "text/xml; charset=utf-8")
+                    .header("SOAPAction", "http://commersoft.pl/PostMan.Transfer/ICommS_WCF_TransferService/ExternalOperationInvoke")
+                    .bodyValue(request)
+                    .retrieve()
+                    .toEntity(String.class)
+                    .block();
+
+            if (response != null && response.getStatusCode().is2xxSuccessful()) {
+                String responseBody = response.getBody();
+                String result = null;
+                String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
+
+                JAXBContext context = JAXBContext.newInstance(Catalog.class);
+                Unmarshaller unmarshaller = context.createUnmarshaller();
+
+                if (innerBase64 != null) {
+                    String secondLevelDecoded = decodeBase64(innerBase64);
+                    String hashresult = extractXMLByTag(secondLevelDecoded, RESULT);
+                    result = decodeBase64(hashresult);
+                    StringReader reader = new StringReader(result);
+                    return PlatonResponse.builder()
+                            .catalog((Catalog) unmarshaller.unmarshal(reader))
+                            .build();
+                }
+                StringReader reader = new StringReader(result);
+                return PlatonResponse.builder()
+                        .catalog((Catalog) unmarshaller.unmarshal(reader))
+                        .build();
+
+            } else if (response != null) {
+                return getStocks("Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody());
+            } else {
+                return getStocks("Response not found");
+            }
+
+        } catch (Exception e) {
+            if (e instanceof WebClientResponseException webClientException) {
+                String responseBody = webClientException.getResponseBodyAsString();
+                String soapMessage = extractXMLByTag(responseBody, "Message");
+                if (soapMessage != null) {
+                    return getStocks("SOAP messange error: " + soapMessage);
+                }
+            }
+            return getStocks("Error connection: " + e.getMessage());
+        }
     }
 
-    private static String getOrderId(int orderNumber) {
+    private PlatonResponse getStocks(String message) {
+        return PlatonResponse.builder()
+                .message(message)
+                .build();
+    }
+
+    private static String getTransactionId(int orderNumber) {
         LocalDateTime reqTime = LocalDateTime.now();
         String fixedPrefix = "00000000-0000";
         String year = String.valueOf(reqTime.getYear());
