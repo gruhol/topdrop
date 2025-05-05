@@ -32,10 +32,10 @@ public class ApiExternalService {
     public static final String EXTERNAL_OPERATION_INVOKE_RESULT = "ExternalOperationInvokeResult";
     public static final String RESULT = "Result";
     private final WebClient webClient;
-    private String platonUser;
-    private String platonPassword;
-    private String platonApiMethodGetStocks;
-    private String platonApiMethodGetPublications;
+    private final String platonUser;
+    private final String platonPassword;
+    private final String platonApiMethodGetStocks;
+    private final String platonApiMethodGetPublications;
 
     public ApiExternalService(WebClient.Builder webClientBuilder,
                               @Value("${platon.api.user}") String platonUser,
@@ -56,14 +56,7 @@ public class ApiExternalService {
         String request = prepareRequest(operationInfo, parameters);
 
         try {
-            ResponseEntity<String> response = webClient.post()
-                    .uri("/csConnector/CommS_WCF_TransferService.svc")
-                    .header("Content-Type", "text/xml; charset=utf-8")
-                    .header("SOAPAction", "http://commersoft.pl/PostMan.Transfer/ICommS_WCF_TransferService/ExternalOperationInvoke")
-                    .bodyValue(request)
-                    .retrieve()
-                    .toEntity(String.class)
-                    .block();
+            ResponseEntity<String> response = getDataFromWebClient(request);
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 String responseBody = response.getBody();
@@ -94,14 +87,7 @@ public class ApiExternalService {
             }
 
         } catch (Exception e) {
-            if (e instanceof WebClientResponseException webClientException) {
-                String responseBody = webClientException.getResponseBodyAsString();
-                String soapMessage = extractXMLByTag(responseBody, "Message");
-                if (soapMessage != null) {
-                    return createPlatonResponse("SOAP messange error: " + soapMessage);
-                }
-            }
-            return createPlatonResponse("Error connection: " + e.getMessage());
+            return getPlatonExceptionResponse(e);
         }
     }
 
@@ -112,14 +98,7 @@ public class ApiExternalService {
         String request = prepareRequest(operationInfo, parameters);
 
         try {
-            ResponseEntity<String> response = webClient.post()
-                    .uri("/csConnector/CommS_WCF_TransferService.svc")
-                    .header("Content-Type", "text/xml; charset=utf-8")
-                    .header("SOAPAction", "http://commersoft.pl/PostMan.Transfer/ICommS_WCF_TransferService/ExternalOperationInvoke")
-                    .bodyValue(request)
-                    .retrieve()
-                    .toEntity(String.class)
-                    .block();
+            ResponseEntity<String> response = getDataFromWebClient(request);
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 String responseBody = response.getBody();
@@ -150,21 +129,36 @@ public class ApiExternalService {
             }
 
         } catch (Exception e) {
-            if (e instanceof WebClientResponseException webClientException) {
-                String responseBody = webClientException.getResponseBodyAsString();
-                String soapMessage = extractXMLByTag(responseBody, "Message");
-                if (soapMessage != null) {
-                    return createPlatonResponse("SOAP messange error: " + soapMessage);
-                }
-            }
-            return createPlatonResponse("Error connection: " + e.getMessage());
+            return getPlatonExceptionResponse(e);
         }
+    }
+
+    private ResponseEntity<String> getDataFromWebClient(String request) {
+        return webClient.post()
+                .uri("/csConnector/CommS_WCF_TransferService.svc")
+                .header("Content-Type", "text/xml; charset=utf-8")
+                .header("SOAPAction", "http://commersoft.pl/PostMan.Transfer/ICommS_WCF_TransferService/ExternalOperationInvoke")
+                .bodyValue(request)
+                .retrieve()
+                .toEntity(String.class)
+                .block();
     }
 
     private PlatonResponse createPlatonResponse(String message) {
         return PlatonResponse.builder()
                 .message(message)
                 .build();
+    }
+
+    private PlatonResponse getPlatonExceptionResponse(Exception e) {
+        if (e instanceof WebClientResponseException webClientException) {
+            String responseBody = webClientException.getResponseBodyAsString();
+            String soapMessage = extractXMLByTag(responseBody, "Message");
+            if (soapMessage != null) {
+                return createPlatonResponse("SOAP messange error: " + soapMessage);
+            }
+        }
+        return createPlatonResponse("Error connection: " + e.getMessage());
     }
 
     private static String getTransactionId(int orderNumber) {
