@@ -22,5 +22,5 @@ public class Rc {
 
     @XmlElementWrapper(name = "PRODUCTS")
     @XmlElement(name = "rp")
-    private List<Product> products;
+    private List<ProductFromXml> products;
 }

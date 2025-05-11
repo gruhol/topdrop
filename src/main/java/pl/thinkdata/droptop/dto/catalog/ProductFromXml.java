@@ -1,11 +1,14 @@
 package pl.thinkdata.droptop.dto.catalog;
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+@Getter
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Product {
+public class ProductFromXml {
 
     @XmlElement(name = "a")
     private String id;
@@ -71,7 +74,7 @@ public class Product {
     private String vat;
 
     @XmlElement(name = "x")
-    private String price;
+    private double price;
 
     @XmlElement(name = "y")
     private String type;
