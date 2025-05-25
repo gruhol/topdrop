@@ -9,10 +9,13 @@ import pl.thinkdata.droptop.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.dto.GetStocksDto;
 import pl.thinkdata.droptop.dto.PlatonResponse;
 import pl.thinkdata.droptop.dto.catalog.ProductFromXml;
+import pl.thinkdata.droptop.mapper.ProductMapper;
 import pl.thinkdata.droptop.product.model.Product;
 import pl.thinkdata.droptop.repository.ProductRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Controller
@@ -38,49 +41,34 @@ public class PlatonApiController {
 
     @GetMapping("/produkt")
     public String getProductsFromApi(Model model) {
-        GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
-                .pageNo("1")
-                .pageSize("10")
-                //.lastChangeDate(LocalDateTime.of(2022,01,01, 12, 11, 2, 33))
-                .transactionNumber(1)
-                .build();
-        PlatonResponse data = apiExternalService.getPublications(getPublicationsDto);
-        data.getCatalog().getRc().getProducts().stream()
-                .map(this::mapToProduct)
-                .filter(Objects::nonNull)
-                .forEach(productRepository::save);
-        model.addAttribute("data", data);
+        int pageNumber = 1;
+        int downloadCount = 0;
+        int total  = 0;
+        List<Product> listOfSaveProducts = new ArrayList<>();
+        do {
+            GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
+                    .pageNo(String.valueOf(pageNumber))
+                    .pageSize("10")
+                    //.lastChangeDate(LocalDateTime.of(2022,01,01, 12, 11, 2, 33))
+                    .transactionNumber(1)
+                    .build();
+            PlatonResponse data = apiExternalService.getPublications(getPublicationsDto);
+            downloadCount += 10;
+            pageNumber++;
+            total = data.getCatalog().getSummary().getTotal();
+            data.getCatalog().getRc().getProducts().stream()
+                    .map(ProductMapper::mapToProduct)
+                    .filter(Objects::nonNull)
+                    .forEach(product -> {
+                            productRepository.save(product);
+                            listOfSaveProducts.add(product);
+                            });
+
+        }
+        while (total > downloadCount);
+        model.addAttribute("data", listOfSaveProducts);
         return "Test";
     }
 
-    private Product mapToProduct(ProductFromXml product) {
-        return Product.builder()
-                .ean(product.getEan())
-                .isbn(product.getIsbn())
-                .title(product.getTitle())
-                .releaseDate(product.getReleaseDate())
-                .status(product.getStatus())
-                .img(product.getImg())
-                .author(product.getAuthor())
-                .series(product.getSeries())
-                .translator(product.getTranslator())
-                .category(product.getCategory())
-                .publisher(product.getPublisher())
-                .description(product.getDescription())
-                .releaseYear(product.getReleaseYear())
-                .coverType(product.getCoverType())
-                .pagesNumber(product.getPagesNumber())
-                .width(product.getWidth())
-                .height(product.getHeight())
-                .edition(product.getEdition())
-                .weight(product.getWeight())
-                .vat(product.getVat())
-                .price(product.getPrice())
-                .type(product.getType())
-                .depth(product.getDepth())
-                .approvalNumber(product.getApprovalNumber())
-                .pcn(product.getPcn())
-                .manufacturingCountryCode(product.getManufacturingCountryCode())
-                .build();
-    }
+
 }
