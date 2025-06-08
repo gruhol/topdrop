@@ -8,10 +8,9 @@ import pl.thinkdata.droptop.api.ApiExternalService;
 import pl.thinkdata.droptop.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.dto.GetStocksDto;
 import pl.thinkdata.droptop.dto.PlatonResponse;
-import pl.thinkdata.droptop.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.mapper.ProductMapper;
 import pl.thinkdata.droptop.product.model.Product;
-import pl.thinkdata.droptop.repository.ProductRepository;
+import pl.thinkdata.droptop.common.repository.ProductRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,12 +47,12 @@ public class PlatonApiController {
         do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(String.valueOf(pageNumber))
-                    .pageSize("10")
+                    .pageSize("100")
                     //.lastChangeDate(LocalDateTime.of(2022,01,01, 12, 11, 2, 33))
                     .transactionNumber(1)
                     .build();
             PlatonResponse data = apiExternalService.getPublications(getPublicationsDto);
-            downloadCount += 10;
+            downloadCount += 100;
             pageNumber++;
             total = data.getCatalog().getSummary().getTotal();
             data.getCatalog().getRc().getProducts().stream()
@@ -69,6 +68,4 @@ public class PlatonApiController {
         model.addAttribute("data", listOfSaveProducts);
         return "Test";
     }
-
-
 }

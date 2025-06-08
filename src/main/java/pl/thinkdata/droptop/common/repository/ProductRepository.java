@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.repository;
+package pl.thinkdata.droptop.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import pl.thinkdata.droptop.product.model.Product;

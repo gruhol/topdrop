@@ -27,6 +27,7 @@ CREATE TABLE product(
     depth DOUBLE,
     approval_number VARCHAR(100),
     pcn VARCHAR(20),
-    manufacturing_country_code VARCHAR(10)
-
+    manufacturing_country_code VARCHAR(10),
+    create_date TIMESTAMP,
+    update_date TIMESTAMP
 );

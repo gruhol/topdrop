@@ -32,17 +32,21 @@ public class ApiExternalService {
     public static final String EXTERNAL_OPERATION_INVOKE_RESULT = "ExternalOperationInvokeResult";
     public static final String RESULT = "Result";
     private final WebClient webClient;
+    private final boolean platonProd;
     private final String platonUser;
     private final String platonPassword;
     private final String platonApiMethodGetStocks;
     private final String platonApiMethodGetPublications;
 
     public ApiExternalService(WebClient.Builder webClientBuilder,
+                              @Value("${platon.api.prod}") boolean platonProd,
                               @Value("${platon.api.user}") String platonUser,
                               @Value("${platon.api.password}") String platonPassword,
                               @Value("${platon.api.method.getstocks}") String platonApiMethodGetStocks,
                               @Value("${platon.api.method.getpublications}") String platonApiMethodGetPublications) {
-        this.webClient = webClientBuilder.baseUrl("https://test.platon.com.pl").build();
+        this.platonProd = platonProd;
+        String url = this.platonProd ? "https://platon.com.pl" : "https://test.platon.com.pl";
+        this.webClient = webClientBuilder.baseUrl(url).build();
         this.platonUser = platonUser;
         this.platonPassword = platonPassword;
         this.platonApiMethodGetStocks = platonApiMethodGetStocks;

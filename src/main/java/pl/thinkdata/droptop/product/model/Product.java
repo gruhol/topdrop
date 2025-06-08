@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "product")
 @Getter
@@ -51,4 +53,6 @@ public class Product {
     private String pcn;
     @Column(name = "manufacturing_country_code")
     private String manufacturingCountryCode;
+    @Embedded
+    private DateOperator dateOperator;
 }
