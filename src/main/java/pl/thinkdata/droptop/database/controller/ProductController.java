@@ -9,7 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.thinkdata.droptop.database.service.ProductService;
-import pl.thinkdata.droptop.product.model.Product;
+import pl.thinkdata.droptop.database.model.Product;
 
 @Controller
 @RequiredArgsConstructor

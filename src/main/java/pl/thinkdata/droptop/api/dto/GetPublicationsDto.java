@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.dto;
+package pl.thinkdata.droptop.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

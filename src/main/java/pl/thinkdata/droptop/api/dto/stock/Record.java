@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.dto.stock;
+package pl.thinkdata.droptop.api.dto.stock;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.dto.catalog;
+package pl.thinkdata.droptop.api.dto.stock;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,13 +6,12 @@ import lombok.Setter;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import java.util.List;
 
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Warnings {
+public class Header {
 
-    @XmlElement(name = "d")
-    private List<String> messages;
+    @XmlElement(name = "ResponseDate")
+    private String responseDate;
 }

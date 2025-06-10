@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.dto.catalog;
+package pl.thinkdata.droptop.api.dto.catalog;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

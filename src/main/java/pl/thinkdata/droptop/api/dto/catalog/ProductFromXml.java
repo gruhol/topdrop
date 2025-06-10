@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.dto.catalog;
+package pl.thinkdata.droptop.api.dto.catalog;
 
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.product.model;
+package pl.thinkdata.droptop.database.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

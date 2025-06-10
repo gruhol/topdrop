@@ -5,9 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.product.model.Product;
-
-import java.util.List;
+import pl.thinkdata.droptop.database.model.Product;
 
 @Service
 @RequiredArgsConstructor

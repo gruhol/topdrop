@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.dto.catalog;
+package pl.thinkdata.droptop.api.dto.catalog;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,8 +11,8 @@ import java.util.List;
 @Getter
 @Setter
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Sc {
+public class Warnings {
 
-    @XmlElement(name = "p")
-    private List<String> ids;
+    @XmlElement(name = "d")
+    private List<String> messages;
 }

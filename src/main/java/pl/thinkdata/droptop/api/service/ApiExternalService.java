@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.api;
+package pl.thinkdata.droptop.api.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -7,11 +7,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import pl.thinkdata.droptop.dto.GetPublicationsDto;
-import pl.thinkdata.droptop.dto.GetStocksDto;
-import pl.thinkdata.droptop.dto.PlatonResponse;
-import pl.thinkdata.droptop.dto.catalog.Catalog;
-import pl.thinkdata.droptop.dto.stock.Stock;
+import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
+import pl.thinkdata.droptop.api.dto.GetStocksDto;
+import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.dto.catalog.Catalog;
+import pl.thinkdata.droptop.api.dto.stock.Stock;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -22,9 +22,9 @@ import java.io.StringReader;
 import java.time.LocalDateTime;
 
 import static pl.thinkdata.droptop.utils.Base64Coder.decodeBase64;
-import static pl.thinkdata.droptop.utils.XMLGenerator.prepareGetStockParameters;
-import static pl.thinkdata.droptop.utils.XMLGenerator.prepareOperationInfo;
-import static pl.thinkdata.droptop.utils.XMLGenerator.prepareRequest;
+import static pl.thinkdata.droptop.utils.PlatonXMLGenerator.prepareGetStockParameters;
+import static pl.thinkdata.droptop.utils.PlatonXMLGenerator.prepareOperationInfo;
+import static pl.thinkdata.droptop.utils.PlatonXMLGenerator.prepareRequest;
 
 @Service
 public class ApiExternalService {

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import static java.util.Objects.isNull;
 import static pl.thinkdata.droptop.utils.Base64Coder.encodeBase64;
 
-public class XMLGenerator {
+public class PlatonXMLGenerator {
 
     public static String prepareRequest(String operationInfo, String parameters) {
         String soapXmlTemple =

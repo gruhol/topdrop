@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.product.model;
+package pl.thinkdata.droptop.database.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.util.Date;
 
 @Entity
 @Table(name = "product")

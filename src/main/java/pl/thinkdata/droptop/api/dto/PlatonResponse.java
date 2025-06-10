@@ -1,10 +1,10 @@
-package pl.thinkdata.droptop.dto;
+package pl.thinkdata.droptop.api.dto;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import pl.thinkdata.droptop.dto.catalog.Catalog;
-import pl.thinkdata.droptop.dto.stock.Stock;
+import pl.thinkdata.droptop.api.dto.catalog.Catalog;
+import pl.thinkdata.droptop.api.dto.stock.Stock;
 
 @Getter
 @Setter

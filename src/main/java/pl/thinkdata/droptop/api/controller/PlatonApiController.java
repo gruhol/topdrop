@@ -1,15 +1,15 @@
-package pl.thinkdata.droptop.controller;
+package pl.thinkdata.droptop.api.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import pl.thinkdata.droptop.api.ApiExternalService;
-import pl.thinkdata.droptop.dto.GetPublicationsDto;
-import pl.thinkdata.droptop.dto.GetStocksDto;
-import pl.thinkdata.droptop.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.service.ApiExternalService;
+import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
+import pl.thinkdata.droptop.api.dto.GetStocksDto;
+import pl.thinkdata.droptop.api.dto.PlatonResponse;
 import pl.thinkdata.droptop.mapper.ProductMapper;
-import pl.thinkdata.droptop.product.model.Product;
+import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 
 import java.time.LocalDateTime;

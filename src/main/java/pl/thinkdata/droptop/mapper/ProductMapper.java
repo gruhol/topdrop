@@ -1,7 +1,7 @@
 package pl.thinkdata.droptop.mapper;
 
-import pl.thinkdata.droptop.dto.catalog.ProductFromXml;
-import pl.thinkdata.droptop.product.model.Product;
+import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
+import pl.thinkdata.droptop.database.model.Product;
 
 public class ProductMapper {
 
