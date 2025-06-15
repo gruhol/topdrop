@@ -1,11 +1,13 @@
 package pl.thinkdata.droptop.database.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "import_raport")
+@Builder
 public class ImportRaport {
 
     @Id

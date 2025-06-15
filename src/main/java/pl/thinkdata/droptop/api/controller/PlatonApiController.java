@@ -8,6 +8,8 @@ import pl.thinkdata.droptop.api.service.ApiExternalService;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.database.model.ImportRaport;
+import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 import pl.thinkdata.droptop.mapper.ProductMapper;
 import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
@@ -23,6 +25,7 @@ public class PlatonApiController {
 
     private final ApiExternalService apiExternalService;
     private final ProductRepository productRepository;
+    private final ImportRaportRepository importRaportRepository;
 
     @GetMapping("/stany")
     public String getStockFromApi(Model model) {
@@ -65,6 +68,12 @@ public class PlatonApiController {
 
         }
         while (total > downloadCount);
+        ImportRaport importRaport = ImportRaport.builder()
+                .importDate(LocalDateTime.now())
+                .importRecord(total)
+                .importStatus("OK")
+                .build();
+        importRaportRepository.save(importRaport);
         model.addAttribute("data", listOfSaveProducts);
         return "Test";
     }
