@@ -97,7 +97,7 @@ public class ApiExternalService {
 
     public PlatonResponse getPublications(GetPublicationsDto dto) {
         String transactionId = getTransactionId(dto.getTransactionNumber());
-        String operationInfo = prepareOperationInfo("getPublications", platonApiMethodGetPublications, platonUser, platonPassword, transactionId);
+        String operationInfo = prepareOperationInfo("getPublicationss", platonApiMethodGetPublications, platonUser, platonPassword, transactionId);
         String parameters = prepareGetStockParameters(dto.getPageSize(),dto.getPageNo(), dto.getLastChangeDate());
         String request = prepareRequest(operationInfo, parameters);
 

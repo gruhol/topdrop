@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.Validate.notNull;
+
 @Controller
 @RequiredArgsConstructor
 public class PlatonApiController {
@@ -26,6 +29,9 @@ public class PlatonApiController {
     private final ApiExternalService apiExternalService;
     private final ProductRepository productRepository;
     private final ImportRaportRepository importRaportRepository;
+
+    PlatonResponse data;
+
 
     @GetMapping("/stany")
     public String getStockFromApi(Model model) {
@@ -47,6 +53,7 @@ public class PlatonApiController {
         int downloadCount = 0;
         int total  = 0;
         List<Product> listOfSaveProducts = new ArrayList<>();
+
         do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(String.valueOf(pageNumber))
@@ -54,27 +61,37 @@ public class PlatonApiController {
                     //.lastChangeDate(LocalDateTime.of(2022,01,01, 12, 11, 2, 33))
                     .transactionNumber(1)
                     .build();
-            PlatonResponse data = apiExternalService.getPublications(getPublicationsDto);
+            this.data = apiExternalService.getPublications(getPublicationsDto);
+
+            if (!isNull(data.getMessage())) {
+                saveImportRaport("Error", data.getMessage(), total);
+                break;
+            }
             downloadCount += 100;
             pageNumber++;
             total = data.getCatalog().getSummary().getTotal();
             data.getCatalog().getRc().getProducts().stream()
                     .map(ProductMapper::mapToProduct)
                     .filter(Objects::nonNull)
-                    .forEach(product -> {
-                            productRepository.save(product);
-                            listOfSaveProducts.add(product);
-                            });
-
+                    .forEach(listOfSaveProducts::add);
+            productRepository.saveAll(listOfSaveProducts);
         }
         while (total > downloadCount);
+
+        if (isNull(this.data.getMessage())) {
+            saveImportRaport("OK", null, total);
+        }
+        model.addAttribute("data", listOfSaveProducts);
+        return "Test";
+    }
+
+    private void saveImportRaport(String status, String message, int total) {
         ImportRaport importRaport = ImportRaport.builder()
                 .importDate(LocalDateTime.now())
                 .importRecord(total)
-                .importStatus("OK")
+                .importStatus(status)
+                .importErrorMessage(message)
                 .build();
         importRaportRepository.save(importRaport);
-        model.addAttribute("data", listOfSaveProducts);
-        return "Test";
     }
 }
