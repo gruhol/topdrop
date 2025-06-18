@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import pl.thinkdata.droptop.api.service.ApiExternalService;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
+import pl.thinkdata.droptop.api.service.GetStocksExternalService;
+import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.ImportRaport;
+import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 import pl.thinkdata.droptop.mapper.ProductMapper;
-import pl.thinkdata.droptop.database.model.Product;
-import pl.thinkdata.droptop.common.repository.ProductRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,18 +21,17 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
-import static org.apache.commons.lang3.Validate.notNull;
 
 @Controller
 @RequiredArgsConstructor
 public class PlatonApiController {
 
-    private final ApiExternalService apiExternalService;
+    private final GetPublicationsExternalService getPublictionService;
+    private final GetStocksExternalService getStockService;
     private final ProductRepository productRepository;
     private final ImportRaportRepository importRaportRepository;
 
     PlatonResponse data;
-
 
     @GetMapping("/stany")
     public String getStockFromApi(Model model) {
@@ -41,7 +41,7 @@ public class PlatonApiController {
                 .lastChangeDate(LocalDateTime.of(2024,01,01, 12, 11, 2, 33))
                 .transactionNumber(1)
                 .build();
-        PlatonResponse data = apiExternalService.createPlatonResponse(getStocksDto);
+        PlatonResponse data = getStockService.get(getStocksDto);
         model.addAttribute("data", data);
 
         return "Test";
@@ -61,7 +61,7 @@ public class PlatonApiController {
                     //.lastChangeDate(LocalDateTime.of(2022,01,01, 12, 11, 2, 33))
                     .transactionNumber(1)
                     .build();
-            this.data = apiExternalService.getPublications(getPublicationsDto);
+            this.data = getPublictionService.get(getPublicationsDto);
 
             if (!isNull(data.getMessage())) {
                 saveImportRaport("Error", data.getMessage(), total);
