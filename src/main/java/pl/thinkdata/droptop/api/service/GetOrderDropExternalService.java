@@ -3,7 +3,7 @@ package pl.thinkdata.droptop.api.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
+import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
 import pl.thinkdata.droptop.api.dto.catalog.Catalog;
 
@@ -15,19 +15,19 @@ import static pl.thinkdata.droptop.utils.Base64Coder.decodeBase64;
 import static pl.thinkdata.droptop.utils.PlatonXMLGenerator.*;
 
 @Service
-public class GetPublicationsExternalService extends BaseExternalService implements ExternalServiceable<GetPublicationsDto>{
+public class GetOrderDropExternalService extends BaseExternalService implements ExternalServiceable<OrderDropDto> {
 
-    private final String platonApiMethodGetPublications;
+    private final String platonApiMethodOrderDrop;
 
-    public GetPublicationsExternalService(@Value("${platon.api.method.getpublications}") String platonApiMethodGetPublications) {
-        this.platonApiMethodGetPublications = platonApiMethodGetPublications;
+    public GetOrderDropExternalService(@Value("${platon.api.method.order.drop}") String platonApiMethodOrderDrop) {
+        this.platonApiMethodOrderDrop = platonApiMethodOrderDrop;
     }
 
     @Override
-    public PlatonResponse get(GetPublicationsDto dto) {
+    public PlatonResponse get(OrderDropDto dto) {
         String transactionId = getTransactionId(dto.getTransactionNumber());
-        String operationInfo = prepareOperationInfo("getPublications", platonApiMethodGetPublications, platonUser, platonPassword, transactionId);
-        String parameters = prepareExportParameters(dto.getPageSize(),dto.getPageNo(), dto.getLastChangeDate());
+        String operationInfo = prepareOperationInfo("ORDERDROP", platonApiMethodOrderDrop, platonUser, platonPassword, transactionId);
+        String parameters = prepareDocumentOrder(dto);
         String request = prepareRequest(operationInfo, parameters);
 
         try {

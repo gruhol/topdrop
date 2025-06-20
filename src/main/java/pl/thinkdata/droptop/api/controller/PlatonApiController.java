@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
+import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
+import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
+import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
 import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
 import pl.thinkdata.droptop.api.service.GetStocksExternalService;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
@@ -15,10 +19,9 @@ import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 import pl.thinkdata.droptop.mapper.ProductMapper;
 
+import java.security.PublicKey;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 
@@ -30,6 +33,7 @@ public class PlatonApiController {
     private final GetStocksExternalService getStockService;
     private final ProductRepository productRepository;
     private final ImportRaportRepository importRaportRepository;
+    private final GetOrderDropExternalService getOrderDropExternalService;
 
     PlatonResponse data;
 
@@ -93,5 +97,41 @@ public class PlatonApiController {
                 .importErrorMessage(message)
                 .build();
         importRaportRepository.save(importRaport);
+    }
+
+    @GetMapping("/order-drop")
+    public String sendOrder(Model model) {
+        DeliveryPoint deliveryPoint = DeliveryPoint.builder()
+                .customerKind(1)
+                .name("Wojciech")
+                .surname("Dąbrowski")
+                .street("Strzygłowska")
+                .homeNumber("58D")
+                .cityName("Warszawa")
+                .postCode("04-872")
+                .post("Warszawa")
+                .email("dabrowskiw@gmail.com")
+                .phone("+48662078402")
+                .country("PL")
+                .deliveryMethod(42)
+                .build();
+
+        OrderLine orderLine = OrderLine.builder()
+                .supplierItemCode("9788375102161")
+                .orderedQuantity(1)
+                .build();
+
+        OrderDropDto orderDropDto = OrderDropDto.builder()
+                .orderNumber("Allegro1")
+                .orderDate(LocalDateTime.now())
+                .accountNumber("30418")
+                .deliveryPoint(deliveryPoint)
+                .orderLine(Collections.singletonList(orderLine))
+                .orderRemarks("Uwagi do zamówienia")
+                .build();
+        PlatonResponse data = getOrderDropExternalService.get(orderDropDto);
+
+        model.addAttribute("data", data);
+        return "Test";
     }
 }

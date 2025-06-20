@@ -1,6 +1,11 @@
 package pl.thinkdata.droptop.utils;
 
+import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
+import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
+import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static java.util.Objects.isNull;
 import static pl.thinkdata.droptop.utils.Base64Coder.encodeBase64;
@@ -35,7 +40,7 @@ public class PlatonXMLGenerator {
         return encodeBase64(operationInfo);
     }
 
-    public static String prepareGetStockParameters(String pageSize, String pageNo, LocalDateTime lastChangedDate) {
+    public static String prepareExportParameters(String pageSize, String pageNo, LocalDateTime lastChangedDate) {
         String parametersTemplate = """
                             <Export>
                             <PageSize>%s</PageSize>
@@ -63,5 +68,107 @@ public class PlatonXMLGenerator {
 
         String externalOperationParams = String.format(externalOperationParamsTemplate, encodeBase64(parameters));
         return encodeBase64(externalOperationParams);
+    }
+
+    public static String prepareDocumentOrder(OrderDropDto dto) {
+        String orderHeader = prepareOrderHeader(dto);
+        String deliveryPoint = prepareDeliveryPoint(dto.getDeliveryPoint());
+        String lineItems = prepareOrderLine(dto.getOrderLine());
+
+        String documentOrderTemplate = """
+                <Document-Order>
+                     <Order-Header>%s</Order-Header>
+                     <Order-Parties>
+                         <Buyer>
+                             <AccountNumber>%s</AccountNumber>
+                         </Buyer>
+                         <DeliveryPoint>%s</DeliveryPoint>
+                     </Order-Parties>
+                     <Order-Lines>
+                         <Line>%s</Line>
+                     </Order-Lines>
+                     <OrderResponse-Summary>
+                        <TotalLines>2</TotalLines>
+                        <TotalOrderedAmount>28.000000</TotalOrderedAmount>
+                     </OrderResponse-Summary>
+                 </Document-Order>
+                """;
+        String documentOrder =  String.format(documentOrderTemplate, orderHeader, dto.getAccountNumber(), deliveryPoint, lineItems);
+        String externalOperationParamsTemplate = """
+                    <ExternalOperationParams>
+                        <Params>%s</Params>
+                    </ExternalOperationParams>
+                    """;
+
+        String externalOperationParams = String.format(externalOperationParamsTemplate, encodeBase64(documentOrder));
+        return encodeBase64(externalOperationParams);
+    }
+
+
+    private static String prepareOrderLine(List<OrderLine> orderLines) {
+        StringBuilder result = new StringBuilder();
+        String lineItemTemplate = """
+                <Line-Item>
+                <LineNumber>%d</LineNumber>
+                <SupplierItemCode>%s</SupplierItemCode>
+                <OrderedQuantity>%s</OrderedQuantity>
+                </Line-Item>
+                """;
+
+        for (int i = 0; i < orderLines.size(); i++) {
+            OrderLine order = orderLines.get(i);
+            result.append(String.format(
+                    lineItemTemplate,
+                    i + 1,
+                    order.getSupplierItemCode(),
+                    order.getOrderedQuantity()
+            ));
+        }
+        return result.toString();
+    }
+
+
+    private static String prepareDeliveryPoint(DeliveryPoint deliveryPoint) {
+        String deliveryPointTemplate = """
+               <CustomerKind>%s</CustomerKind>
+               <Name>%s</Name>
+               <Surname>%s</Surname>
+               <Street>%s</Street>
+               <HNo>%s</HNo>
+               <LNo>%s</LNo>
+               <CityName>%s</CityName>
+               <PostalCode>%s</PostalCode>
+               <Post>%s</Post>
+               <Email>%s</Email>
+               <Phone>%s</Phone>
+               <Country>%s</Country>
+               <DeliveryMethod>%s</DeliveryMethod>
+               <MachineName>%s</MachineName>
+               """;
+        return String.format(deliveryPointTemplate,
+                deliveryPoint.getCustomerKind(),
+                deliveryPoint.getName(),
+                deliveryPoint.getSurname(),
+                deliveryPoint.getStreet(),
+                deliveryPoint.getHomeNumber(),
+                deliveryPoint.getFlatNumber(),
+                deliveryPoint.getCityName(),
+                deliveryPoint.getPostCode(),
+                deliveryPoint.getPost(),
+                deliveryPoint.getEmail(),
+                deliveryPoint.getPhone(),
+                deliveryPoint.getCountry(),
+                deliveryPoint.getDeliveryMethod(),
+                deliveryPoint.getMachineName());
+    }
+
+    private static String prepareOrderHeader(OrderDropDto dto) {
+        String orderHeaderTemplate = """
+                <OrderNumber>%s</OrderNumber>
+                 <OrderDate>%s</OrderDate>
+                 <Remarks>%s</Remarks>
+                 <OrderCurrency>PLN</OrderCurrency>
+                """;
+        return String.format(orderHeaderTemplate, dto.getOrderNumber(), dto.getOrderDate(), dto.getOrderRemarks());
     }
 }

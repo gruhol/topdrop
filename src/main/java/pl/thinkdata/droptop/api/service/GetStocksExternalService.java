@@ -27,7 +27,7 @@ public class GetStocksExternalService extends BaseExternalService implements Ext
     public PlatonResponse get(GetStocksDto getStocksDto) {
         String orderId = getTransactionId(getStocksDto.getTransactionNumber());
         String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, orderId); //00000000-0000-2025-0426-000000000001
-        String parameters = prepareGetStockParameters(getStocksDto.getPageSize(),getStocksDto.getPageNo(), getStocksDto.getLastChangeDate());
+        String parameters = prepareExportParameters(getStocksDto.getPageSize(),getStocksDto.getPageNo(), getStocksDto.getLastChangeDate());
         String request = prepareRequest(operationInfo, parameters);
 
         try {
