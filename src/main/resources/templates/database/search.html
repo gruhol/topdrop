@@ -10,9 +10,9 @@
 <body>
 
 <div class="container">
-    <h1>Baza produktów</h1>
+    <h1>Wynik wyszukiwania dla: <span th:text="${keywords}"></span></h1>
     <div class="row">
-        <div class="col"><p>Produktów w bazie: <span th:text="${products.totalElements}"></span></p></div>
+        <div class="col"><p>Wyszukano produktów: <span th:text="${products.totalElements}"></span></p></div>
         <div class="col">
             <form th:action="@{/search}">
                 <input type="text" name="keywords" class="form-control form-control-solid" placeholder="Szukaj..." id="generalSearch">
@@ -50,19 +50,20 @@
     <nav aria-label="Page navigation example" th:if="${totalPages > 1}">
         <ul class="pagination">
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/produkty(pageNumber=${currentPage - 1}, size=${pageSize})}">Poprzednia</a>
+                <a class="page-link" th:href="@{/search(keywords=${keywords}, pageNumber=${currentPage - 1}, size=${pageSize})}">Poprzednia</a>
             </li>
 
             <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                 class="page-item"
                 th:classappend="${i} == ${currentPage} ? 'active'">
                 <a class="page-link"
-                   th:href="@{/produkty(pageNumber=${i}, size=${pageSize})}"
+                   th:href="@{/search(keywords=${keywords}, pageNumber=${i}, size=${pageSize})}"
                    th:text="${i + 1}">1</a>
+
             </li>
 
             <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/produkty(pageNumber=${currentPage + 1}, size=${pageSize})}">Następna</a>
+                <a class="page-link" th:href="@{/search(keywords=${keywords}, pageNumber=${currentPage + 1}, size=${pageSize})}">Następna</a>
             </li>
         </ul>
     </nav>

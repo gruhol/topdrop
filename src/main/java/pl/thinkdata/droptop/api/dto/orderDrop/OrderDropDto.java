@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderDropDto {
     private String orderNumber;
-    private LocalDateTime orderDate;
+    private String orderDate;
     private String orderRemarks;
     private String accountNumber;
     private DeliveryPoint deliveryPoint;

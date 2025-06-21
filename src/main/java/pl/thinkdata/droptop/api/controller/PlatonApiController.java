@@ -21,6 +21,7 @@ import pl.thinkdata.droptop.mapper.ProductMapper;
 
 import java.security.PublicKey;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.util.Objects.isNull;
@@ -123,7 +124,7 @@ public class PlatonApiController {
 
         OrderDropDto orderDropDto = OrderDropDto.builder()
                 .orderNumber("Allegro1")
-                .orderDate(LocalDateTime.now())
+                .orderDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .accountNumber("30418")
                 .deliveryPoint(deliveryPoint)
                 .orderLine(Collections.singletonList(orderLine))

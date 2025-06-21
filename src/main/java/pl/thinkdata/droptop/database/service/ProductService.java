@@ -16,4 +16,12 @@ public class ProductService {
     public Page<Product> getProducts(Pageable pageable) {
         return productRepository.findAll(pageable);
     }
+
+    public Page<Product> findProductsByKeyWords(String keyword, Pageable pageable) {
+        Page<Product> resultByEan = productRepository.findAllByEan(keyword, pageable);
+        if (!resultByEan.isEmpty()) {
+            return resultByEan;
+        }
+        return productRepository.findAllByTitleContaining(keyword, pageable);
+    }
 }
