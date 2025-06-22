@@ -13,7 +13,7 @@ CREATE TABLE product(
     translator VARCHAR(255),
     category VARCHAR(255),
     publisher VARCHAR(255),
-    description CLOB,
+    description TEXT,
     release_year VARCHAR(10),
     cover_type VARCHAR(50),
     pages_number INT,
