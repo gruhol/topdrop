@@ -19,10 +19,12 @@ import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 import pl.thinkdata.droptop.mapper.ProductMapper;
 
-import java.security.PublicKey;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -63,7 +65,7 @@ public class PlatonApiController {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(String.valueOf(pageNumber))
                     .pageSize("100")
-                    //.lastChangeDate(LocalDateTime.of(2022,01,01, 12, 11, 2, 33))
+                    .lastChangeDate(getLastUpdate())
                     .transactionNumber(1)
                     .build();
             this.data = getPublictionService.get(getPublicationsDto);
@@ -88,6 +90,12 @@ public class PlatonApiController {
         }
         model.addAttribute("data", listOfSaveProducts);
         return "Test";
+    }
+
+    private LocalDateTime getLastUpdate() {
+        return importRaportRepository.findFirstByImportStatusOrderByImportDateDesc("OK")
+                .map(ImportRaport::getImportDate)
+                .orElse(null);
     }
 
     private void saveImportRaport(String status, String message, int total) {
