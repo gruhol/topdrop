@@ -137,7 +137,7 @@ public class PlatonXMLGenerator {
                <Surname>%s</Surname>
                <Street>%s</Street>
                <HNo>%s</HNo>
-               <LNo>%s</LNo>
+               %s
                <CityName>%s</CityName>
                <PostalCode>%s</PostalCode>
                <Post>%s</Post>
@@ -153,7 +153,7 @@ public class PlatonXMLGenerator {
                 deliveryPoint.getSurname(),
                 deliveryPoint.getStreet(),
                 deliveryPoint.getHomeNumber(),
-                deliveryPoint.getFlatNumber(),
+                isNull(deliveryPoint.getFlatNumber()) ? "" : "<LNo>" + deliveryPoint.getFlatNumber() + "</LNo>",
                 deliveryPoint.getCityName(),
                 deliveryPoint.getPostCode(),
                 deliveryPoint.getPost(),

@@ -3,6 +3,7 @@ package pl.thinkdata.droptop.api.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import pl.thinkdata.droptop.api.dto.documentOrderResponse.DocumentOrderResponse;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
 import pl.thinkdata.droptop.api.dto.catalog.Catalog;
@@ -38,7 +39,7 @@ public class GetOrderDropExternalService extends BaseExternalService implements 
                 String result = null;
                 String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
 
-                JAXBContext context = JAXBContext.newInstance(Catalog.class);
+                JAXBContext context = JAXBContext.newInstance(DocumentOrderResponse.class);
                 Unmarshaller unmarshaller = context.createUnmarshaller();
 
                 if (innerBase64 != null) {
@@ -47,12 +48,12 @@ public class GetOrderDropExternalService extends BaseExternalService implements 
                     result = decodeBase64(hashresult);
                     StringReader reader = new StringReader(result);
                     return PlatonResponse.builder()
-                            .catalog((Catalog) unmarshaller.unmarshal(reader))
+                            .documentOrderResponse((DocumentOrderResponse) unmarshaller.unmarshal(reader))
                             .build();
                 }
                 StringReader reader = new StringReader(result);
                 return PlatonResponse.builder()
-                        .catalog((Catalog) unmarshaller.unmarshal(reader))
+                        .documentOrderResponse((DocumentOrderResponse) unmarshaller.unmarshal(reader))
                         .build();
 
             } else if (response != null) {
