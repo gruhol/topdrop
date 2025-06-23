@@ -78,6 +78,7 @@ public class BaseExternalService {
     }
 
     static String extractXMLByTag(String xml, String tagName) {
+        System.out.println("XML:" + xml);
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
@@ -90,6 +91,7 @@ public class BaseExternalService {
             }
         } catch (Exception e) {
             System.err.println("Błąd parsowania XML: " + e.getMessage());
+
         }
         return null;
     }
