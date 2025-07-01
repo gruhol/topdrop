@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
@@ -21,10 +22,7 @@ import pl.thinkdata.droptop.mapper.ProductMapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 
@@ -108,8 +106,8 @@ public class PlatonApiController {
         importRaportRepository.save(importRaport);
     }
 
-    @GetMapping("/order-drop")
-    public String sendOrder(Model model) {
+    @GetMapping("/order-drop/{idOrder}/{eanOrder}")
+    public String sendOrder(@PathVariable String idOrder, @PathVariable String eanOrder, Model model) {
         DeliveryPoint deliveryPoint = DeliveryPoint.builder()
                 .customerKind(1)
                 .name("Wojciech")
@@ -126,16 +124,16 @@ public class PlatonApiController {
                 .build();
 
         OrderLine orderLine = OrderLine.builder()
-                .supplierItemCode("9788375102161")
+                .supplierItemCode(eanOrder)
                 .orderedQuantity(1)
                 .build();
 
         OrderDropDto orderDropDto = OrderDropDto.builder()
-                .orderNumber("Allegro1")
+                .orderNumber(idOrder)
                 .orderDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .accountNumber("30418")
                 .deliveryPoint(deliveryPoint)
-                .orderLine(Collections.singletonList(orderLine))
+                .orderLine(Arrays.asList(orderLine))
                 .orderRemarks("Uwagi do zamówienia")
                 .build();
         PlatonResponse data = getOrderDropExternalService.get(orderDropDto);
