@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.w3c.dom.Document;
@@ -37,7 +36,9 @@ public class BaseExternalService {
     @PostConstruct
     private void initWebClient() {
         String url = platonProd ? "https://platon.com.pl" : "https://test.platon.com.pl";
-        this.webClient = webClientBuilder.baseUrl(url).build();
+        this.webClient = webClientBuilder.baseUrl(url)
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
     }
 
     ResponseEntity<String> getDataFromWebClient(String request) {
@@ -78,7 +79,6 @@ public class BaseExternalService {
     }
 
     static String extractXMLByTag(String xml, String tagName) {
-        System.out.println("XML:" + xml);
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
@@ -90,8 +90,7 @@ public class BaseExternalService {
                 return nodes.item(0).getTextContent().trim();
             }
         } catch (Exception e) {
-            System.err.println("Błąd parsowania XML: " + e.getMessage());
-
+            System.err.println("Błąd parsowania XML: " + e.getMessage() + e.getLocalizedMessage());
         }
         return null;
     }
