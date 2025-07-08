@@ -37,7 +37,7 @@ public class BaseExternalService {
     private void initWebClient() {
         String url = platonProd ? "https://platon.com.pl" : "https://test.platon.com.pl";
         this.webClient = webClientBuilder.baseUrl(url)
-                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(100 * 1024 * 1024))
                 .build();
     }
 

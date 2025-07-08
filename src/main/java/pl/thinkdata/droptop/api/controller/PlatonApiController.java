@@ -62,7 +62,7 @@ public class PlatonApiController {
         do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(String.valueOf(pageNumber))
-                    .pageSize("1000")
+                    .pageSize("10000")
                     .lastChangeDate(getLastUpdate())
                     .transactionNumber(1)
                     .build();
@@ -72,7 +72,7 @@ public class PlatonApiController {
                 saveImportRaport("Error", data.getMessage(), total);
                 break;
             }
-            downloadCount += 1000;
+            downloadCount += 10000;
             pageNumber++;
             total = data.getCatalog().getSummary().getTotal();
             data.getCatalog().getRc().getProducts().stream()

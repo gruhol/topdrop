@@ -2,9 +2,9 @@
 --changeset dabrowskiw:1
 CREATE TABLE product(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    ean VARCHAR(15) NOT NULL UNIQUE,
+    ean VARCHAR(15) NOT NULL,
     isbn VARCHAR(255),
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR(1000) NOT NULL,
     release_date VARCHAR(255),
     status VARCHAR(255),
     img VARCHAR(255),
@@ -30,4 +30,4 @@ CREATE TABLE product(
     manufacturing_country_code VARCHAR(10),
     create_date TIMESTAMP,
     update_date TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
