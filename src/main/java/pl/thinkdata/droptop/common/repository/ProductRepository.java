@@ -5,9 +5,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import pl.thinkdata.droptop.database.model.Product;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findAllByEan(String keyword, Pageable pageable);
 
     Page<Product> findAllByTitleContaining(String keyword, Pageable pageable);
+
+    Optional<Product> findByEan(String ean);
+
+    List<Product> findByEanIn(List<String> eans);
 }

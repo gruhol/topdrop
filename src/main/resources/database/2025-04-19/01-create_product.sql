@@ -2,7 +2,7 @@
 --changeset dabrowskiw:1
 CREATE TABLE product(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    ean VARCHAR(15) NOT NULL,
+    ean VARCHAR(15) UNIQUE NOT NULL,
     isbn VARCHAR(255),
     title VARCHAR(1000) NOT NULL,
     release_date VARCHAR(255),

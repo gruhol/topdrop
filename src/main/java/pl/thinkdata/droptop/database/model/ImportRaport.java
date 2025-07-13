@@ -18,8 +18,11 @@ public class ImportRaport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "import_record")
-    private Integer importRecord;
+    @Column(name = "import_added_record")
+    private Integer importAddedRecord;
+
+    @Column(name = "import_updated_record")
+    private Integer importUpdatedRecord;
 
     @Column(name = "import_date")
     private LocalDateTime importDate;

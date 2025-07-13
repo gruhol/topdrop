@@ -11,6 +11,7 @@ import pl.thinkdata.droptop.api.dto.PlatonResponse;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
+import pl.thinkdata.droptop.api.service.ApiProductService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
 import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
 import pl.thinkdata.droptop.api.service.GetStocksExternalService;
@@ -35,8 +36,10 @@ public class PlatonApiController {
     private final ProductRepository productRepository;
     private final ImportRaportRepository importRaportRepository;
     private final GetOrderDropExternalService getOrderDropExternalService;
+    private final ApiProductService apiProductService;
 
     PlatonResponse data;
+    List<Product> productToUpdate = new ArrayList<>();
 
     @GetMapping("/stany")
     public String getStockFromApi(Model model) {
@@ -58,6 +61,8 @@ public class PlatonApiController {
         int downloadCount = 0;
         int total  = 0;
         List<Product> listOfSaveProducts = new ArrayList<>();
+        List<Product> dowloadProducts = new ArrayList<>();
+        List<String> notDuplatedDownloadEan = new ArrayList<>();
 
         do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
@@ -69,22 +74,43 @@ public class PlatonApiController {
             this.data = getPublictionService.get(getPublicationsDto);
 
             if (!isNull(data.getMessage())) {
-                saveImportRaport("Error", data.getMessage(), total);
+                saveImportRaport("Error", data.getMessage(), 0, 0);
                 break;
             }
             downloadCount += 10000;
             pageNumber++;
-            total = data.getCatalog().getSummary().getTotal();
+            total = Optional.ofNullable(data.getCatalog().getSummary().getTotal()).orElse(0);
             data.getCatalog().getRc().getProducts().stream()
                     .map(ProductMapper::mapToProduct)
                     .filter(Objects::nonNull)
-                    .forEach(listOfSaveProducts::add);
-            productRepository.saveAll(listOfSaveProducts);
+                    .forEach(dowloadProducts::add);
         }
         while (total > downloadCount);
 
+        List<String> dowloadEans = dowloadProducts.stream()
+                .map(Product::getEan)
+                .toList();
+
+        List<String> findEanInBase = productRepository.findByEanIn(dowloadEans).stream()
+                .map(Product::getEan)
+                .toList();
+
+        for (Product prod : dowloadProducts) {
+            if (findEanInBase.contains(prod.getEan())) {
+                productToUpdate.add(prod);
+            } else if (notDuplatedDownloadEan.contains(prod.getEan())) {
+                productToUpdate.add(prod);
+            } else {
+                listOfSaveProducts.add(prod);
+            }
+            notDuplatedDownloadEan.add(prod.getEan());
+        }
+
+        productRepository.saveAll(listOfSaveProducts);
+        apiProductService.updateAll(productToUpdate);
+
         if (isNull(this.data.getMessage())) {
-            saveImportRaport("OK", null, total);
+            saveImportRaport("OK", null, listOfSaveProducts.size(), productToUpdate.size());
         }
         model.addAttribute("data", listOfSaveProducts);
         return "Test";
@@ -96,10 +122,11 @@ public class PlatonApiController {
                 .orElse(null);
     }
 
-    private void saveImportRaport(String status, String message, int total) {
+    private void saveImportRaport(String status, String message, int addedTotal, int updateTotal) {
         ImportRaport importRaport = ImportRaport.builder()
                 .importDate(LocalDateTime.now())
-                .importRecord(total)
+                .importAddedRecord(addedTotal)
+                .importUpdatedRecord(updateTotal)
                 .importStatus(status)
                 .importErrorMessage(message)
                 .build();
