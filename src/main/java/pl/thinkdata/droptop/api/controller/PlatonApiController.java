@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.dto.catalog.CatalogResponseSummary;
+import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
+import pl.thinkdata.droptop.api.dto.catalog.Rc;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
@@ -24,6 +27,7 @@ import pl.thinkdata.droptop.mapper.ProductMapper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
@@ -39,7 +43,6 @@ public class PlatonApiController {
     private final ApiProductService apiProductService;
 
     PlatonResponse data;
-    List<Product> productToUpdate = new ArrayList<>();
 
     @GetMapping("/stany")
     public String getStockFromApi(Model model) {
@@ -62,7 +65,8 @@ public class PlatonApiController {
         int total  = 0;
         List<Product> listOfSaveProducts = new ArrayList<>();
         List<Product> dowloadProducts = new ArrayList<>();
-        List<String> notDuplatedDownloadEan = new ArrayList<>();
+        Set<String> notDuplatedDownloadEan = new HashSet<>();
+        List<Product> productToUpdate = new ArrayList<>();
 
         do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
@@ -79,8 +83,13 @@ public class PlatonApiController {
             }
             downloadCount += 10000;
             pageNumber++;
-            total = Optional.ofNullable(data.getCatalog().getSummary().getTotal()).orElse(0);
-            data.getCatalog().getRc().getProducts().stream()
+            total = Optional.ofNullable(data.getCatalog().getSummary())
+                    .map(CatalogResponseSummary::getTotal)
+                    .orElse(0);
+            List<ProductFromXml> productFromXmls = Optional.ofNullable(data.getCatalog().getRc())
+                    .map(Rc::getProducts)
+                    .orElse(Collections.emptyList());
+            productFromXmls.stream()
                     .map(ProductMapper::mapToProduct)
                     .filter(Objects::nonNull)
                     .forEach(dowloadProducts::add);
@@ -91,9 +100,9 @@ public class PlatonApiController {
                 .map(Product::getEan)
                 .toList();
 
-        List<String> findEanInBase = productRepository.findByEanIn(dowloadEans).stream()
+        Set<String> findEanInBase = productRepository.findByEanIn(dowloadEans).stream()
                 .map(Product::getEan)
-                .toList();
+                .collect(Collectors.toSet());
 
         for (Product prod : dowloadProducts) {
             if (findEanInBase.contains(prod.getEan())) {
