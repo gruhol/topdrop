@@ -49,7 +49,7 @@ public class PlatonApiController {
         GetStocksDto getStocksDto = GetStocksDto.builder()
                 .pageNo("1")
                 .pageSize("10")
-                .lastChangeDate(LocalDateTime.of(2024,01,01, 12, 11, 2, 33))
+//                .lastChangeDate(LocalDateTime.of(2024,01,01, 12, 11, 2, 33))
                 .transactionNumber(1)
                 .build();
         PlatonResponse data = getStockService.get(getStocksDto);

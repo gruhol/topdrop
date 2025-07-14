@@ -49,11 +49,20 @@
 
     <nav aria-label="Page navigation example" th:if="${totalPages > 1}">
         <ul class="pagination">
+
+            <!-- Poprzednia -->
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                 <a class="page-link" th:href="@{/produkty(pageNumber=${currentPage - 1}, size=${pageSize})}">Poprzednia</a>
             </li>
 
-            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            <!-- Pierwsza strona -->
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'active'">
+                <a class="page-link" th:href="@{/produkty(pageNumber=0, size=${pageSize})}">1</a>
+            </li>
+
+            <!-- Trzy przed, bieżąca, trzy po -->
+            <li th:each="i : ${#numbers.sequence(1, totalPages - 2)}"
+                th:if="${i >= currentPage - 3 and i <= currentPage + 3}"
                 class="page-item"
                 th:classappend="${i} == ${currentPage} ? 'active'">
                 <a class="page-link"
@@ -61,6 +70,15 @@
                    th:text="${i + 1}">1</a>
             </li>
 
+            <!-- Ostatnia strona -->
+            <li class="page-item" th:if="${totalPages > 1}"
+                th:classappend="${currentPage == totalPages - 1} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/produkty(pageNumber=${totalPages - 1}, size=${pageSize})}"
+                   th:text="${totalPages}">999</a>
+            </li>
+
+            <!-- Następna -->
             <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
                 <a class="page-link" th:href="@{/produkty(pageNumber=${currentPage + 1}, size=${pageSize})}">Następna</a>
             </li>
