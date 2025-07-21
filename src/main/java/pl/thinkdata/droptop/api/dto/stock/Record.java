@@ -16,10 +16,10 @@ public class Record {
     private String ean;
 
     @XmlElement(name = "b")
-    private String productCode;
+    private Long productCode;
 
     @XmlElement(name = "c")
-    private String quantity;
+    private Integer quantity;
 
     @XmlElement(name = "d")
     private double netPrice;
@@ -28,8 +28,8 @@ public class Record {
     private double grossPrice;
 
     @XmlElement(name = "f")
-    private int discount;
+    private double discount;
 
     @XmlElement(name = "g")
-    private String quantity2;
+    private Integer quantity2;
 }

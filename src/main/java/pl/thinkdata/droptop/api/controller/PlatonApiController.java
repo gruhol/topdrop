@@ -14,10 +14,13 @@ import pl.thinkdata.droptop.api.dto.catalog.Rc;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
+import pl.thinkdata.droptop.api.dto.stock.ProductOfferLog;
+import pl.thinkdata.droptop.api.dto.stock.Summary;
 import pl.thinkdata.droptop.api.service.ApiProductService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
 import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
 import pl.thinkdata.droptop.api.service.GetStocksExternalService;
+import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.ImportRaport;
 import pl.thinkdata.droptop.database.model.Product;
@@ -30,6 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static pl.thinkdata.droptop.mapper.ProductOfferLogMapper.map;
 
 @Controller
 @RequiredArgsConstructor
@@ -41,20 +45,37 @@ public class PlatonApiController {
     private final ImportRaportRepository importRaportRepository;
     private final GetOrderDropExternalService getOrderDropExternalService;
     private final ApiProductService apiProductService;
+    private final ProductOfferLogRepository productOfferLogRepository;
 
     PlatonResponse data;
 
     @GetMapping("/stany")
     public String getStockFromApi(Model model) {
-        GetStocksDto getStocksDto = GetStocksDto.builder()
-                .pageNo("1")
-                .pageSize("10")
+        int pageNumber = 1;
+        int downloadCount = 0;
+        int total  = 0;
+        do {
+            GetStocksDto getStocksDto = GetStocksDto.builder()
+                    .pageNo("1")
+                    .pageSize("10000")
 //                .lastChangeDate(LocalDateTime.of(2024,01,01, 12, 11, 2, 33))
-                .transactionNumber(1)
-                .build();
-        PlatonResponse data = getStockService.get(getStocksDto);
-        model.addAttribute("data", data);
+                    .transactionNumber(1)
+                    .build();
+            PlatonResponse data = getStockService.get(getStocksDto);
+            if (!data.getStock().getRecords().isEmpty()) {
+                List<ProductOfferLog> stockToSave = data.getStock().getRecords().stream()
+                        .map(record -> map(record, "platon"))
+                        .toList();
+                productOfferLogRepository.saveAll(stockToSave);
+            }
+            total = Optional.ofNullable(data.getStock().getSummary())
+                    .map(Summary::getTotal)
+                    .orElse(0);
+            downloadCount += 10000;
+            pageNumber++;
+        } while (total > downloadCount);
 
+        model.addAttribute("data", data);
         return "Test";
     }
 
@@ -156,7 +177,8 @@ public class PlatonApiController {
                 .email("dabrowskiw@gmail.com")
                 .phone("+48662078402")
                 .country("PL")
-                .deliveryMethod(42)
+                .deliveryMethod(16)
+                .machineName("WAW430M")
                 .build();
 
         OrderLine orderLine = OrderLine.builder()
