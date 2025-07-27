@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class GetStocksDto {
-    private String pageSize;
-    private String pageNo;
+    private int pageSize;
+    private int pageNo;
     private LocalDateTime lastChangeDate;
     private int transactionNumber;
 }

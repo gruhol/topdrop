@@ -14,8 +14,21 @@ public class ProductOfferLogMapper {
                 .wholesaleNetPrice(record.getNetPrice())
                 .wholesaleGrossPrice(record.getGrossPrice())
                 .discountPercent(record.getDiscount())
-                .stock(record.getQuantity())
+                .stock(convertToStock(record.getQuantity()))
                 .fetchedAt(LocalDateTime.now())
                 .build();
     }
+
+    private static Integer convertToStock(String quantity) {
+        return switch (quantity) {
+            case "201-250" -> 201;
+            case "251-300" -> 251;
+            case "301-500" -> 301;
+            case "501-1000" -> 501;
+            case ">1000" -> 1001;
+            default -> Integer.parseInt(quantity);
+        };
+    }
+
+
 }

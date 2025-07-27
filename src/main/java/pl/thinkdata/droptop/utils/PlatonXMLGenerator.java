@@ -40,7 +40,7 @@ public class PlatonXMLGenerator {
         return encodeBase64(operationInfo);
     }
 
-    public static String prepareExportParameters(String pageSize, String pageNo, LocalDateTime lastChangedDate) {
+    public static String prepareExportParameters(int pageSize, int pageNo, LocalDateTime lastChangedDate) {
         String parametersTemplate = """
                             <Export>
                             <PageSize>%s</PageSize>

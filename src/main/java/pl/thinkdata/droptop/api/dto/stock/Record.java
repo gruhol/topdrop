@@ -19,7 +19,7 @@ public class Record {
     private Long productCode;
 
     @XmlElement(name = "c")
-    private Integer quantity;
+    private String quantity;
 
     @XmlElement(name = "d")
     private double netPrice;
@@ -31,5 +31,5 @@ public class Record {
     private double discount;
 
     @XmlElement(name = "g")
-    private Integer quantity2;
+    private String quantity2;
 }

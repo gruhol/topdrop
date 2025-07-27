@@ -6,13 +6,13 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "import_raport")
+@Table(name = "import_product_raport")
 @Getter
 @Setter
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class ImportRaport {
+public class ImportProductRaport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +23,10 @@ public class ImportRaport {
 
     @Column(name = "import_updated_record")
     private Integer importUpdatedRecord;
+
+    @Column(name = "import_type")
+    @Enumerated(EnumType.STRING)
+    private ImportTypeEnu importType;
 
     @Column(name = "import_date")
     private LocalDateTime importDate;

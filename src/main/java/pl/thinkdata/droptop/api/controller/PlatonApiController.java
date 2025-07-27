@@ -22,7 +22,8 @@ import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
 import pl.thinkdata.droptop.api.service.GetStocksExternalService;
 import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.database.model.ImportRaport;
+import pl.thinkdata.droptop.database.model.ImportProductRaport;
+import pl.thinkdata.droptop.database.model.ImportTypeEnu;
 import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 import pl.thinkdata.droptop.mapper.ProductMapper;
@@ -54,19 +55,25 @@ public class PlatonApiController {
         int pageNumber = 1;
         int downloadCount = 0;
         int total  = 0;
+        int totalStockSave = 0;
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
-                    .pageNo("1")
-                    .pageSize("10000")
-//                .lastChangeDate(LocalDateTime.of(2024,01,01, 12, 11, 2, 33))
+                    .pageNo(pageNumber)
+                    .pageSize(10000)
+                    //.lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
             PlatonResponse data = getStockService.get(getStocksDto);
+            if (!isNull(data.getMessage())) {
+                saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.STOCK);
+                break;
+            }
             if (!data.getStock().getRecords().isEmpty()) {
                 List<ProductOfferLog> stockToSave = data.getStock().getRecords().stream()
                         .map(record -> map(record, "platon"))
                         .toList();
                 productOfferLogRepository.saveAll(stockToSave);
+                totalStockSave += stockToSave.size();
             }
             total = Optional.ofNullable(data.getStock().getSummary())
                     .map(Summary::getTotal)
@@ -74,6 +81,10 @@ public class PlatonApiController {
             downloadCount += 10000;
             pageNumber++;
         } while (total > downloadCount);
+
+        if (isNull(this.data.getMessage())) {
+            saveImportRaport("OK", null, totalStockSave, 0, ImportTypeEnu.STOCK);
+        }
 
         model.addAttribute("data", data);
         return "Test";
@@ -91,15 +102,15 @@ public class PlatonApiController {
 
         do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
-                    .pageNo(String.valueOf(pageNumber))
-                    .pageSize("10000")
-                    .lastChangeDate(getLastUpdate())
+                    .pageNo(pageNumber)
+                    .pageSize(10000)
+                    .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
                     .transactionNumber(1)
                     .build();
             this.data = getPublictionService.get(getPublicationsDto);
 
             if (!isNull(data.getMessage())) {
-                saveImportRaport("Error", data.getMessage(), 0, 0);
+                saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
                 break;
             }
             downloadCount += 10000;
@@ -140,27 +151,28 @@ public class PlatonApiController {
         apiProductService.updateAll(productToUpdate);
 
         if (isNull(this.data.getMessage())) {
-            saveImportRaport("OK", null, listOfSaveProducts.size(), productToUpdate.size());
+            saveImportRaport("OK", null, listOfSaveProducts.size(), productToUpdate.size(), ImportTypeEnu.PRODUCT);
         }
         model.addAttribute("data", listOfSaveProducts);
         return "Test";
     }
 
-    private LocalDateTime getLastUpdate() {
-        return importRaportRepository.findFirstByImportStatusOrderByImportDateDesc("OK")
-                .map(ImportRaport::getImportDate)
+    private LocalDateTime getLastUpdate(ImportTypeEnu importType) {
+        return importRaportRepository.findFirstByImportStatusAndImportTypeOrderByImportDateDesc("OK", importType)
+                .map(ImportProductRaport::getImportDate)
                 .orElse(null);
     }
 
-    private void saveImportRaport(String status, String message, int addedTotal, int updateTotal) {
-        ImportRaport importRaport = ImportRaport.builder()
+    private void saveImportRaport(String status, String message, int addedTotal, int updateTotal, ImportTypeEnu type) {
+        ImportProductRaport importProductRaport = ImportProductRaport.builder()
                 .importDate(LocalDateTime.now())
                 .importAddedRecord(addedTotal)
                 .importUpdatedRecord(updateTotal)
+                .importType(type)
                 .importStatus(status)
                 .importErrorMessage(message)
                 .build();
-        importRaportRepository.save(importRaport);
+        importRaportRepository.save(importProductRaport);
     }
 
     @GetMapping("/order-drop/{idOrder}/{eanOrder}")
