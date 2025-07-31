@@ -14,7 +14,7 @@ import pl.thinkdata.droptop.api.dto.catalog.Rc;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
-import pl.thinkdata.droptop.api.dto.stock.ProductOfferLog;
+import pl.thinkdata.droptop.database.model.ProductOfferLog;
 import pl.thinkdata.droptop.api.dto.stock.Summary;
 import pl.thinkdata.droptop.api.service.ApiProductService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;

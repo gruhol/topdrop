@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.Comparator;
+import java.util.List;
+
 @Entity
 @Table(name = "product")
 @Getter
@@ -53,4 +56,13 @@ public class Product {
     private String manufacturingCountryCode;
     @Embedded
     private DateOperator dateOperator;
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductOfferLog> offers;
+
+    public ProductOfferLog getLatestOffer() {
+        return this.getOffers().stream()
+                .max(Comparator.comparing(ProductOfferLog::getFetchedAt))
+                .orElse(null);
+    }
+
 }

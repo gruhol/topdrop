@@ -1,4 +1,5 @@
-package pl.thinkdata.droptop.api.dto.stock;
+package pl.thinkdata.droptop.database.model;
+
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,4 +43,7 @@ public class ProductOfferLog {
     @Column(name = "fetched_at")
     private LocalDateTime fetchedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_ean", referencedColumnName = "ean", nullable = false, insertable = false, updatable = false)
+    private Product product;
 }

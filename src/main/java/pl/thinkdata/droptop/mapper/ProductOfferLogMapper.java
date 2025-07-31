@@ -1,6 +1,6 @@
 package pl.thinkdata.droptop.mapper;
 
-import pl.thinkdata.droptop.api.dto.stock.ProductOfferLog;
+import pl.thinkdata.droptop.database.model.ProductOfferLog;
 import pl.thinkdata.droptop.api.dto.stock.Record;
 
 import java.time.LocalDateTime;
