@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import pl.thinkdata.droptop.baselinker.service.BaselinkerService;
 import pl.thinkdata.droptop.database.service.ProductService;
 import pl.thinkdata.droptop.database.model.Product;
 
@@ -16,6 +18,7 @@ import pl.thinkdata.droptop.database.model.Product;
 public class ProductController {
 
     private final ProductService productService;
+    private final BaselinkerService baselinkerService;
 
     @GetMapping("/produkty")
     public String getAllProduct(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
@@ -28,5 +31,18 @@ public class ProductController {
         model.addAttribute("pageSize", size);
         model.addAttribute("totalPages", products.getTotalPages());
         return "database/products";
+    }
+
+    @GetMapping("/produkt/send/{ean}")
+    public String sendProductToBaseLinker(@PathVariable(value = "ean", required = true) String ean, Model model) {
+        String message;
+        boolean result = baselinkerService.sendProduct(ean);
+        if (result) {
+            message = "Utworzono";
+        } else {
+            message = "Błąd.";
+        }
+        model.addAttribute("massage", message);
+        return "database/alerts/alerts";
     }
 }

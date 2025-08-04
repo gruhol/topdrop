@@ -1,18 +1,19 @@
 package pl.thinkdata.droptop.mapper;
 
+import org.apache.commons.text.StringEscapeUtils;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.database.model.Product;
 
 public class ProductMapper {
 
-    public static Product mapToProduct(ProductFromXml product) {
+    public static Product mapToProduct(ProductFromXml product, String url) {
         return Product.builder()
                 .ean(product.getEan())
                 .isbn(product.getIsbn())
                 .title(product.getTitle())
                 .releaseDate(product.getReleaseDate())
                 .status(product.getStatus())
-                .img(product.getImg())
+                .img(StringEscapeUtils.unescapeHtml4(url) + product.getImg())
                 .author(product.getAuthor())
                 .series(product.getSeries())
                 .translator(product.getTranslator())

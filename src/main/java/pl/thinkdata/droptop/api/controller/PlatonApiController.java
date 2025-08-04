@@ -63,7 +63,7 @@ public class PlatonApiController {
                     //.lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
-            PlatonResponse data = getStockService.get(getStocksDto);
+            this.data = getStockService.get(getStocksDto);
             if (!isNull(data.getMessage())) {
                 saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.STOCK);
                 break;
@@ -109,6 +109,9 @@ public class PlatonApiController {
                     .build();
             this.data = getPublictionService.get(getPublicationsDto);
 
+            String covertUrl = Optional.ofNullable(this.data.getCatalog().getRc().getUrlCoverBookLink())
+                    .orElse("");
+
             if (!isNull(data.getMessage())) {
                 saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
                 break;
@@ -122,7 +125,7 @@ public class PlatonApiController {
                     .map(Rc::getProducts)
                     .orElse(Collections.emptyList());
             productFromXmls.stream()
-                    .map(ProductMapper::mapToProduct)
+                    .map(p -> ProductMapper.mapToProduct(p, covertUrl))
                     .filter(Objects::nonNull)
                     .forEach(dowloadProducts::add);
         }
