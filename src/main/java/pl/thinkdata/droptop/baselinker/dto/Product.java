@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.baselinker.model;
+package pl.thinkdata.droptop.baselinker.dto;
 
 import lombok.*;
 

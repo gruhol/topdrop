@@ -1,47 +1,37 @@
 package pl.thinkdata.droptop.baselinker.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import pl.thinkdata.droptop.baselinker.model.Product;
-import pl.thinkdata.droptop.common.repository.ProductRepository;
 
-import java.util.Optional;
-
-import static pl.thinkdata.droptop.baselinker.mapper.ProductMapper.map;
-
-@Service
-@RequiredArgsConstructor
 public class BaselinkerService {
 
-    private final ProductRepository productRepository;
+    @Value("${baselinker.token}")
+    private String token;
 
-    private final WebClient webClient = WebClient.builder()
-            .baseUrl("https://api.baselinker.com")
-            .defaultHeader("X-BLToken", "xxx")
-            .build();
+    private String urlApi = "https://api.baselinker.com";
 
-    public boolean sendProduct(String ean) {
+    protected String methodName;
 
-        Optional<Product> product = productRepository.findByEan(ean)
-                .map(p -> map(p, "platon"));
-        try {
-            if (product.isEmpty()) return false;
-            String jsonParams = new ObjectMapper().writeValueAsString(product.get());
-            webClient.post()
-                    .uri("/connector.php")
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .bodyValue("method=addProduct&parameters=" + jsonParams)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .subscribe(System.out::println);
-            return true;
-        } catch (JsonProcessingException e) {
-            System.out.println(e);
-            return false;
-        }
+    protected WebClient webClient;
+
+    @PostConstruct
+    private void initWebClient() {
+        this.webClient = WebClient.builder()
+                .baseUrl(urlApi)
+                .defaultHeader("X-BLToken", token)
+                .build();
+    }
+
+    ResponseEntity<String> getDataFromWebClient(String json) {
+        return webClient.post()
+                .uri("/connector.php")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .bodyValue("method=" + methodName + "&parameters=" + json)
+                .retrieve()
+                .toEntity(String.class)
+                .block();
     }
 }

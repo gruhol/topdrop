@@ -1,11 +1,10 @@
 package pl.thinkdata.droptop.baselinker.mapper;
 
-import pl.thinkdata.droptop.baselinker.model.Feature;
-import pl.thinkdata.droptop.baselinker.model.Product;
+import pl.thinkdata.droptop.baselinker.dto.Feature;
+import pl.thinkdata.droptop.baselinker.dto.Product;
 import pl.thinkdata.droptop.database.model.ProductOfferLog;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
