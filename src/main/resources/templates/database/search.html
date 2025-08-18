@@ -32,6 +32,10 @@
                 <td>Typ</td>
                 <td>Cena</td>
                 <td>Vat</td>
+                <td>Rabat %</td>
+                <td>Cena hurtowa</td>
+                <td>Cena hurtowa brutto</td>
+                <td>Stan</td>
             </tr>
             <tr th:each="product : ${products.content}">
                 <td th:text="${product.id}"></td>
@@ -43,6 +47,10 @@
                 <td th:text="${product.type}"></td>
                 <td th:text="${product.price}"></td>
                 <td th:text="${product.vat}"></td>
+                <td th:text="${product?.LatestOffer?.discountPercent} ?: '0'"></td>
+                <td th:text="${product?.LatestOffer?.wholesaleNetPrice} ?: '0'"></td>
+                <td th:text="${product?.LatestOffer?.wholesaleGrossPrice} ?: '0'"></td>
+                <td th:text="${product?.LatestOffer?.stock} ?: '0'"></td>
             </tr>
         </table>
     </div>

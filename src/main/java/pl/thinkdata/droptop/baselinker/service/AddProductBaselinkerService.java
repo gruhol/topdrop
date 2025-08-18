@@ -32,7 +32,7 @@ public class AddProductBaselinkerService extends BaselinkerService implements Ba
         Optional<Product> product = productRepository.findByEan(ean)
                 .map(p -> map(p, "platon"));
 
-        if (product.isEmpty()) throw new IllegalArgumentException("Nie ma takiego projektu");
+        if (product.isEmpty()) throw new IllegalArgumentException("Nie ma takiego produktu");
         return sendRequest(product.get());
     }
 

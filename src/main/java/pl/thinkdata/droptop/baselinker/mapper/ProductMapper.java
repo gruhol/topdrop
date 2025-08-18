@@ -21,30 +21,27 @@ public class ProductMapper {
         addFeature(features, "translator", product.getTranslator());
         addFeature(features, "releaseYear", product.getReleaseYear());
 
-        return Product.builder()
-                .storage_id("bl_1")
-                .ean(product.getEan())
-                .sku(product.getEan())
-                .location(location)
-                .name(product.getTitle())
-                .quantity(Optional.ofNullable(product.getLatestOffer())
-                        .map(ProductOfferLog::getStock)
-                        .orElse(0))
-                .price_brutto(product.getPrice())
-                .price_wholesale_netto(Optional.ofNullable(product.getLatestOffer())
-                        .map(ProductOfferLog::getWholesaleNetPrice)
-                        .orElse(product.getPrice()))
-                .tax_rate(product.getVat())
-                .weight(product.getWeight())
-                .height(product.getHeight())
-                .width(product.getWidth())
-                .length(product.getDepth())
-                .description(product.getDescription())
-                .man_name(product.getPublisher())
-                .category_id("4554825")
-                //.images(Collections.singletonList(product.getImg()))
-                .features(features)
-                .build();
+//        return Product.builder()
+//                .inventory_id("bl_1")
+//                .ean(product.getEan())
+//                .sku(product.getEan())
+//
+//                .quantity(Optional.ofNullable(product.getLatestOffer())
+//                        .map(ProductOfferLog::getStock)
+//                        .orElse(0))
+//                .price_brutto(product.getPrice())
+//                .price_wholesale_netto(Optional.ofNullable(product.getLatestOffer())
+//                        .map(ProductOfferLog::getWholesaleNetPrice)
+//                        .orElse(product.getPrice()))
+//                .tax_rate(product.getVat())
+//                .weight(product.getWeight())
+//                .description(product.getDescription())
+//                .man_name(product.getPublisher())
+//                .category_id("4554825")
+//                //.images(Collections.singletonList(product.getImg()))
+//                .features(features)
+//                .build();
+        return null;
     }
 
     private static void addFeature(List<Feature> features, String name, String value) {
