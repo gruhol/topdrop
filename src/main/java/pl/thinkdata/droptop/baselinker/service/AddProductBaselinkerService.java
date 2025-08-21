@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.dto.Product;
+import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class AddProductBaselinkerService extends BaselinkerService implements Ba
     public AddProductResponse sendProduct(String ean) {
 
         Optional<Product> product = productRepository.findByEan(ean)
-                .map(p -> map(p, "platon"));
+                .map(ProductMapper::map);
 
         if (product.isEmpty()) throw new IllegalArgumentException("Nie ma takiego produktu");
         return sendRequest(product.get());

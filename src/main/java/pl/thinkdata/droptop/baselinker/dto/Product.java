@@ -20,8 +20,8 @@ public class Product {
     private double height;
     private double width;
     private double length;
-    private int manufacturer_id;
-    private int category_id;
+    private String manufacturer_id;
+    private String category_id;
     private Map<String, Double> prices;
     private Map<String, Integer> stocks;
     private Map<String, String> locations;
