@@ -13,8 +13,6 @@ import pl.thinkdata.droptop.common.repository.ProductRepository;
 
 import java.util.Optional;
 
-import static pl.thinkdata.droptop.baselinker.mapper.ProductMapper.map;
-
 @Service
 @RequiredArgsConstructor
 public class AddProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<Product,AddProductResponse> {

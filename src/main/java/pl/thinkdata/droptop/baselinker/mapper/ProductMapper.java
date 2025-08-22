@@ -1,6 +1,7 @@
 package pl.thinkdata.droptop.baselinker.mapper;
 
 import pl.thinkdata.droptop.baselinker.dto.Product;
+import pl.thinkdata.droptop.baselinker.dto.TextFields;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,38 +9,24 @@ import java.util.Map;
 public class ProductMapper {
 
     public static Product map(pl.thinkdata.droptop.database.model.Product product) {
-//        List<Feature> features = new ArrayList<>();
-//        addFeature(features, "releaseDate", product.getReleaseDate());
-//        addFeature(features, "status", product.getStatus());
-//        addFeature(features, "author", product.getAuthor());
-//        addFeature(features, "series", product.getSeries());
-//        addFeature(features, "translator", product.getTranslator());
-//        addFeature(features, "releaseYear", product.getReleaseYear());
-
-//        return Product.builder()
-//                .inventory_id("bl_1")
-//                .ean(product.getEan())
-//                .sku(product.getEan())
-//
-//                .quantity(Optional.ofNullable(product.getLatestOffer())
-//                        .map(ProductOfferLog::getStock)
-//                        .orElse(0))
-//                .price_brutto(product.getPrice())
-//                .price_wholesale_netto(Optional.ofNullable(product.getLatestOffer())
-//                        .map(ProductOfferLog::getWholesaleNetPrice)
-//                        .orElse(product.getPrice()))
-//                .tax_rate(product.getVat())
-//                .weight(product.getWeight())
-//                .description(product.getDescription())
-//                .man_name(product.getPublisher())
-//                .category_id("4554825")
-//                //.images(Collections.singletonList(product.getImg()))
-//                .features(features)
-//                .build();
         Map<String, Double> prices = new HashMap<>();
         prices.put("51936", product.getLatestOffer().getWholesaleGrossPrice());
         Map<String, Integer> stocks = new HashMap<>();
         stocks.put("87714", product.getLatestOffer().getStock());
+        Map<String, String> locations = new HashMap<>();
+        locations.put("bl_1", "platon");
+
+        TextFields textFields = new TextFields();
+        textFields.setName(product.getTitle());
+        textFields.setDescription(product.getDescription());
+        Map<String, String> reatures = new HashMap<>();
+        reatures.put("releaseDate", product.getReleaseDate());
+        reatures.put("status", product.getStatus());
+        reatures.put("author", product.getAuthor());
+        reatures.put("series", product.getSeries());
+        reatures.put("translator", product.getTranslator());
+        reatures.put("releaseYear", product.getReleaseYear());
+        textFields.setFeatures(reatures);
 
         return Product.builder()
                 .inventory_id("59592")
@@ -54,6 +41,8 @@ public class ProductMapper {
                 .category_id("4554825")
                 .prices(prices)
                 .stocks(stocks)
+                .locations(locations)
+                .textFields(textFields)
                 .build();
 
     }
