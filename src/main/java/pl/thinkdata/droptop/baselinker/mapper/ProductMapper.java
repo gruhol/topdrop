@@ -14,7 +14,7 @@ public class ProductMapper {
         Map<String, Integer> stocks = new HashMap<>();
         stocks.put("87714", product.getLatestOffer().getStock());
         Map<String, String> locations = new HashMap<>();
-        locations.put("bl_1", "platon");
+        locations.put("bl_87714", "platon");
 
         TextFields textFields = new TextFields();
         textFields.setName(product.getTitle());
@@ -42,7 +42,7 @@ public class ProductMapper {
                 .prices(prices)
                 .stocks(stocks)
                 .locations(locations)
-                .textFields(textFields)
+                .text_fields(textFields)
                 .build();
 
     }

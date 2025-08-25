@@ -2,7 +2,6 @@ package pl.thinkdata.droptop.baselinker.dto;
 
 import lombok.*;
 
-import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -25,7 +24,7 @@ public class Product {
     private Map<String, Double> prices;
     private Map<String, Integer> stocks;
     private Map<String, String> locations;
-    private TextFields textFields;
+    private TextFields text_fields;
     private Map<Integer, String> images;
 }
 
