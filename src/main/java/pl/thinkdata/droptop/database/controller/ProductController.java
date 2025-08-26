@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
-import pl.thinkdata.droptop.baselinker.service.AddProductBaselinkerService;
+import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
 import pl.thinkdata.droptop.database.service.ProductService;
 import pl.thinkdata.droptop.database.model.Product;
 
@@ -19,7 +19,7 @@ import pl.thinkdata.droptop.database.model.Product;
 public class ProductController {
 
     private final ProductService productService;
-    private final AddProductBaselinkerService baselinkerService;
+    private final AddInventoryProductBaselinkerService baselinkerService;
 
     @GetMapping("/produkty")
     public String getAllProduct(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,

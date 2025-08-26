@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AddProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<Product,AddProductResponse> {
+public class AddInventoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<Product,AddProductResponse> {
 
     private final ProductRepository productRepository;
 
@@ -23,7 +23,7 @@ public class AddProductBaselinkerService extends BaselinkerService implements Ba
 
     @PostConstruct
     private void initMethodName() {
-        super.methodName = "addProduct";
+        super.methodName = "addInventoryProduct";
     }
 
     public AddProductResponse sendProduct(String ean) {

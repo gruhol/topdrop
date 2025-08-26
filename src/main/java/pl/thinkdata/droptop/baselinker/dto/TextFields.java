@@ -13,7 +13,7 @@ import java.util.Map;
 public class TextFields {
     private String name;
     private String description;
-    private String descriptionExtra1;
-    private String descriptionExtra2;
+    private String description_extra1;
+    private String description_extra2;
     private Map<String, String> features;
 }

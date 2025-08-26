@@ -22,7 +22,7 @@ public class Product {
     private String manufacturer_id;
     private String category_id;
     private Map<String, Double> prices;
-    private Map<String, Integer> stocks;
+    private Map<String, Integer> stock;
     private Map<String, String> locations;
     private TextFields text_fields;
     private Map<Integer, String> images;

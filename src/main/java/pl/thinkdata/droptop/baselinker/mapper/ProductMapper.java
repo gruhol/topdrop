@@ -11,8 +11,8 @@ public class ProductMapper {
     public static Product map(pl.thinkdata.droptop.database.model.Product product) {
         Map<String, Double> prices = new HashMap<>();
         prices.put("51936", product.getLatestOffer().getWholesaleGrossPrice());
-        Map<String, Integer> stocks = new HashMap<>();
-        stocks.put("87714", product.getLatestOffer().getStock());
+        Map<String, Integer> stock = new HashMap<>();
+        stock.put("bl_87714", product.getLatestOffer().getStock());
         Map<String, String> locations = new HashMap<>();
         locations.put("bl_87714", "platon");
 
@@ -33,17 +33,16 @@ public class ProductMapper {
                 .ean(product.getEan())
                 .sku(product.getEan())
                 .tax_rate(product.getVat())
-                .weight(product.getWeight())
-                .height(product.getHeight())
-                .width(product.getWidth())
-                .length(product.getDepth())
+                .weight((double) product.getWeight() / 1000)
+                .height((double) product.getHeight() / 10)
+                .width((double) product.getWidth() / 10)
+                .length(product.getDepth() / 10)
                 .manufacturer_id("2494877")
                 .category_id("4554825")
                 .prices(prices)
-                .stocks(stocks)
+                .stock(stock)
                 .locations(locations)
                 .text_fields(textFields)
                 .build();
-
     }
 }
