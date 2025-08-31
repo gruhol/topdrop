@@ -26,6 +26,6 @@ public class Product {
     private Map<String, Integer> stock;
     private Map<String, String> locations;
     private TextFields text_fields;
-    private Map<Integer, String> images;
+    private Map<String, String> images;
 }
 
