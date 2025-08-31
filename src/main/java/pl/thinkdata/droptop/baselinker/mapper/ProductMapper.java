@@ -37,6 +37,7 @@ public class ProductMapper {
                 .height((double) product.getHeight() / 10)
                 .width((double) product.getWidth() / 10)
                 .length(product.getDepth() / 10)
+                .average_cost(product.getLatestOffer().getWholesaleGrossPrice())
                 .manufacturer_id("2494877")
                 .category_id("4554825")
                 .prices(prices)

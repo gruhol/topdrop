@@ -19,6 +19,7 @@ public class Product {
     private double height;
     private double width;
     private double length;
+    private double average_cost;
     private String manufacturer_id;
     private String category_id;
     private Map<String, Double> prices;
