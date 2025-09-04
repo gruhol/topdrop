@@ -16,7 +16,7 @@ public class ProductMapper {
         Map<String, String> locations = new HashMap<>();
         locations.put("bl_87714", "platon");
         Map<String, String> images = new HashMap<>();
-        images.put("bl_1", product.getImg());
+        images.put("0", "data:" + product.getImg());
 
 
         TextFields textFields = new TextFields();
