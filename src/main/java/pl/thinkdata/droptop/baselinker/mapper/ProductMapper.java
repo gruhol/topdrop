@@ -32,6 +32,7 @@ public class ProductMapper {
         textFields.setFeatures(reatures);
 
         return Product.builder()
+                .product_id(product.getId())
                 .inventory_id("59592")
                 .ean(product.getEan())
                 .sku(product.getEan())

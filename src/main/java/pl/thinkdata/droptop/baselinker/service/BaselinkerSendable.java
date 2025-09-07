@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Unmarshaller;
 
-public interface BaselinkerSendable<REQ, RES> {
-    RES sendRequest(REQ req) throws JsonProcessingException;
+public interface BaselinkerSendable<REQ, D, RES> {
+    RES sendRequest(REQ req, D date) throws JsonProcessingException;
 
     default <RES> RES deserialize(String json, Class<RES> clazz) {
         try {

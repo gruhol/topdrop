@@ -12,12 +12,14 @@ import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class AddInventoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<Product,AddProductResponse> {
+public class AddInventoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<Product, pl.thinkdata.droptop.database.model.Product, AddProductResponse> {
 
     private final ProductRepository productRepository;
+    private final BaselinkerLogService baselinkerLogService;
 
     protected String methodName;
 
@@ -26,25 +28,36 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
         super.methodName = "addInventoryProduct";
     }
 
+
     public AddProductResponse sendProduct(String ean) {
+        pl.thinkdata.droptop.database.model.Product product = productRepository.findByEan(ean)
+                .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu"));
 
-        Optional<Product> product = productRepository.findByEan(ean)
-                .map(ProductMapper::map);
-
-        if (product.isEmpty()) throw new IllegalArgumentException("Nie ma takiego produktu");
-        return sendRequest(product.get());
+        return sendRequest(ProductMapper.map(product), product);
     }
 
     @Override
-    public AddProductResponse sendRequest(Product product) {
+    public AddProductResponse sendRequest(Product productDto, pl.thinkdata.droptop.database.model.Product product) {
         try {
-            String jsonParams = new ObjectMapper().writeValueAsString(product);
+            String jsonParams = new ObjectMapper().writeValueAsString(productDto);
             ResponseEntity<String> response = getDataFromWebClient(jsonParams);
             return Optional.ofNullable(response)
-                    .map(res -> deserialize(res.getBody(), AddProductResponse.class))
-                    .orElseThrow(() -> new RuntimeException("Deserialization Error"));
+                    .map(res -> {
+                        AddProductResponse addProductResponse = mapToAddProductResponse(res);
+                        baselinkerLogService.sendSuccesExport(product, addProductResponse);
+                        return addProductResponse;
+                    })
+                    .orElseThrow(() -> new RuntimeException("Empty response"));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Serialization Error");
+        }
+    }
+
+    private AddProductResponse mapToAddProductResponse(ResponseEntity<String> response) {
+        try {
+            return new ObjectMapper().readValue(response.getBody(), AddProductResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Deserialization Error", e);
         }
     }
 }

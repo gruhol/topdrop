@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.baselinker.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.Map;
@@ -11,8 +12,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class AddProductResponse {
     private String status;
-    private String storage_id;
-    private long product_id;
+    @JsonProperty("product_id")
+    private long productId;
     private Map<String, String> warnings;
 }
 

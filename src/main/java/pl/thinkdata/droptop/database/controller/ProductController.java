@@ -39,11 +39,11 @@ public class ProductController {
         String message;
         AddProductResponse result = baselinkerService.sendProduct(ean);
         if (result.getStatus().equals("SUCCESS")) {
-            message = "Utworzono";
+            message = "Utworzono o id: " + result.getProductId();
         } else {
             message = "Błąd.";
         }
-        model.addAttribute("massage", message);
+        model.addAttribute("message", message);
         return "database/alerts/alerts";
     }
 }

@@ -11,7 +11,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class Product {
     private String inventory_id;
-    private String product_id;
+    private Long product_id;
     private String ean;
     private String sku;
     private String tax_rate;
