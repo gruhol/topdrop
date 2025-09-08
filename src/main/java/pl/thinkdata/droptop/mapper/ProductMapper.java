@@ -52,7 +52,11 @@ public class ProductMapper {
             try (InputStream in = url.openStream()) {
                 imageBytes = in.readAllBytes();
             }
-            return "data:" + extension + ";base64," + Base64.getEncoder().encodeToString(imageBytes);
+
+            String base64 = Base64.getEncoder().encodeToString(imageBytes);
+            base64 = base64.replace("+", "%2B");
+
+            return "data:" + extension + ";base64," + base64;
         } catch (IOException e) {
             return "";
         }
