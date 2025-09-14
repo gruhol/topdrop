@@ -8,13 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
-import pl.thinkdata.droptop.api.dto.catalog.CatalogResponseSummary;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.api.dto.catalog.Rc;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
-import pl.thinkdata.droptop.database.model.ProductOfferLog;
 import pl.thinkdata.droptop.api.dto.stock.Summary;
 import pl.thinkdata.droptop.api.service.ApiProductService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
@@ -25,6 +23,7 @@ import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.ImportProductRaport;
 import pl.thinkdata.droptop.database.model.ImportTypeEnu;
 import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.ProductOfferLog;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 import pl.thinkdata.droptop.mapper.ProductMapper;
 
@@ -47,6 +46,7 @@ public class PlatonApiController {
     private final GetOrderDropExternalService getOrderDropExternalService;
     private final ApiProductService apiProductService;
     private final ProductOfferLogRepository productOfferLogRepository;
+    private final ProductMapper productMapper;
 
     PlatonResponse data;
 
@@ -59,7 +59,7 @@ public class PlatonApiController {
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
-                    .pageSize(10000)
+                    .pageSize(100)
                     //.lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
@@ -78,7 +78,7 @@ public class PlatonApiController {
             total = Optional.ofNullable(data.getStock().getSummary())
                     .map(Summary::getTotal)
                     .orElse(0);
-            downloadCount += 10000;
+            downloadCount += 100;
             pageNumber++;
         } while (total > downloadCount);
 
@@ -100,10 +100,10 @@ public class PlatonApiController {
         Set<String> notDuplatedDownloadEan = new HashSet<>();
         List<Product> productToUpdate = new ArrayList<>();
 
-        do {
+        //do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(pageNumber)
-                    .pageSize(10000)
+                    .pageSize(100)
                     .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
                     .transactionNumber(1)
                     .build();
@@ -112,24 +112,24 @@ public class PlatonApiController {
             String covertUrl = Optional.ofNullable(this.data.getCatalog().getRc().getUrlCoverBookLink())
                     .orElse("");
 
-            if (!isNull(data.getMessage())) {
-                saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
-                break;
-            }
-            downloadCount += 10000;
+            //if (!isNull(data.getMessage())) {
+            //    saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
+            //    break;
+            //}
+            downloadCount += 100;
             pageNumber++;
-            total = Optional.ofNullable(data.getCatalog().getSummary())
-                    .map(CatalogResponseSummary::getTotal)
-                    .orElse(0);
+//            total = Optional.ofNullable(data.getCatalog().getSummary())
+//                    .map(CatalogResponseSummary::getTotal)
+//                    .orElse(0);
             List<ProductFromXml> productFromXmls = Optional.ofNullable(data.getCatalog().getRc())
                     .map(Rc::getProducts)
                     .orElse(Collections.emptyList());
             productFromXmls.stream()
-                    .map(p -> ProductMapper.mapToProduct(p, covertUrl))
+                    .map(p -> productMapper.mapToProduct(p, covertUrl))
                     .filter(Objects::nonNull)
                     .forEach(dowloadProducts::add);
-        }
-        while (total > downloadCount);
+        //}
+        //while (9000 > downloadCount);
 
         List<String> dowloadEans = dowloadProducts.stream()
                 .map(Product::getEan)
