@@ -1,6 +1,8 @@
 package pl.thinkdata.droptop.api.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,7 @@ import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
 import pl.thinkdata.droptop.api.service.GetStocksExternalService;
 import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
+import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.ImportProductRaport;
 import pl.thinkdata.droptop.database.model.ImportTypeEnu;
 import pl.thinkdata.droptop.database.model.Product;
@@ -47,6 +50,7 @@ public class PlatonApiController {
     private final ApiProductService apiProductService;
     private final ProductOfferLogRepository productOfferLogRepository;
     private final ProductMapper productMapper;
+    private final ImageService imageService;
 
     PlatonResponse data;
 
@@ -104,7 +108,7 @@ public class PlatonApiController {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(pageNumber)
                     .pageSize(100)
-                    .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
+                    //.lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
                     .transactionNumber(1)
                     .build();
             this.data = getPublictionService.get(getPublicationsDto);
@@ -213,5 +217,10 @@ public class PlatonApiController {
 
         model.addAttribute("data", data);
         return "Test";
+    }
+
+    @GetMapping("/get/{dir}/{filename}")
+    public ResponseEntity<Resource> serveImages(@PathVariable String dir, @PathVariable String filename) {
+        return imageService.serveImages(filename, dir);
     }
 }
