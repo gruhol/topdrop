@@ -63,7 +63,7 @@ public class PlatonApiController {
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
-                    .pageSize(100)
+                    .pageSize(10000)
                     //.lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
@@ -82,7 +82,7 @@ public class PlatonApiController {
             total = Optional.ofNullable(data.getStock().getSummary())
                     .map(Summary::getTotal)
                     .orElse(0);
-            downloadCount += 100;
+            downloadCount += 10000;
             pageNumber++;
         } while (total > downloadCount);
 

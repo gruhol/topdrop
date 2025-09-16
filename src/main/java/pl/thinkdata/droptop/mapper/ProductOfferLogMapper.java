@@ -14,7 +14,7 @@ public class ProductOfferLogMapper {
                 .wholesaleNetPrice(record.getNetPrice())
                 .wholesaleGrossPrice(record.getGrossPrice())
                 .discountPercent(record.getDiscount())
-                .stock(convertToStock(record.getQuantity()))
+                .stock(convertToStock(record.getQuantity2()))
                 .fetchedAt(LocalDateTime.now())
                 .build();
     }
