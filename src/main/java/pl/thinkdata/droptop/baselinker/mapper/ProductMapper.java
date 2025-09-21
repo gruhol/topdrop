@@ -32,7 +32,6 @@ public class ProductMapper {
         textFields.setFeatures(reatures);
 
         return Product.builder()
-                //.product_id(product.getId())
                 .inventory_id("59592")
                 .ean(product.getEan())
                 .sku(product.getEan())
@@ -43,7 +42,7 @@ public class ProductMapper {
                 .length(product.getDepth() / 10)
                 .average_cost(product.getLatestOffer().getWholesaleGrossPrice())
                 .manufacturer_id("2494877")
-                .category_id("4554825")
+                .category_id("4827992")
                 .prices(prices)
                 .stock(stock)
                 .locations(locations)

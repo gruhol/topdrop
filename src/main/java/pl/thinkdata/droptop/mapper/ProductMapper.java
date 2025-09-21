@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Component;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
+import pl.thinkdata.droptop.api.utils.CategoryGeneratorUtils;
 import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.Product;
 
@@ -14,6 +15,7 @@ import java.io.IOException;
 public class ProductMapper {
 
     private final ImageService imageService;
+    private final CategoryGeneratorUtils categoryGeneratorUtils;
 
     public Product mapToProduct(ProductFromXml product, String url)  {
         return Product.builder()
@@ -27,7 +29,7 @@ public class ProductMapper {
                 .author(product.getAuthor())
                 .series(product.getSeries())
                 .translator(product.getTranslator())
-                .category(product.getCategory())
+                .category(categoryGeneratorUtils.parseStringToCategory(product.getCategory(), product.getType()))
                 .publisher(product.getPublisher())
                 .description(product.getDescription())
                 .releaseYear(product.getReleaseYear())

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import pl.thinkdata.droptop.api.model.Category;
 import pl.thinkdata.droptop.baselinker.model.BaselinkerExportLog;
 
 import java.util.Comparator;
@@ -35,7 +36,9 @@ public class Product {
     private String author;
     private String series;
     private String translator;
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
     private String publisher;
 
     @Lob

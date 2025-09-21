@@ -108,7 +108,7 @@ public class PlatonApiController {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(pageNumber)
                     .pageSize(100)
-                    //.lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
+                    .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
                     .transactionNumber(1)
                     .build();
             this.data = getPublictionService.get(getPublicationsDto);
