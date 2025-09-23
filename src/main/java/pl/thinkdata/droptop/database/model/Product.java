@@ -36,7 +36,6 @@ public class Product {
     private String author;
     private String series;
     private String translator;
-    private String stringCategory;
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

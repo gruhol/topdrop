@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.dto.catalog.Catalog;
+import pl.thinkdata.droptop.api.dto.catalog.CatalogResponseSummary;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.api.dto.catalog.Rc;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
@@ -64,7 +66,7 @@ public class PlatonApiController {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
                     .pageSize(10000)
-                    //.lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
+                    .lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
             this.data = getStockService.get(getStocksDto);
@@ -98,42 +100,46 @@ public class PlatonApiController {
     public String getProductsFromApi(Model model) {
         int pageNumber = 1;
         int downloadCount = 0;
-        int total  = 0;
+        int total;
         List<Product> listOfSaveProducts = new ArrayList<>();
         List<Product> dowloadProducts = new ArrayList<>();
         Set<String> notDuplatedDownloadEan = new HashSet<>();
         List<Product> productToUpdate = new ArrayList<>();
 
-        //do {
+        do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(pageNumber)
-                    .pageSize(100)
+                    .pageSize(10000)
                     .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
                     .transactionNumber(1)
                     .build();
             this.data = getPublictionService.get(getPublicationsDto);
 
-            String covertUrl = Optional.ofNullable(this.data.getCatalog().getRc().getUrlCoverBookLink())
+            String covertUrl = Optional.ofNullable(this.data.getCatalog())
+                    .map(Catalog::getRc)
+                    .map(Rc::getUrlCoverBookLink)
                     .orElse("");
 
-            //if (!isNull(data.getMessage())) {
-            //    saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
-            //    break;
-            //}
-            downloadCount += 100;
+            if (!isNull(data.getMessage())) {
+                saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
+                break;
+            }
+            downloadCount += 10000;
             pageNumber++;
-//            total = Optional.ofNullable(data.getCatalog().getSummary())
-//                    .map(CatalogResponseSummary::getTotal)
-//                    .orElse(0);
-            List<ProductFromXml> productFromXmls = Optional.ofNullable(data.getCatalog().getRc())
+            total = Optional.ofNullable(data.getCatalog())
+                    .map(Catalog::getSummary)
+                    .map(CatalogResponseSummary::getTotal)
+                    .orElse(0);
+            List<ProductFromXml> productFromXmls = Optional.ofNullable(data.getCatalog())
+                    .map(Catalog::getRc)
                     .map(Rc::getProducts)
                     .orElse(Collections.emptyList());
             productFromXmls.stream()
                     .map(p -> productMapper.mapToProduct(p, covertUrl))
                     .filter(Objects::nonNull)
                     .forEach(dowloadProducts::add);
-        //}
-        //while (9000 > downloadCount);
+        }
+        while (total > downloadCount);
 
         List<String> dowloadEans = dowloadProducts.stream()
                 .map(Product::getEan)

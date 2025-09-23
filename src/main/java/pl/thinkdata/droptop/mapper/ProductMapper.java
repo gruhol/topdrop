@@ -8,11 +8,11 @@ import pl.thinkdata.droptop.api.utils.CategoryGeneratorUtils;
 import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.Product;
 
-import java.io.IOException;
-
 @Component
 @RequiredArgsConstructor
 public class ProductMapper {
+
+    public static final String PRODUCT = "product";
 
     private final ImageService imageService;
     private final CategoryGeneratorUtils categoryGeneratorUtils;
@@ -24,12 +24,11 @@ public class ProductMapper {
                 .title(product.getTitle())
                 .releaseDate(product.getReleaseDate())
                 .status(product.getStatus())
-                //.img(imageService.uploadImage(url + product.getImg(), "product", product.getEan()))
-                .img(StringEscapeUtils.unescapeHtml4(url + product.getImg()))
+                //.img(imageService.uploadImage(url + product.getImg(), PRODUCT, product.getEan())) // get data from server
+                .img(StringEscapeUtils.unescapeHtml4(url + product.getImg())) //get data from product source
                 .author(product.getAuthor())
                 .series(product.getSeries())
                 .translator(product.getTranslator())
-                .stringCategory(product.getCategory())
                 .category(categoryGeneratorUtils.parseStringToCategory(product.getCategory(), product.getType()))
                 .publisher(product.getPublisher())
                 .description(product.getDescription())
