@@ -3,6 +3,7 @@ package pl.thinkdata.droptop.api.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,9 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Category parent;
+
+    private String baselinkerId;
+    private LocalDateTime sendDate;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Category> children = new ArrayList<>();

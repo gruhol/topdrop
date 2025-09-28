@@ -46,4 +46,9 @@ public class ProductController {
         model.addAttribute("message", message);
         return "database/alerts/alerts";
     }
+
+    @GetMapping("/category/send")
+    public String sendCategoryToBaselinker(Model model) {
+        return "";
+    }
 }

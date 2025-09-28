@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AddInventoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
+public class AddCategoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
 
     private final ProductRepository productRepository;
     private final BaselinkerLogService baselinkerLogService;
@@ -28,7 +28,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     }
 
 
-    public AddProductResponse sendProduct(String ean) {
+    public AddProductResponse sendCategories(String ean) {
         pl.thinkdata.droptop.database.model.Product product = productRepository.findByEan(ean)
                 .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu"));
 
@@ -42,6 +42,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     @Override
     public AddProductResponse sendRequest(AddProductRequest request) {
         try {
+            /// do zmiany
             String jsonParams = new ObjectMapper().writeValueAsString(request.getProductDto());
             ResponseEntity<String> response = getDataFromWebClient(jsonParams);
             return Optional.ofNullable(response)
