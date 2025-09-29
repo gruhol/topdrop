@@ -6,60 +6,74 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import pl.thinkdata.droptop.baselinker.dto.AddProductRequest;
-import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
-import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
-import pl.thinkdata.droptop.common.repository.ProductRepository;
+import pl.thinkdata.droptop.api.model.Category;
+import pl.thinkdata.droptop.api.repository.CategoryRepository;
+import pl.thinkdata.droptop.baselinker.dto.AddCategoryDto;
+import pl.thinkdata.droptop.baselinker.dto.AddCategoryRequest;
+import pl.thinkdata.droptop.baselinker.dto.AddCategoryResponse;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AddCategoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
+public class AddCategoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddCategoryResponse, AddCategoryRequest> {
 
-    private final ProductRepository productRepository;
-    private final BaselinkerLogService baselinkerLogService;
+    private final CategoryRepository categoryRepository;
 
     protected String methodName;
 
     @PostConstruct
     private void initMethodName() {
-        super.methodName = "addInventoryProduct";
+        super.methodName = "addInventoryCategory";
     }
 
 
-    public AddProductResponse sendCategories(String ean) {
-        pl.thinkdata.droptop.database.model.Product product = productRepository.findByEan(ean)
-                .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu"));
+    public List<AddCategoryResponse> sendCategories() {
 
-        AddProductRequest request = AddProductRequest.builder()
-                .productDto(ProductMapper.map(product))
-                .product(product)
+        return categoryRepository.findAll().stream()
+                .map(this::createAddCategoryRequest)
+                .map(this::sendRequest)
+                .toList();
+    }
+
+    private AddCategoryRequest createAddCategoryRequest(Category category) {
+        return AddCategoryRequest.builder()
+                .dto(createCategoryDto(category))
+                .category(category)
                 .build();
-        return sendRequest(request);
     }
 
     @Override
-    public AddProductResponse sendRequest(AddProductRequest request) {
+    public AddCategoryResponse sendRequest(AddCategoryRequest request) {
         try {
-            /// do zmiany
-            String jsonParams = new ObjectMapper().writeValueAsString(request.getProductDto());
+            String jsonParams = new ObjectMapper().writeValueAsString(request.getDto());
             ResponseEntity<String> response = getDataFromWebClient(jsonParams);
             return Optional.ofNullable(response)
                     .map(res -> {
-                        AddProductResponse addProductResponse = mapToAddProductResponse(res);
-                        baselinkerLogService.sendSuccesExport(request.getProduct(), addProductResponse);
-                        return addProductResponse;
+                        AddCategoryResponse addCategoryResponse = mapToAddCategoryResponse(res);
+                        request.getCategory().setBaselinkerId(addCategoryResponse.getCategory_id());
+                        request.getCategory().setSendDate(LocalDateTime.now());
+                        categoryRepository.save(request.getCategory());
+                        return addCategoryResponse;
                     })
-                    .orElseThrow(() -> new RuntimeException("Empty response"));
+                    .orElseThrow(() -> new RuntimeException("Error baselinker api"));
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Serialization Error");
         }
     }
 
-    private AddProductResponse mapToAddProductResponse(ResponseEntity<String> response) {
+    private AddCategoryDto createCategoryDto(Category category) {
+        return AddCategoryDto.builder()
+                .name(category.getName())
+                .parent_id(category.getParent() == null ? "4554825" : category.getParent().getBaselinkerId())
+                .build();
+    }
+
+    private AddCategoryResponse mapToAddCategoryResponse(ResponseEntity<String> response) {
         try {
-            return new ObjectMapper().readValue(response.getBody(), AddProductResponse.class);
+            return new ObjectMapper().readValue(response.getBody(), AddCategoryResponse.class);
         } catch (Exception e) {
             throw new RuntimeException("Deserialization Error", e);
         }
