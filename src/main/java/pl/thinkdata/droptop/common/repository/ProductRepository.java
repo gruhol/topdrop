@@ -17,4 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByEan(String ean);
 
     List<Product> findByEanIn(List<String> eans);
+
+    List<Product> findTop100ByExportLogIsNull();
 }

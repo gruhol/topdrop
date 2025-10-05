@@ -21,6 +21,7 @@ import java.util.Optional;
 public class AddCategoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddCategoryResponse, AddCategoryRequest> {
 
     private final CategoryRepository categoryRepository;
+    private final GetCategoryProductBaselinkerService getCategoryProductBaselinkerService;
 
     protected String methodName;
 
@@ -31,18 +32,11 @@ public class AddCategoryProductBaselinkerService extends BaselinkerService imple
 
 
     public List<AddCategoryResponse> sendCategories() {
-
+        String mainCatBaseLinker = getCategoryProductBaselinkerService.getIdMainCategory().toString();
         return categoryRepository.findAll().stream()
-                .map(this::createAddCategoryRequest)
+                .map(cat -> createAddCategoryRequest(cat, mainCatBaseLinker))
                 .map(this::sendRequest)
                 .toList();
-    }
-
-    private AddCategoryRequest createAddCategoryRequest(Category category) {
-        return AddCategoryRequest.builder()
-                .dto(createCategoryDto(category))
-                .category(category)
-                .build();
     }
 
     @Override
@@ -52,7 +46,7 @@ public class AddCategoryProductBaselinkerService extends BaselinkerService imple
             ResponseEntity<String> response = getDataFromWebClient(jsonParams);
             return Optional.ofNullable(response)
                     .map(res -> {
-                        AddCategoryResponse addCategoryResponse = mapToAddCategoryResponse(res);
+                        AddCategoryResponse addCategoryResponse = mapToResponse(res, AddCategoryResponse.class);
                         request.getCategory().setBaselinkerId(addCategoryResponse.getCategory_id());
                         request.getCategory().setSendDate(LocalDateTime.now());
                         categoryRepository.save(request.getCategory());
@@ -64,18 +58,20 @@ public class AddCategoryProductBaselinkerService extends BaselinkerService imple
         }
     }
 
-    private AddCategoryDto createCategoryDto(Category category) {
-        return AddCategoryDto.builder()
-                .name(category.getName())
-                .parent_id(category.getParent() == null ? "4554825" : category.getParent().getBaselinkerId())
+    private AddCategoryRequest createAddCategoryRequest(Category category, String mainCategory) {
+
+        return AddCategoryRequest.builder()
+                .dto(createCategoryDto(category, mainCategory))
+                .category(category)
                 .build();
     }
 
-    private AddCategoryResponse mapToAddCategoryResponse(ResponseEntity<String> response) {
-        try {
-            return new ObjectMapper().readValue(response.getBody(), AddCategoryResponse.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Deserialization Error", e);
-        }
+    private AddCategoryDto createCategoryDto(Category category, String mainCategory) {
+        return AddCategoryDto.builder()
+                .name(category.getName())
+                .parent_id(category.getParent() == null
+                        ? mainCategory
+                        : category.getParent().getBaselinkerId())
+                .build();
     }
 }

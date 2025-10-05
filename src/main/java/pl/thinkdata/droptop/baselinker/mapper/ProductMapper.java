@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.baselinker.mapper;
 
+import pl.thinkdata.droptop.baselinker.dto.Inventory;
 import pl.thinkdata.droptop.baselinker.dto.Product;
 import pl.thinkdata.droptop.baselinker.dto.TextFields;
 
@@ -8,16 +9,19 @@ import java.util.Map;
 
 public class ProductMapper {
 
-    public static Product map(pl.thinkdata.droptop.database.model.Product product) {
+    public static Product map(pl.thinkdata.droptop.database.model.Product product, Inventory inventory) {
+        String priceId = inventory.getDefaultPriceGroup().toString();
+        String defaultWarehouse = inventory.getDefaultWarehouse();
+        String inventoryId = inventory.getInventoryId().toString();
+
         Map<String, Double> prices = new HashMap<>();
-        prices.put("51936", product.getLatestOffer().getWholesaleGrossPrice());
+        prices.put(priceId, product.getLatestOffer().getWholesaleGrossPrice());
         Map<String, Integer> stock = new HashMap<>();
-        stock.put("bl_87714", product.getLatestOffer().getStock());
+        stock.put(defaultWarehouse, product.getLatestOffer().getStock());
         Map<String, String> locations = new HashMap<>();
-        locations.put("bl_87714", "platon");
+        locations.put(defaultWarehouse, "platon");
         Map<String, String> images = new HashMap<>();
         images.put("0", "url:" + product.getImg());
-
 
         TextFields textFields = new TextFields();
         textFields.setName(product.getTitle());
@@ -32,7 +36,7 @@ public class ProductMapper {
         textFields.setFeatures(reatures);
 
         return Product.builder()
-                .inventory_id("59592")
+                .inventory_id(inventoryId)
                 .ean(product.getEan())
                 .sku(product.getEan())
                 .tax_rate(product.getVat())
@@ -42,7 +46,7 @@ public class ProductMapper {
                 .length(product.getDepth() / 10)
                 .average_cost(product.getLatestOffer().getWholesaleGrossPrice())
                 .manufacturer_id("2494877")
-                .category_id("4827992")
+                .category_id(product.getCategory().getBaselinkerId())
                 .prices(prices)
                 .stock(stock)
                 .locations(locations)

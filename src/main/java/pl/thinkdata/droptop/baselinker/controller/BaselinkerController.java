@@ -11,6 +11,7 @@ import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -25,6 +26,20 @@ public class BaselinkerController {
     public String sendProductToBaseLinker(@PathVariable(value = "ean", required = true) String ean, Model model) {
         String message;
         AddProductResponse result = addInventoryProductService.sendProduct(ean);
+        if (result.getStatus().equals("SUCCESS")) {
+            message = "Utworzono o id: " + result.getProductId();
+        } else {
+            message = "Błąd.";
+        }
+        model.addAttribute("message", message);
+        return "database/alerts/alerts";
+    }
+
+    @GetMapping("/send/products")
+    public String sendProductsToBaseLinker(Model model) {
+
+        String message;
+        AddProductResponse result = addInventoryProductService.sendProducts();
         if (result.getStatus().equals("SUCCESS")) {
             message = "Utworzono o id: " + result.getProductId();
         } else {

@@ -1,19 +1,17 @@
 package pl.thinkdata.droptop.baselinker.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Unmarshaller;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.ResponseEntity;
 
 public interface BaselinkerSendable<RES, REQ> {
     RES sendRequest(REQ req) throws JsonProcessingException;
 
-    default <RES> RES deserialize(String json, Class<RES> clazz) {
+    default RES mapToResponse(ResponseEntity<String> response, Class<RES> clazz) {
         try {
-            JAXBContext context = jakarta.xml.bind.JAXBContext.newInstance(clazz);
-            Unmarshaller unmarshaller = context.createUnmarshaller();
-            return clazz.cast(unmarshaller.unmarshal(new java.io.StringReader(json)));
+            return new ObjectMapper().readValue(response.getBody(), clazz);
         } catch (Exception e) {
-            throw new RuntimeException("Błąd deserializacji XML", e);
+            throw new RuntimeException("Deserialization Error", e);
         }
     }
 
