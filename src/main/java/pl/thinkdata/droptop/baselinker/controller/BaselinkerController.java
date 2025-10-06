@@ -54,6 +54,7 @@ public class BaselinkerController {
         String message;
         List<AddCategoryResponse> addCategoryResponse = addCategoryProductService.sendCategories();
         boolean allSuccess = addCategoryResponse.stream()
+                .map(AddCategoryResponse::getStatus)
                 .allMatch("SUCCESS"::equals);
         if (allSuccess) {
             message = "Utworzono";
