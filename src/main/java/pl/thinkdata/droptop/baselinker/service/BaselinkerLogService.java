@@ -7,6 +7,8 @@ import pl.thinkdata.droptop.baselinker.model.BaselinkerExportLog;
 import pl.thinkdata.droptop.baselinker.repository.BaselinkerExportLogRepository;
 import pl.thinkdata.droptop.database.model.Product;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class BaselinkerLogService {
@@ -14,10 +16,16 @@ public class BaselinkerLogService {
     private final BaselinkerExportLogRepository repository;
 
     public BaselinkerExportLog sendSuccesExport(Product product, AddProductResponse response) {
-        BaselinkerExportLog log = BaselinkerExportLog.builder()
-                .product(product)
-                .baselinkerId(response.getProductId())
-                .build();
-        return repository.save(log);
+        return repository.findByProductId(product.getId())
+                .map(log -> {
+                    log.setUpdateDate(LocalDateTime.now());
+                    return repository.save(log);
+                }).orElseGet(() -> {
+                    BaselinkerExportLog newLog = BaselinkerExportLog.builder()
+                            .product(product)
+                            .baselinkerId(response.getProductId())
+                            .build();
+                    return repository.save(newLog);
+                });
     }
 }
