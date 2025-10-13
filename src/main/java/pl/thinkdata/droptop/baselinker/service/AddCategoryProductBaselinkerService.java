@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 @Service
 @RequiredArgsConstructor
 public class AddCategoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddCategoryResponse, AddCategoryRequest> {
@@ -34,6 +36,7 @@ public class AddCategoryProductBaselinkerService extends BaselinkerService imple
     public List<AddCategoryResponse> sendCategories() {
         String mainCatBaseLinker = getCategoryProductBaselinkerService.getIdMainCategory().toString();
         return categoryRepository.findAll().stream()
+                .filter(id -> isNull(id.getBaselinkerId()))
                 .map(cat -> createAddCategoryRequest(cat, mainCatBaseLinker))
                 .map(this::sendRequest)
                 .toList();
