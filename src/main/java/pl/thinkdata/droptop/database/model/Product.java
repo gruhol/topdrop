@@ -79,6 +79,11 @@ public class Product {
     @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
     private BaselinkerExportLog exportLog;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sync_status")
+    private SyncStatus syncStatus;
+
+
     public ProductOfferLog getLatestOffer() {
         return this.getOffers().stream()
                 .max(Comparator.comparing(ProductOfferLog::getFetchedAt))

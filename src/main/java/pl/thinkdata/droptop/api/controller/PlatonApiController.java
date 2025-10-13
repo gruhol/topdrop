@@ -25,10 +25,7 @@ import pl.thinkdata.droptop.api.service.GetStocksExternalService;
 import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.common.service.ImageService;
-import pl.thinkdata.droptop.database.model.ImportProductRaport;
-import pl.thinkdata.droptop.database.model.ImportTypeEnu;
-import pl.thinkdata.droptop.database.model.Product;
-import pl.thinkdata.droptop.database.model.ProductOfferLog;
+import pl.thinkdata.droptop.database.model.*;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 import pl.thinkdata.droptop.mapper.ProductMapper;
 
@@ -151,10 +148,13 @@ public class PlatonApiController {
 
         for (Product prod : dowloadProducts) {
             if (findEanInBase.contains(prod.getEan())) {
+                prod.setSyncStatus(SyncStatus.TO_UPDATE);
                 productToUpdate.add(prod);
             } else if (notDuplatedDownloadEan.contains(prod.getEan())) {
+                prod.setSyncStatus(SyncStatus.TO_UPDATE);
                 productToUpdate.add(prod);
             } else {
+                prod.setSyncStatus(SyncStatus.NEW);
                 listOfSaveProducts.add(prod);
             }
             notDuplatedDownloadEan.add(prod.getEan());

@@ -12,7 +12,9 @@ import pl.thinkdata.droptop.baselinker.dto.Inventory;
 import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.SyncStatus;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,6 +29,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     private final GetPriceGroupsBaselinkerService getPriceGroupsService;
     private final GetInventoryBaselinkerService getInventoryService;
 
+    private final List<SyncStatus> newAndUpdateSyncStatus = Arrays.asList(SyncStatus.NEW, SyncStatus.TO_UPDATE);
     protected String methodName;
 
     @PostConstruct
@@ -37,18 +40,29 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
 
     public AddProductResponse sendProduct(String ean) {
         pl.thinkdata.droptop.database.model.Product product = productRepository.findByEan(ean)
-                .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu"));
+                .filter(p -> p.getSyncStatus().equals(SyncStatus.NEW) || p.getSyncStatus().equals(SyncStatus.TO_UPDATE))
+                .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu do aktualizacji"));
+
         Inventory inventory = getInventoryService.getDefaultInventory();
 
         AddProductRequest request = AddProductRequest.builder()
                 .productDto(ProductMapper.map(product, inventory))
                 .product(product)
                 .build();
-        return sendRequest(request);
+
+        AddProductResponse response = sendRequest(request);
+
+        if (response.getStatus().equals("SUCCESS")) {
+            product.setSyncStatus(SyncStatus.SYNCED);
+        } else {
+            product.setSyncStatus(SyncStatus.ERROR);
+        }
+        productRepository.save(product);
+        return response;
     }
 
     public AddProductResponse sendProducts() {
-        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNull();
+        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
         Inventory inventory = getInventoryService.getDefaultInventory();
         if (productsToSend.isEmpty()) throw new IllegalArgumentException("Nie ma takich produktów");
         Set<AddProductResponse> productsSend = productsToSend.stream()
@@ -56,7 +70,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
                         .productDto(ProductMapper.map(product, inventory))
                         .product(product)
                         .build())
-                .map(this::sendRequest)
+                .map(this::sendRequest)//wyciągnąc request oraz product?
                 .collect(Collectors.toSet());
         if(!productsSend.isEmpty()) {
             return AddProductResponse.builder()
@@ -66,6 +80,17 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
         return AddProductResponse.builder()
                 .status("ERROR")
                 .build();
+    }
+
+    private AddProductResponse sendAndChangeStatus(AddProductRequest request, Product product) {
+        AddProductResponse response = sendRequest(request);
+        if (response.getStatus().equals("SUCCESS")) {
+            product.setSyncStatus(SyncStatus.SYNCED);
+        } else {
+            product.setSyncStatus(SyncStatus.ERROR);
+        }
+        productRepository.save(product);
+        return response;
     }
 
     @Override

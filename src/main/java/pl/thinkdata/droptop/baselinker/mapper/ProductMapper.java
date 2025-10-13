@@ -4,6 +4,7 @@ import pl.thinkdata.droptop.baselinker.dto.Inventory;
 import pl.thinkdata.droptop.baselinker.dto.Product;
 import pl.thinkdata.droptop.baselinker.dto.TextFields;
 import pl.thinkdata.droptop.baselinker.model.BaselinkerExportLog;
+import pl.thinkdata.droptop.database.model.ProductOfferLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,9 +18,13 @@ public class ProductMapper {
         String inventoryId = inventory.getInventoryId().toString();
 
         Map<String, Double> prices = new HashMap<>();
-        prices.put(priceId, product.getLatestOffer().getWholesaleGrossPrice());
+        prices.put(priceId, Optional.ofNullable(product.getLatestOffer())
+                .map(ProductOfferLog::getWholesaleGrossPrice)
+                .orElse(0.0));
         Map<String, Integer> stock = new HashMap<>();
-        stock.put(defaultWarehouse, product.getLatestOffer().getStock());
+        stock.put(defaultWarehouse, Optional.ofNullable(product.getLatestOffer())
+                .map(ProductOfferLog::getStock)
+                .orElse(0));
         Map<String, String> locations = new HashMap<>();
         locations.put(defaultWarehouse, "platon");
         Map<String, String> images = new HashMap<>();
@@ -39,7 +44,9 @@ public class ProductMapper {
                 .height((double) product.getHeight() / 10)
                 .width((double) product.getWidth() / 10)
                 .length(product.getDepth() / 10)
-                .average_cost(product.getLatestOffer().getWholesaleGrossPrice())
+                .average_cost(Optional.ofNullable(product.getLatestOffer())
+                        .map(ProductOfferLog::getWholesaleGrossPrice)
+                        .orElse(0.0))
                 //.manufacturer_id("2494877")
                 .category_id(product.getCategory().getBaselinkerId())
                 .prices(prices)
