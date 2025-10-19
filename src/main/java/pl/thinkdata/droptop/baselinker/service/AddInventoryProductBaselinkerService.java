@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.AddProductRequest;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.dto.Inventory;
+import pl.thinkdata.droptop.baselinker.dto.RequestWithProduct;
 import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.Product;
@@ -64,15 +65,22 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     public AddProductResponse sendProducts() {
         List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
         Inventory inventory = getInventoryService.getDefaultInventory();
-        if (productsToSend.isEmpty()) throw new IllegalArgumentException("Nie ma takich produktów");
+
+        if (productsToSend.isEmpty())
+            throw new IllegalArgumentException("Nie ma takich produktów");
+
         Set<AddProductResponse> productsSend = productsToSend.stream()
-                .map(product -> AddProductRequest.builder()
-                        .productDto(ProductMapper.map(product, inventory))
-                        .product(product)
-                        .build())
-                .map(this::sendRequest)//wyciągnąc request oraz product?
+                .map(product -> new RequestWithProduct(
+                        AddProductRequest.builder()
+                                .productDto(ProductMapper.map(product, inventory))
+                                .product(product)
+                                .build(),
+                        product
+                ))
+                .map(pair -> sendAndChangeStatus(pair.request(), pair.product()))
                 .collect(Collectors.toSet());
-        if(!productsSend.isEmpty()) {
+
+        if (!productsSend.isEmpty()) {
             return AddProductResponse.builder()
                     .status("SUCCESS")
                     .build();
