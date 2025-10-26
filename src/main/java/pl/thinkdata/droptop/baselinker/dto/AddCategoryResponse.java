@@ -10,4 +10,5 @@ public class AddCategoryResponse {
     private String status;
     private String category_id;
     private String error_code;
+    private String error_message;
 }

@@ -2,7 +2,7 @@
 --changeset dabrowskiw:1 dbms:mysql
 CREATE TABLE product(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    ean VARCHAR(15) UNIQUE NOT NULL,
+    ean VARCHAR(50) UNIQUE NOT NULL,
     isbn VARCHAR(255),
     title VARCHAR(1000) NOT NULL,
     release_date VARCHAR(255),
@@ -37,7 +37,7 @@ CREATE TABLE product(
 --changeset dabrowskiw:1-h2 dbms:h2
 CREATE TABLE product(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    ean VARCHAR(15) UNIQUE NOT NULL,
+    ean VARCHAR(50) UNIQUE NOT NULL,
     isbn VARCHAR(255),
     title VARCHAR(1000) NOT NULL,
     release_date VARCHAR(255),

@@ -51,15 +51,19 @@ public class BaselinkerController {
 
     @GetMapping("/send/category")
     public String sendCategoryToBaselinker(Model model) {
-        String message;
+        StringBuilder message = new StringBuilder();
         List<AddCategoryResponse> addCategoryResponse = addCategoryProductService.sendCategories();
         boolean allSuccess = addCategoryResponse.stream()
                 .map(AddCategoryResponse::getStatus)
                 .allMatch("SUCCESS"::equals);
         if (allSuccess) {
-            message = "Utworzono";
+            message.append("Utworzono");
         } else {
-            message = "Błąd: ";
+            message.append("Błąd: ");
+            addCategoryResponse.stream()
+                    .filter(status -> status.getStatus().equals("ERROR"))
+                    .map(AddCategoryResponse::getError_code)
+                    .forEach(message::append);
         }
         model.addAttribute("message", message);
         return "database/alerts/alerts";
