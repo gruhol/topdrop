@@ -16,9 +16,9 @@ public class CategoryGeneratorUtilsProd implements CategoryGeneratorUtils {
 
     @Transactional
     public Category parseStringToCategory(String categoryPath, String productType) {
-        Category parent = getParent(productType);
-        String[] categoryNames = categoryPath.split("\\\\");
 
+        String[] categoryNames = categoryPath.split("\\\\");
+        Category parent = getParent(productType);
         for (String categoryName : categoryNames) {
             String trimmedName = categoryName.trim();
             if (trimmedName.isEmpty()) {

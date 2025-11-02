@@ -11,7 +11,6 @@ import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Controller

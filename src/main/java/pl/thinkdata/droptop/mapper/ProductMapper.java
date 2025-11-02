@@ -29,6 +29,7 @@ public class ProductMapper {
                 .author(product.getAuthor())
                 .series(product.getSeries())
                 .translator(product.getTranslator())
+                .stringCategory(product.getCategory())
                 .category(categoryGeneratorUtils.parseStringToCategory(product.getCategory(), product.getType()))
                 .publisher(product.getPublisher())
                 .description(product.getDescription())
