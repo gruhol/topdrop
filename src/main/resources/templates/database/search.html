@@ -58,20 +58,20 @@
     <nav aria-label="Page navigation example" th:if="${totalPages > 1}">
         <ul class="pagination">
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/search(keywords=${keywords}, pageNumber=${currentPage - 1}, size=${pageSize})}">Poprzednia</a>
+                <a class="page-link" th:href="@{/admin/search(keywords=${keywords}, pageNumber=${currentPage - 1}, size=${pageSize})}">Poprzednia</a>
             </li>
 
             <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                 class="page-item"
                 th:classappend="${i} == ${currentPage} ? 'active'">
                 <a class="page-link"
-                   th:href="@{/search(keywords=${keywords}, pageNumber=${i}, size=${pageSize})}"
+                   th:href="@{/admin/search(keywords=${keywords}, pageNumber=${i}, size=${pageSize})}"
                    th:text="${i + 1}">1</a>
 
             </li>
 
             <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/search(keywords=${keywords}, pageNumber=${currentPage + 1}, size=${pageSize})}">Następna</a>
+                <a class="page-link" th:href="@{/admin/search(keywords=${keywords}, pageNumber=${currentPage + 1}, size=${pageSize})}">Następna</a>
             </li>
         </ul>
     </nav>
