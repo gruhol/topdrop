@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static pl.thinkdata.droptop.mapper.ProductOfferLogMapper.map;
 
 @Controller
@@ -75,7 +76,16 @@ public class PlatonApiController {
                 List<ProductOfferLog> stockToSave = data.getStock().getRecords().stream()
                         .map(record -> map(record, "platon"))
                         .toList();
-                productOfferLogRepository.saveAll(stockToSave);
+                List<ProductOfferLog> productOfferLogs = productOfferLogRepository.saveAll(stockToSave);
+                
+                List<Product> listProductUpdateStatus = productOfferLogs.stream()
+                        .map(ProductOfferLog::getProduct)
+                        .filter(Objects::nonNull)
+                        .peek(this::changeStatus)
+                        .toList();
+                productRepository.saveAll(listProductUpdateStatus);
+
+
                 totalStockSave += stockToSave.size();
             }
             total = Optional.ofNullable(data.getStock().getSummary())
@@ -91,6 +101,14 @@ public class PlatonApiController {
 
         model.addAttribute("data", data);
         return "Test";
+    }
+
+    private void changeStatus(Product p) {
+        if (nonNull(p.getExportLog())) {
+            p.setSyncStatus(SyncStatus.TO_UPDATE);
+        } else {
+            p.setSyncStatus(SyncStatus.NEW);
+        }
     }
 
     @GetMapping("/produkt")

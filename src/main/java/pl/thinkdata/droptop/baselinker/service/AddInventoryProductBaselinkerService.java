@@ -3,6 +3,7 @@ package pl.thinkdata.droptop.baselinker.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
         return response;
     }
 
+    @Transactional
     public AddProductResponse sendProducts() {
         List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
         Inventory inventory = getInventoryService.getDefaultInventory();
