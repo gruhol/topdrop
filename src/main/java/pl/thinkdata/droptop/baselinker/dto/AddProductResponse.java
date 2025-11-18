@@ -15,5 +15,6 @@ public class AddProductResponse {
     @JsonProperty("product_id")
     private long productId;
     private Map<String, String> warnings;
+    private String error_message;
 }
 

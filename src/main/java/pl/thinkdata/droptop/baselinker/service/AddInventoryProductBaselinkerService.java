@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.AddProductRequest;
@@ -16,13 +17,11 @@ import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.model.SyncStatus;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AddInventoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
 
@@ -93,14 +92,31 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     }
 
     private AddProductResponse sendAndChangeStatus(AddProductRequest request, Product product) {
-        AddProductResponse response = sendRequest(request);
-        if (response.getStatus().equals("SUCCESS")) {
-            product.setSyncStatus(SyncStatus.SYNCED);
-        } else {
+        try {
+            log.info("Sending product: id={}, ean={}", product.getId(), product.getEan());
+
+            AddProductResponse response = sendRequest(request);
+            log.info("Received response for product id={}, status={}", product.getId(), response.getStatus());
+            if (response.getStatus().equals("SUCCESS")) {
+                product.setSyncStatus(SyncStatus.SYNCED);
+            } else {
+                product.setSyncStatus(SyncStatus.ERROR);
+                log.error("Error syncing product id={}, ean={}, response={}",
+                        product.getId(), product.getEan(), response);
+            }
+            productRepository.save(product);
+            return response;
+        }  catch (Exception e) {
+            log.error("Exception while sending product id={}, ean={} -> {}",
+                    product.getId(), product.getEan(), e.getMessage(), e);
+
             product.setSyncStatus(SyncStatus.ERROR);
+            productRepository.save(product);
+
+            return AddProductResponse.builder()
+                    .status("ERROR")
+                    .build();
         }
-        productRepository.save(product);
-        return response;
     }
 
     @Override
@@ -115,6 +131,10 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
                         return addProductResponse;
                     })
                     .orElseThrow(() -> new RuntimeException("Empty response"));
+            //TODO trzeba dodac bosługę błędu <200 OK OK,{
+            // "status":"ERROR",
+            // "error_code":"ERROR_INVALID_DATA",
+            // "error_message":"Osi\u0105gni\u0119ty limit produkt\u00f3w w magazynie"},
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Serialization Error");
         }
