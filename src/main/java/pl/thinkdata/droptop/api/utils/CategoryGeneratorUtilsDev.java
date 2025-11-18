@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.api.model.Category;
 import pl.thinkdata.droptop.api.repository.CategoryRepository;
 
@@ -17,9 +18,9 @@ public class CategoryGeneratorUtilsDev implements CategoryGeneratorUtils {
     private final CategoryRepository categoryRepository;
 
     @Transactional
-    public Category parseStringToCategory(String categoryPath, String productType) {
+    public Category parseStringToCategory(ProductFromXml categoryPath, String productType) {
         Category parent = getParent(productType);
-        String[] categoryNames = categoryPath.split("\\\\");
+        String[] categoryNames = categoryPath.getCategory().split("\\\\");
 
         for (String categoryName : categoryNames) {
             String trimmedName = categoryName.trim();

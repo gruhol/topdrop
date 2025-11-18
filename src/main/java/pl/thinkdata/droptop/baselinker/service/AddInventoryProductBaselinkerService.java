@@ -127,14 +127,15 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
             return Optional.ofNullable(response)
                     .map(res -> {
                         AddProductResponse addProductResponse = mapToResponse(res, AddProductResponse.class);
-                        baselinkerLogService.sendSuccesExport(request.getProduct(), addProductResponse);
+                        if (!addProductResponse.getStatus().equals("ERROR")) {
+                            baselinkerLogService.sendSuccesExport(request.getProduct(), addProductResponse);
+                            return addProductResponse;
+                        }
+                        log.error("Problem to add product id={}, to baselinker error_message={}",
+                                addProductResponse.getProductId(), addProductResponse.getError_message());
                         return addProductResponse;
                     })
                     .orElseThrow(() -> new RuntimeException("Empty response"));
-            //TODO trzeba dodac bosługę błędu <200 OK OK,{
-            // "status":"ERROR",
-            // "error_code":"ERROR_INVALID_DATA",
-            // "error_message":"Osi\u0105gni\u0119ty limit produkt\u00f3w w magazynie"},
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Serialization Error");
         }

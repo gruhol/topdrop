@@ -63,7 +63,7 @@ public class PlatonApiController {
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
-                    .pageSize(10000)
+                    .pageSize(25000)
                     .lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
@@ -91,7 +91,7 @@ public class PlatonApiController {
             total = Optional.ofNullable(data.getStock().getSummary())
                     .map(Summary::getTotal)
                     .orElse(0);
-            downloadCount += 10000;
+            downloadCount += 25000;
             pageNumber++;
         } while (total > downloadCount);
 
@@ -124,7 +124,7 @@ public class PlatonApiController {
         do {
             GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
                     .pageNo(pageNumber)
-                    .pageSize(10000)
+                    .pageSize(25000)
                     .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
                     .transactionNumber(1)
                     .build();
@@ -139,7 +139,7 @@ public class PlatonApiController {
                 saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
                 break;
             }
-            downloadCount += 10000;
+            downloadCount += 25000;
             pageNumber++;
             total = Optional.ofNullable(data.getCatalog())
                     .map(Catalog::getSummary)

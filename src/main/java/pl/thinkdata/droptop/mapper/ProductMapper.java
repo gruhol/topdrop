@@ -18,6 +18,7 @@ public class ProductMapper {
     private final CategoryGeneratorUtils categoryGeneratorUtils;
 
     public Product mapToProduct(ProductFromXml product, String url)  {
+
         return Product.builder()
                 .ean(product.getEan())
                 .isbn(product.getIsbn())
@@ -30,7 +31,7 @@ public class ProductMapper {
                 .series(product.getSeries())
                 .translator(product.getTranslator())
                 .stringCategory(product.getCategory())
-                .category(categoryGeneratorUtils.parseStringToCategory(product.getCategory(), product.getType()))
+                .category(categoryGeneratorUtils.parseStringToCategory(product, product.getType()))
                 .publisher(product.getPublisher())
                 .description(product.getDescription())
                 .releaseYear(product.getReleaseYear())
