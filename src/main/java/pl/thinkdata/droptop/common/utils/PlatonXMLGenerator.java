@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.utils;
+package pl.thinkdata.droptop.common.utils;
 
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Objects.isNull;
-import static pl.thinkdata.droptop.utils.Base64Coder.encodeBase64;
+import static pl.thinkdata.droptop.common.utils.Base64Coder.encodeBase64;
 
 public class PlatonXMLGenerator {
 

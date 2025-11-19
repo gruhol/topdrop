@@ -1,12 +1,16 @@
 package pl.thinkdata.droptop.api.controller;
 
+import lombok.Builder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
@@ -27,7 +31,7 @@ import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.*;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
-import pl.thinkdata.droptop.mapper.ProductMapper;
+import pl.thinkdata.droptop.common.mapper.ProductMapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,10 +40,11 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static pl.thinkdata.droptop.mapper.ProductOfferLogMapper.map;
+import static pl.thinkdata.droptop.common.mapper.ProductOfferLogMapper.map;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("api")
 public class PlatonApiController {
 
     private final GetPublicationsExternalService getPublictionService;
@@ -54,16 +59,31 @@ public class PlatonApiController {
 
     PlatonResponse data;
 
-    @GetMapping("/stany")
+    @GetMapping("/getstocks")
     public String getStockFromApi(Model model) {
+        int stockCount = getStockFromApi(25000);
+        model.addAttribute("updated", stockCount);
+        return "api/get_stocks";
+    }
+
+    @GetMapping("/getproducts")
+    public String getProductsFromApi(Model model) {
+        UpdateProduct productsFromApi = getProductsFromApi(25000);
+        model.addAttribute("newprod", productsFromApi.getNewprod());
+        model.addAttribute("update", productsFromApi.getUpdate());
+        return "api/get_products";
+    }
+
+    public int getStockFromApi(int pageSize) {
         int pageNumber = 1;
         int downloadCount = 0;
         int total  = 0;
         int totalStockSave = 0;
+        int productChanged = 0;
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
-                    .pageSize(25000)
+                    .pageSize(pageSize)
                     .lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
@@ -72,18 +92,19 @@ public class PlatonApiController {
                 saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.STOCK);
                 break;
             }
-            if (!data.getStock().getRecords().isEmpty()) {
+            if (data.getStock().getRecords() != null && !data.getStock().getRecords().isEmpty()) {
                 List<ProductOfferLog> stockToSave = data.getStock().getRecords().stream()
                         .map(record -> map(record, "platon"))
                         .toList();
                 List<ProductOfferLog> productOfferLogs = productOfferLogRepository.saveAll(stockToSave);
-                
+
                 List<Product> listProductUpdateStatus = productOfferLogs.stream()
                         .map(ProductOfferLog::getProduct)
                         .filter(Objects::nonNull)
                         .peek(this::changeStatus)
                         .toList();
                 productRepository.saveAll(listProductUpdateStatus);
+                productChanged = listProductUpdateStatus.size();
 
 
                 totalStockSave += stockToSave.size();
@@ -91,28 +112,17 @@ public class PlatonApiController {
             total = Optional.ofNullable(data.getStock().getSummary())
                     .map(Summary::getTotal)
                     .orElse(0);
-            downloadCount += 25000;
+            downloadCount += pageSize;
             pageNumber++;
         } while (total > downloadCount);
 
         if (isNull(this.data.getMessage())) {
             saveImportRaport("OK", null, totalStockSave, 0, ImportTypeEnu.STOCK);
         }
-
-        model.addAttribute("data", data);
-        return "Test";
+        return productChanged;
     }
 
-    private void changeStatus(Product p) {
-        if (nonNull(p.getExportLog())) {
-            p.setSyncStatus(SyncStatus.TO_UPDATE);
-        } else {
-            p.setSyncStatus(SyncStatus.NEW);
-        }
-    }
-
-    @GetMapping("/produkt")
-    public String getProductsFromApi(Model model) {
+    public UpdateProduct getProductsFromApi(int pageSize) {
         int pageNumber = 1;
         int downloadCount = 0;
         int total;
@@ -122,13 +132,7 @@ public class PlatonApiController {
         List<Product> productToUpdate = new ArrayList<>();
 
         do {
-            GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
-                    .pageNo(pageNumber)
-                    .pageSize(25000)
-                    .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
-                    .transactionNumber(1)
-                    .build();
-            this.data = getPublictionService.get(getPublicationsDto);
+            this.data = getPublictionService.get(getRequestDto(pageSize, pageNumber));
 
             String covertUrl = Optional.ofNullable(this.data.getCatalog())
                     .map(Catalog::getRc)
@@ -139,7 +143,7 @@ public class PlatonApiController {
                 saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
                 break;
             }
-            downloadCount += 25000;
+            downloadCount += pageSize;
             pageNumber++;
             total = Optional.ofNullable(data.getCatalog())
                     .map(Catalog::getSummary)
@@ -184,8 +188,28 @@ public class PlatonApiController {
         if (isNull(this.data.getMessage())) {
             saveImportRaport("OK", null, listOfSaveProducts.size(), productToUpdate.size(), ImportTypeEnu.PRODUCT);
         }
-        model.addAttribute("data", listOfSaveProducts);
-        return "Test";
+        return UpdateProduct.builder()
+                .newprod(listOfSaveProducts.size())
+                .update(productToUpdate.size())
+                .build();
+    }
+
+    private GetPublicationsDto getRequestDto(int pageSize, int pageNumber) {
+        GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
+                .pageNo(pageNumber)
+                .pageSize(pageSize)
+                .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
+                .transactionNumber(1)
+                .build();
+        return getPublicationsDto;
+    }
+
+    private void changeStatus(Product p) {
+        if (nonNull(p.getExportLog())) {
+            p.setSyncStatus(SyncStatus.TO_UPDATE);
+        } else {
+            p.setSyncStatus(SyncStatus.NEW);
+        }
     }
 
     private LocalDateTime getLastUpdate(ImportTypeEnu importType) {
@@ -247,4 +271,12 @@ public class PlatonApiController {
     public ResponseEntity<Resource> serveImages(@PathVariable String dir, @PathVariable String filename) {
         return imageService.serveImages(filename, dir);
     }
+}
+
+@Getter
+@Setter
+@Builder
+class UpdateProduct {
+    private int newprod;
+    private int update;
 }

@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.utils;
+package pl.thinkdata.droptop.common.utils;
 
 import org.springframework.stereotype.Component;
 

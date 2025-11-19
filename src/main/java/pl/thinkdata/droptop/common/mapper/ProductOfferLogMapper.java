@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.mapper;
+package pl.thinkdata.droptop.common.mapper;
 
 import pl.thinkdata.droptop.database.model.ProductOfferLog;
 import pl.thinkdata.droptop.api.dto.stock.Record;

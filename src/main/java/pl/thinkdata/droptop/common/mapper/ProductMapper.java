@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.mapper;
+package pl.thinkdata.droptop.common.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringEscapeUtils;

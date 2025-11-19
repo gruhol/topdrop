@@ -11,8 +11,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 
-import static pl.thinkdata.droptop.utils.Base64Coder.decodeBase64;
-import static pl.thinkdata.droptop.utils.PlatonXMLGenerator.*;
+import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
+import static pl.thinkdata.droptop.common.utils.PlatonXMLGenerator.*;
 
 @Service
 public class GetPublicationsExternalService extends BaseExternalService implements ExternalServiceable<GetPublicationsDto>{
