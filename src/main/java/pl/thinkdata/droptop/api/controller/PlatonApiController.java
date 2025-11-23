@@ -1,9 +1,6 @@
 package pl.thinkdata.droptop.api.controller;
 
-import lombok.Builder;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.dto.UpdateProductInfo;
 import pl.thinkdata.droptop.api.dto.catalog.Catalog;
 import pl.thinkdata.droptop.api.dto.catalog.CatalogResponseSummary;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
@@ -26,12 +24,12 @@ import pl.thinkdata.droptop.api.service.ApiProductService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
 import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
 import pl.thinkdata.droptop.api.service.GetStocksExternalService;
+import pl.thinkdata.droptop.common.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.*;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
-import pl.thinkdata.droptop.common.mapper.ProductMapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -68,7 +66,7 @@ public class PlatonApiController {
 
     @GetMapping("/getproducts")
     public String getProductsFromApi(Model model) {
-        UpdateProduct productsFromApi = getProductsFromApi(25000);
+        UpdateProductInfo productsFromApi = getProductsFromApi(25000);
         model.addAttribute("newprod", productsFromApi.getNewprod());
         model.addAttribute("update", productsFromApi.getUpdate());
         return "api/get_products";
@@ -122,7 +120,7 @@ public class PlatonApiController {
         return productChanged;
     }
 
-    public UpdateProduct getProductsFromApi(int pageSize) {
+    public UpdateProductInfo getProductsFromApi(int pageSize) {
         int pageNumber = 1;
         int downloadCount = 0;
         int total;
@@ -188,7 +186,7 @@ public class PlatonApiController {
         if (isNull(this.data.getMessage())) {
             saveImportRaport("OK", null, listOfSaveProducts.size(), productToUpdate.size(), ImportTypeEnu.PRODUCT);
         }
-        return UpdateProduct.builder()
+        return UpdateProductInfo.builder()
                 .newprod(listOfSaveProducts.size())
                 .update(productToUpdate.size())
                 .build();
@@ -271,12 +269,4 @@ public class PlatonApiController {
     public ResponseEntity<Resource> serveImages(@PathVariable String dir, @PathVariable String filename) {
         return imageService.serveImages(filename, dir);
     }
-}
-
-@Getter
-@Setter
-@Builder
-class UpdateProduct {
-    private int newprod;
-    private int update;
 }
