@@ -41,10 +41,7 @@ public class BaselinkerExportScheduled {
             }
 
         } else {
-            String now = Instant.ofEpochMilli(System.currentTimeMillis())
-                    .atZone(ZoneId.systemDefault())
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            log.info("Eksport is stop: {}", now);
+            log.info("Eksport is stop: {}", getCorrentDate());
         }
     }
 
@@ -72,27 +69,40 @@ public class BaselinkerExportScheduled {
 
     @Scheduled(cron = "0 0 */3 * * *", zone = "Europe/Warsaw")
     public void platonAutoImportProducts() {
-        UpdateProductInfo info = platonApiController.getProductsFromApi(25000);
-        log.info("Inport produktów z Platon: nowe produty {}, zaaktualizowane: {}", info.getNewprod() ,info.getUpdate());
+        boolean enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
+        if (enabled) {
+            UpdateProductInfo info = platonApiController.getProductsFromApi(10000);
+            log.info("Inport produktów z Platon: nowe produty {}, zaaktualizowane: {}", info.getNewprod() ,info.getUpdate());
+        } else {
+            log.info("Import produktów wyłączony. Data: {}", getCorrentDate());
+        }
     }
 
     @Scheduled(cron = "0 0 * * * *", zone = "Europe/Warsaw")
     public void platonAutoImportStock() {
-        int stockUpdateCount = platonApiController.getStockFromApi(25000);
-        log.info("Inport stanów z Platon: {} nowych rekordów.", stockUpdateCount);
+        boolean enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
+        if (enabled) {
+            int stockUpdateCount = platonApiController.getStockFromApi(10000);
+            log.info("Inport stanów z Platon: {} nowych rekordów.", stockUpdateCount);
+        } else {
+            log.info("Import stanów wyłączony. Data: {}", getCorrentDate());
+        }
     }
 
     public void sendProductsToBaseLinker() {
-        String now = Instant.ofEpochMilli(System.currentTimeMillis())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         AddProductResponse result = addInventoryProductService.sendProducts();
         if (result.getStatus().equals("SUCCESS")) {
 
-            log.info("Utworzono o id: {} Data: {}", result.getProductId(), now);
+            log.info("Utworzono o id: {} Data: {}", result.getProductId(), getCorrentDate());
         } else {
 
-            log.info("Bład wysłania produktu o id: {} Data: {}, Error: {}", result.getProductId(), now, result.getError_message());
+            log.info("Bład wysłania produktu o id: {} Data: {}, Error: {}", result.getProductId(), getCorrentDate(), result.getError_message());
         }
+    }
+
+    private String getCorrentDate() {
+        return Instant.ofEpochMilli(System.currentTimeMillis())
+                .atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }

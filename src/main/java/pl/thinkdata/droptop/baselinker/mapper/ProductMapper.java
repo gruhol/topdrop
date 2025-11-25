@@ -13,12 +13,16 @@ import java.util.Optional;
 public class ProductMapper {
 
     public static Product map(pl.thinkdata.droptop.database.model.Product product, Inventory inventory) {
-        String priceId = inventory.getDefaultPriceGroup().toString();
+        String defultPriceGroupId = inventory.getDefaultPriceGroup().toString();
+        String wholesalePriceId = null;
+        
         String defaultWarehouse = inventory.getDefaultWarehouse();
         String inventoryId = inventory.getInventoryId().toString();
 
         Map<String, Double> prices = new HashMap<>();
-        prices.put(priceId, Optional.ofNullable(product.getLatestOffer())
+        prices.put(defultPriceGroupId, Optional.ofNullable(product.getPrice())
+                .orElse(0.0));
+        prices.put(defultPriceGroupId, Optional.ofNullable(product.getLatestOffer())
                 .map(ProductOfferLog::getWholesaleGrossPrice)
                 .orElse(0.0));
         Map<String, Integer> stock = new HashMap<>();

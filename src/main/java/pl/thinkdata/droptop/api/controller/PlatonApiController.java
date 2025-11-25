@@ -1,6 +1,7 @@
 package pl.thinkdata.droptop.api.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -42,6 +43,7 @@ import static pl.thinkdata.droptop.common.mapper.ProductOfferLogMapper.map;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("api")
 public class PlatonApiController {
 
@@ -59,14 +61,14 @@ public class PlatonApiController {
 
     @GetMapping("/getstocks")
     public String getStockFromApi(Model model) {
-        int stockCount = getStockFromApi(25000);
+        int stockCount = getStockFromApi(10000);
         model.addAttribute("updated", stockCount);
         return "api/get_stocks";
     }
 
     @GetMapping("/getproducts")
     public String getProductsFromApi(Model model) {
-        UpdateProductInfo productsFromApi = getProductsFromApi(25000);
+        UpdateProductInfo productsFromApi = getProductsFromApi(10000);
         model.addAttribute("newprod", productsFromApi.getNewprod());
         model.addAttribute("update", productsFromApi.getUpdate());
         return "api/get_products";
@@ -77,7 +79,6 @@ public class PlatonApiController {
         int downloadCount = 0;
         int total  = 0;
         int totalStockSave = 0;
-        int productChanged = 0;
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
@@ -102,9 +103,6 @@ public class PlatonApiController {
                         .peek(this::changeStatus)
                         .toList();
                 productRepository.saveAll(listProductUpdateStatus);
-                productChanged = listProductUpdateStatus.size();
-
-
                 totalStockSave += stockToSave.size();
             }
             total = Optional.ofNullable(data.getStock().getSummary())
@@ -117,7 +115,7 @@ public class PlatonApiController {
         if (isNull(this.data.getMessage())) {
             saveImportRaport("OK", null, totalStockSave, 0, ImportTypeEnu.STOCK);
         }
-        return productChanged;
+        return totalStockSave;
     }
 
     public UpdateProductInfo getProductsFromApi(int pageSize) {
@@ -155,6 +153,7 @@ public class PlatonApiController {
                     .map(p -> productMapper.mapToProduct(p, covertUrl))
                     .filter(Objects::nonNull)
                     .forEach(dowloadProducts::add);
+            log.info("Pobrano z platona: {}", dowloadProducts.size());
         }
         while (total > downloadCount);
 
