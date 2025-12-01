@@ -203,6 +203,7 @@ public class PlatonApiController {
 
     private void changeStatus(Product p) {
         if (nonNull(p.getExportLog())) {
+
             p.setSyncStatus(SyncStatus.TO_UPDATE);
         } else {
             p.setSyncStatus(SyncStatus.NEW);

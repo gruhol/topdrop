@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import pl.thinkdata.droptop.baselinker.dto.AddProductRequest;
-import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
-import pl.thinkdata.droptop.baselinker.dto.Inventory;
-import pl.thinkdata.droptop.baselinker.dto.RequestWithProduct;
+import pl.thinkdata.droptop.baselinker.dto.*;
 import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.Product;
@@ -45,9 +42,10 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
                 .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu do aktualizacji"));
 
         Inventory inventory = getInventoryService.getDefaultInventory();
+        GetPriceGroupsResponse priceGroups = getPriceGroupsService.sendRequest(new EmptyRequest());
 
         AddProductRequest request = AddProductRequest.builder()
-                .productDto(ProductMapper.map(product, inventory))
+                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups()))
                 .product(product)
                 .build();
 
@@ -64,8 +62,10 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
 
     @Transactional
     public AddProductResponse sendProducts() {
-        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
+        //List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
+        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(143L,newAndUpdateSyncStatus); // only one category
         Inventory inventory = getInventoryService.getDefaultInventory();
+        GetPriceGroupsResponse priceGroups = getPriceGroupsService.sendRequest(new EmptyRequest());
 
         if (productsToSend.isEmpty())
             throw new IllegalArgumentException("Nie ma takich produktów");
@@ -73,7 +73,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
         Set<AddProductResponse> productsSend = productsToSend.stream()
                 .map(product -> new RequestWithProduct(
                         AddProductRequest.builder()
-                                .productDto(ProductMapper.map(product, inventory))
+                                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups()))
                                 .product(product)
                                 .build(),
                         product
