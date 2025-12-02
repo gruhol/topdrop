@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import pl.thinkdata.droptop.api.controller.PlatonApiController;
 import pl.thinkdata.droptop.api.dto.UpdateProductInfo;
-import pl.thinkdata.droptop.baselinker.dto.AddCategoryResponse;
+import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;

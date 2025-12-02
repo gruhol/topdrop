@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.baselinker.dto;
+package pl.thinkdata.droptop.baselinker.dto.addCategory;
 
 import lombok.*;
 

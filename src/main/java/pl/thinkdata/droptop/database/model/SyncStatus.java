@@ -5,6 +5,7 @@ public enum SyncStatus {
     TO_UPDATE,
     STOCK_UPDATE,
     PRICE_UPDATE,
+    PRICE_STOCK_UPDATE,
     SYNCED,
     ERROR
 }

@@ -203,11 +203,32 @@ public class PlatonApiController {
 
     private void changeStatus(Product p) {
         if (nonNull(p.getExportLog())) {
-
+            if (p.getOffers() != null && p.getOffers().size() > 2) {
+                List<ProductOfferLog> sorted = p.getOffers().stream()
+                        .sorted(Comparator.comparing(ProductOfferLog::getFetchedAt).reversed())
+                        .toList();
+                ProductOfferLog now = sorted.get(0);
+                ProductOfferLog old = sorted.get(1);
+                if (productChangePriceAndStock(now, old)) p.setSyncStatus(SyncStatus.PRICE_STOCK_UPDATE);
+                if (productChangePrice(now, old)) p.setSyncStatus(SyncStatus.PRICE_UPDATE);
+                if (productChangeStock(now, old)) p.setSyncStatus(SyncStatus.STOCK_UPDATE);
+            }
             p.setSyncStatus(SyncStatus.TO_UPDATE);
         } else {
             p.setSyncStatus(SyncStatus.NEW);
         }
+    }
+
+    private boolean productChangePrice(ProductOfferLog now, ProductOfferLog old) {
+        return !now.getWholesaleNetPrice().equals(old.getWholesaleNetPrice());
+    }
+
+    private boolean productChangeStock(ProductOfferLog now, ProductOfferLog old) {
+        return !now.getStock().equals(old.getStock());
+    }
+
+    private boolean productChangePriceAndStock(ProductOfferLog now, ProductOfferLog old) {
+        return productChangePrice(now, old) && productChangeStock(now, old);
     }
 
     private LocalDateTime getLastUpdate(ImportTypeEnu importType) {
