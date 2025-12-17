@@ -192,13 +192,12 @@ public class PlatonApiController {
     }
 
     private GetPublicationsDto getRequestDto(int pageSize, int pageNumber) {
-        GetPublicationsDto getPublicationsDto = GetPublicationsDto.builder()
+        return GetPublicationsDto.builder()
                 .pageNo(pageNumber)
                 .pageSize(pageSize)
                 .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
                 .transactionNumber(1)
                 .build();
-        return getPublicationsDto;
     }
 
     private void changeStatus(Product p) {

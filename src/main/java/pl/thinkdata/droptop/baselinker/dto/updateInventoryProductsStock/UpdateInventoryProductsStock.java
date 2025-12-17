@@ -13,7 +13,7 @@ import java.util.List;
 public class UpdateInventoryProductsStock {
 
     @JsonProperty("inventory_id")
-    private String inventoryId;
+    private Long inventoryId;
     @JsonProperty("products")
     private List<ProductStockUpdate> productStockUpdate;
 }

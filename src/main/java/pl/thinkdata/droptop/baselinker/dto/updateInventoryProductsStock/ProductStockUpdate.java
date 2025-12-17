@@ -10,6 +10,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class ProductStockUpdate {
-    private String productId;
+    private long productId;
     private List<WarehouseStock> stocks;
 }

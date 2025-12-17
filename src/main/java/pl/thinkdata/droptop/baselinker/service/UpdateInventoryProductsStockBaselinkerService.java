@@ -25,11 +25,11 @@ public class UpdateInventoryProductsStockBaselinkerService
 
     @PostConstruct
     private void initMethodName() {
-        super.methodName = "addInventoryCategory";
+        super.methodName = "updateInventoryProductsStock";
     }
 
     @Override
-    public UpdateInventoryProductsStockResponse sendRequest(UpdateInventoryProductsStockRequest request) throws JsonProcessingException {
+    public UpdateInventoryProductsStockResponse sendRequest(UpdateInventoryProductsStockRequest request) {
         try {
             String jsonParams = new ObjectMapper().writeValueAsString(request.getRequest());
             ResponseEntity<String> response = getDataFromWebClient(jsonParams);
