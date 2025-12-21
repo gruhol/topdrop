@@ -8,6 +8,8 @@ import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.api.model.Category;
 import pl.thinkdata.droptop.api.repository.CategoryRepository;
 
+import java.util.Optional;
+
 @Profile("prod")
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,9 @@ public class CategoryGeneratorUtilsProd implements CategoryGeneratorUtils {
 
     public Category parseStringToCategory(ProductFromXml product, String productType) {
 
-        String[] categoryNames = product.getCategory().split("\\\\");
+        String[] categoryNames = Optional.ofNullable(product.getCategory())
+                .map(cat -> cat.split("\\\\"))
+                .orElseGet(() -> new String[0]);
         Category parent = getParent(productType);
         for (String categoryName : categoryNames) {
             String trimmedName = categoryName.trim();
