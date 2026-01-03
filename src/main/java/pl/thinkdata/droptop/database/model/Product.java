@@ -84,6 +84,9 @@ public class Product {
     @Column(name = "sync_status")
     private SyncStatus syncStatus;
 
+    private String aditionalImgs;
+    private String fragments;
+
 
     public ProductOfferLog getLatestOffer() {
         return this.getOffers().stream()

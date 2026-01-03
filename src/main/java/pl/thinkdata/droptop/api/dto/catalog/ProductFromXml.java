@@ -97,6 +97,9 @@ public class ProductFromXml {
     @XmlElement(name = "sc")
     private Sc sc;
 
+    @XmlElement(name = "fr")
+    private Fr fr;
+
     @XmlElement(name = "gpsr")
     private Gpsr gpsr;
 }

@@ -31,7 +31,9 @@ CREATE TABLE product(
     sync_status VARCHAR(20),
     manufacturing_country_code VARCHAR(10),
     create_date TIMESTAMP,
-    update_date TIMESTAMP
+    update_date TIMESTAMP,
+    aditional_imgs TEXT,
+    fragments TEXT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 --liquibase formatted sql
@@ -67,5 +69,7 @@ CREATE TABLE product(
     sync_status VARCHAR(20),
     manufacturing_country_code VARCHAR(10),
     create_date TIMESTAMP,
-    update_date TIMESTAMP
+    update_date TIMESTAMP,
+    aditional_imgs TEXT,
+    fragments TEXT
 );

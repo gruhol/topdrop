@@ -3,10 +3,16 @@ package pl.thinkdata.droptop.common.mapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Component;
+import pl.thinkdata.droptop.api.dto.catalog.Fr;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
+import pl.thinkdata.droptop.api.dto.catalog.Sc;
 import pl.thinkdata.droptop.api.utils.CategoryGeneratorUtils;
 import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.Product;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -48,6 +54,26 @@ public class ProductMapper {
                 .approvalNumber(product.getApprovalNumber())
                 .pcn(product.getPcn())
                 .manufacturingCountryCode(product.getManufacturingCountryCode())
+                .aditionalImgs(getaditionalImgs(product.getSc(), url))
+                .fragments(getFragments(product.getFr(), url))
                 .build();
+    }
+
+    private String getaditionalImgs(Sc images, String url) {
+        return Optional.ofNullable(images)
+                .map(Sc::getIds)
+                .orElse(List.of())
+                .stream()
+                .map(img -> StringEscapeUtils.unescapeHtml4(url + img + ";"))
+                .collect(Collectors.joining());
+    }
+
+    private String getFragments(Fr fragments, String url) {
+        return Optional.ofNullable(fragments)
+                .map(Fr::getIds)
+                .orElse(List.of())
+                .stream()
+                .map(img -> StringEscapeUtils.unescapeHtml4(url + img + ";"))
+                .collect(Collectors.joining());
     }
 }

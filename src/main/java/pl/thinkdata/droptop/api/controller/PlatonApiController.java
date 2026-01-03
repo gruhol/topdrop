@@ -83,7 +83,7 @@ public class PlatonApiController {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
                     .pageSize(pageSize)
-                    .lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
+                    //.lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
                     .transactionNumber(1)
                     .build();
             this.data = getStockService.get(getStocksDto);
