@@ -19,4 +19,4 @@ CMD ["sh", "-c", "java -jar \
   -DPLATON_ORDER_DROP=$PLATON_ORDER_DROP \
   -DPLATON_PASSWORD=$PLATON_PASSWORD \
   -DPLATON_USER=$PLATON_USER \
-  -DPROFILE=prod /app/b2bbase-0.1.jar"]
+  -DPROFILE=prod /app/app.jar"]
