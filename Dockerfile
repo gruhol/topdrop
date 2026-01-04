@@ -1,7 +1,7 @@
 FROM eclipse-temurin:17-jre
 RUN mkdir -p /app/data
 WORKDIR /app
-COPY target/droptop-0.1.jar /app/app.jar
+COPY target/droptop-0.0.1-SNAPSHOT.jar /app/app.jar
 EXPOSE 8080
 CMD ["sh", "-c", "java -jar \
   -DBASELINKER_TOKEN=$BASELINKER_TOKEN \
