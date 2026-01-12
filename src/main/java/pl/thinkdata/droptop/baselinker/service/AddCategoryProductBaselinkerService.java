@@ -35,8 +35,7 @@ public class AddCategoryProductBaselinkerService extends BaselinkerService imple
 
     public List<AddCategoryResponse> sendCategories() {
         String mainCatBaseLinker = getCategoryProductBaselinkerService.getIdMainCategory().toString();
-        return categoryRepository.findAll().stream()
-                .filter(id -> isNull(id.getBaselinkerId()))
+        return categoryRepository.findTop50ByBaselinkerIdIsNull().stream()
                 .map(cat -> createAddCategoryRequest(cat, mainCatBaseLinker))
                 .map(this::sendRequest)
                 .toList();

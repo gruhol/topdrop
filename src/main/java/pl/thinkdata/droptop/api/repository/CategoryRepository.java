@@ -12,7 +12,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Optional<Category> findByNameAndParent(String name, Category parent);
 
-    List<Category> findByParentIsNull();
-
-    List<Category> findByParent(Category parent);
+    List<Category> findTop50ByBaselinkerIdIsNull();
 }
