@@ -61,7 +61,7 @@ public class BaselinkerExportScheduled {
             message.append("Błąd: ");
             addCategoryResponse.stream()
                     .filter(status -> status.getStatus().equals("ERROR"))
-                    .map(AddCategoryResponse::getError_code)
+                    .map(toString -> toString.getCategory_id() + " - Error: " + toString.getError_code() + ", Message: " + toString.getError_message())
                     .forEach(message::append);
         }
         log.info("Category export -> {} ", message);
