@@ -10,6 +10,7 @@ import pl.thinkdata.droptop.baselinker.dto.*;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.*;
 import pl.thinkdata.droptop.baselinker.service.*;
+import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.model.SyncStatus;
@@ -42,7 +43,7 @@ public class BaselinkerController {
     }
 
     @GetMapping("/send/products")
-    public String sendProductsToBaseLinker(Model model) {
+    public String sendProductsToBaseLinker(Model model) throws NotFoundFileToExportException {
 
         String message;
         AddProductResponse result = addInventoryProductService.sendProducts();

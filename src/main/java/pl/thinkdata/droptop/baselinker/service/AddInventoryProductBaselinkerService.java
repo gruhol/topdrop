@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.*;
 import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
+import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.model.SyncStatus;
@@ -61,14 +62,14 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     }
 
     @Transactional
-    public AddProductResponse sendProducts() {
-        //List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
-        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(143L,newAndUpdateSyncStatus); // only one category
+    public AddProductResponse sendProducts() throws NotFoundFileToExportException {
+        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
+        //List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(143L,newAndUpdateSyncStatus); // only one category
         Inventory inventory = getInventoryService.getDefaultInventory();
         GetPriceGroupsResponse priceGroups = getPriceGroupsService.sendRequest(new EmptyRequest());
 
         if (productsToSend.isEmpty())
-            throw new IllegalArgumentException("Nie ma takich produktów");
+            throw new NotFoundFileToExportException("Nie ma takich produktów");
 
         Set<AddProductResponse> productsSend = productsToSend.stream()
                 .map(product -> new RequestWithProduct(

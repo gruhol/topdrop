@@ -11,6 +11,7 @@ import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
+import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 import pl.thinkdata.droptop.config.service.SystemSettingService;
 
 import java.time.Instant;
@@ -36,6 +37,8 @@ public class BaselinkerExportScheduled {
                 sendProductsToBaseLinker();
             } catch (WebClientRequestException e) {
                 log.info("Błąd połączenia z BaseLinker: {}", e.getMessage());
+            } catch (NotFoundFileToExportException e) {
+                log.info("Brak nowych produktów do exportu");
             } catch (Exception e) {
                 log.info("Nieoczekiwany błąd w zadaniu Baselinker export: {}", e.getMessage());
             }
@@ -89,10 +92,9 @@ public class BaselinkerExportScheduled {
         }
     }
 
-    public void sendProductsToBaseLinker() {
+    public void sendProductsToBaseLinker() throws NotFoundFileToExportException {
         AddProductResponse result = addInventoryProductService.sendProducts();
         if (result.getStatus().equals("SUCCESS")) {
-
             log.info("Utworzono o id: {} Data: {}", result.getProductId(), getCorrentDate());
         } else {
 
