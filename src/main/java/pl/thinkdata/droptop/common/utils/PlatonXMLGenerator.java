@@ -87,11 +87,6 @@ public class PlatonXMLGenerator {
                      <Order-Lines>
                          <Line>%s</Line>
                      </Order-Lines>
-                     <Order-Summary>
-                         <TotalLines>2</TotalLines>
-                         <TotalNetAmount>2900.00</TotalNetAmount>
-                         <csTotalGrossAmount>3567.00</csTotalGrossAmount>
-                     </Order-Summary>
                  </Document-Order>
                 """;
         String documentOrder =  String.format(documentOrderTemplate, orderHeader, dto.getAccountNumber(), deliveryPoint, lineItems);
@@ -111,7 +106,7 @@ public class PlatonXMLGenerator {
         String lineItemTemplate = """
                 <Line-Item>
                 <LineNumber>%d</LineNumber>
-                <SupplierItemCode>%s</SupplierItemCode>
+                <EAN>%s</EAN>
                 <OrderedQuantity>%s</OrderedQuantity>
                 <UnitOfMeasure>szt</UnitOfMeasure>
                 </Line-Item>

@@ -28,9 +28,9 @@ public class ProductMapper {
         Map<String, Double> prices = new HashMap<>();
         prices.put(defultPriceGroupId, Optional.ofNullable(product.getPrice())
                 .orElse(0.0));
-        prices.put(wholesalePriceId, Optional.ofNullable(product.getLatestOffer())
-                .map(ProductOfferLog::getWholesaleGrossPrice)
-                .orElse(0.0));
+//        prices.put(wholesalePriceId, Optional.ofNullable(product.getLatestOffer())
+//                .map(ProductOfferLog::getWholesaleGrossPrice)
+//                .orElse(0.0));
         Map<String, Integer> stock = new HashMap<>();
         stock.put(defaultWarehouse, Optional.ofNullable(product.getLatestOffer())
                 .map(ProductOfferLog::getStock)

@@ -29,7 +29,7 @@ public class BaselinkerExportScheduled {
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final PlatonApiController platonApiController;
 
-    @Scheduled(fixedRate = 5 * 60 * 1000)
+    @Scheduled(fixedRate = 2 * 60 * 1000)
     public void baselinkerAutoExportProducts() {
         boolean enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
         if (enabled) {
