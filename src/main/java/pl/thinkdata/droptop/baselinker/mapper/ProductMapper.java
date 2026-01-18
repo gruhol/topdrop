@@ -16,11 +16,11 @@ public class ProductMapper {
 
     public static Product map(pl.thinkdata.droptop.database.model.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
         String defultPriceGroupId = inventory.getDefaultPriceGroup().toString();
-        String wholesalePriceId = priceGroups.stream()
-                .filter(g -> g.getName().equals("hurtowa"))
-                .map(id -> id.getPriceGroupId().toString())
-                .findFirst()
-                .orElse(defultPriceGroupId);
+//        String wholesalePriceId = priceGroups.stream()
+//                .filter(g -> g.getName().equals("hurtowa"))
+//                .map(id -> id.getPriceGroupId().toString())
+//                .findFirst()
+//                .orElse(defultPriceGroupId);
         
         String defaultWarehouse = inventory.getDefaultWarehouse();
         String inventoryId = inventory.getInventoryId().toString();

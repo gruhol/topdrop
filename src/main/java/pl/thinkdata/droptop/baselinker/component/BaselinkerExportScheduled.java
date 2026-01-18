@@ -59,7 +59,7 @@ public class BaselinkerExportScheduled {
                 .map(AddCategoryResponse::getStatus)
                 .allMatch("SUCCESS"::equals);
         if (allSuccess) {
-            message.append("Exportowano nowe kategorie do baselinkera o: " + now);
+            message.append("Exportowano nowe kategorie do baselinkera o: ").append(now);
         } else {
             message.append("Błąd: ");
             addCategoryResponse.stream()
