@@ -81,7 +81,7 @@ public class BaselinkerExportScheduled {
         }
     }
 
-    @Scheduled(cron = "0 0 * * * *", zone = "Europe/Warsaw")
+    // @Scheduled(cron = "0 0 * * * *", zone = "Europe/Warsaw")
     public void platonAutoImportStock() {
         boolean enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
         if (enabled) {

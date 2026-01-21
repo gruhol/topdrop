@@ -49,7 +49,6 @@ public class CsvController {
 
                 log.info("Downloaded {} bytes, processing...", csvBytes.length);
 
-                // Przetwórz CSV
                 processingService.process(
                         new ByteArrayInputStream(csvBytes),
                         outputStream
