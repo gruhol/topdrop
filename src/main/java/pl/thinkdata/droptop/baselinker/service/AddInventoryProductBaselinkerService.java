@@ -62,9 +62,9 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     }
 
     @Transactional
-    public AddProductResponse sendProducts() throws NotFoundFileToExportException {
-        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
-        //List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(143L,newAndUpdateSyncStatus); // only one category
+    public AddProductResponse  sendProducts() throws NotFoundFileToExportException {
+        //List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
+        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(143L,newAndUpdateSyncStatus); // only one category
         Inventory inventory = getInventoryService.getDefaultInventory();
         GetPriceGroupsResponse priceGroups = getPriceGroupsService.sendRequest(new EmptyRequest());
 

@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.baselinker.component;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,11 +29,16 @@ public class BaselinkerExportScheduled {
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final PlatonApiController platonApiController;
+    private boolean sync_enabled = false;
+
+    @PostConstruct
+    private void initMethodName() {
+        this.sync_enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
+    }
 
     @Scheduled(fixedRate = 2 * 60 * 1000)
     public void baselinkerAutoExportProducts() {
-        boolean enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
-        if (enabled) {
+        if (sync_enabled) {
             try {
                 sendProductsToBaseLinker();
             } catch (WebClientRequestException e) {
@@ -42,7 +48,6 @@ public class BaselinkerExportScheduled {
             } catch (Exception e) {
                 log.info("Nieoczekiwany błąd w zadaniu Baselinker export: {}", e.getMessage());
             }
-
         } else {
             log.info("Eksport is stop: {}", getCorrentDate());
         }
@@ -50,30 +55,33 @@ public class BaselinkerExportScheduled {
 
     @Scheduled(cron = "0 15 */3 * * *", zone = "Europe/Warsaw")
     public void baselinkerAutoExportCategory() {
-        StringBuilder message = new StringBuilder();
-        List<AddCategoryResponse> addCategoryResponse = addCategoryProductService.sendCategories();
-        String now = Instant.ofEpochMilli(System.currentTimeMillis())
-                .atZone(ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        boolean allSuccess = addCategoryResponse.stream()
-                .map(AddCategoryResponse::getStatus)
-                .allMatch("SUCCESS"::equals);
-        if (allSuccess) {
-            message.append("Exportowano nowe kategorie do baselinkera o: ").append(now);
+        if (sync_enabled) {
+            StringBuilder message = new StringBuilder();
+            List<AddCategoryResponse> addCategoryResponse = addCategoryProductService.sendCategories();
+            String now = Instant.ofEpochMilli(System.currentTimeMillis())
+                    .atZone(ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            boolean allSuccess = addCategoryResponse.stream()
+                    .map(AddCategoryResponse::getStatus)
+                    .allMatch("SUCCESS"::equals);
+            if (allSuccess) {
+                message.append("Exportowano nowe kategorie do baselinkera o: ").append(now);
+            } else {
+                message.append("Błąd: ");
+                addCategoryResponse.stream()
+                        .filter(status -> status.getStatus().equals("ERROR"))
+                        .map(toString -> toString.getCategory_id() + " - Error: " + toString.getError_code() + ", Message: " + toString.getError_message())
+                        .forEach(message::append);
+            }
+            log.info("Category export -> {} ", message);
         } else {
-            message.append("Błąd: ");
-            addCategoryResponse.stream()
-                    .filter(status -> status.getStatus().equals("ERROR"))
-                    .map(toString -> toString.getCategory_id() + " - Error: " + toString.getError_code() + ", Message: " + toString.getError_message())
-                    .forEach(message::append);
+            log.info("Eksport category is stop: {}", getCorrentDate());
         }
-        log.info("Category export -> {} ", message);
     }
 
     @Scheduled(cron = "0 0 */3 * * *", zone = "Europe/Warsaw")
     public void platonAutoImportProducts() {
-        boolean enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
-        if (enabled) {
+        if (sync_enabled) {
             UpdateProductInfo info = platonApiController.getProductsFromApi(10000);
             log.info("Inport produktów z Platon: nowe produty {}, zaaktualizowane: {}", info.getNewprod() ,info.getUpdate());
         } else {
@@ -83,8 +91,7 @@ public class BaselinkerExportScheduled {
 
     @Scheduled(cron = "0 0 * * * *", zone = "Europe/Warsaw")
     public void platonAutoImportStock() {
-        boolean enabled = systemSettingService.getValue("baselinker_auto_export", Boolean.class);
-        if (enabled) {
+        if (sync_enabled) {
             int stockUpdateCount = platonApiController.getStockFromApi(10000);
             log.info("Inport stanów z Platon: {} nowych rekordów.", stockUpdateCount);
         } else {

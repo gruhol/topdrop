@@ -36,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -161,7 +162,9 @@ public class PlatonApiController {
                 .map(Product::getEan)
                 .toList();
 
-        Set<String> findEanInBase = productRepository.findByEanIn(dowloadEans).stream()
+        Set<String> findEanInBase = IntStream.range(0, (dowloadEans.size() + 999) / 1000)
+                .mapToObj(i -> dowloadEans.subList(i * 1000, Math.min((i + 1) * 1000, dowloadEans.size())))
+                .flatMap(batch -> productRepository.findByEanIn(batch).stream())
                 .map(Product::getEan)
                 .collect(Collectors.toSet());
 
