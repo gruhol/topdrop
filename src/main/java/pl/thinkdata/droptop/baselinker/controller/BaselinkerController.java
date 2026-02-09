@@ -6,8 +6,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import pl.thinkdata.droptop.baselinker.dto.*;
+import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
+import pl.thinkdata.droptop.baselinker.dto.Inventory;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.*;
 import pl.thinkdata.droptop.baselinker.service.*;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
@@ -25,6 +27,7 @@ public class BaselinkerController {
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final UpdateInventoryProductsStockBaselinkerService updateInventoryProductsStockBaselinkerService;
+    private final UpdateInventoryProductsPricesBaselinkerService updateInventoryProductsPricesBaselinkerService;
     private final GetPriceGroupsBaselinkerService getPriceGroupsService;
     private final ProductRepository productRepository;
     private final GetInventoryBaselinkerService getInventoryService;
@@ -78,7 +81,8 @@ public class BaselinkerController {
 
     @GetMapping("/send/stocks/update")
     public String sendStockUpdate(Model model) {
-        List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
+        //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(SyncStatus.STOCK_UPDATE));
         UpdateInventoryProductsStockRequest request = new UpdateInventoryProductsStockRequest();
         Inventory inventory = getInventoryService.getDefaultInventory();
         request.setProducts(toSyncProducts.stream()
@@ -90,7 +94,27 @@ public class BaselinkerController {
                         .map(product -> mapToProductStockUpdate(product, inventory))
                         .toList())
                 .build());
-        UpdateInventoryProductsStockResponse result = updateInventoryProductsStockBaselinkerService.sendRequest(request);
+        UpdateInventoryProductsStockAndPriceResponse result = updateInventoryProductsStockBaselinkerService.sendRequest(request);
+        model.addAttribute("message", result.toString());
+        return "database/alerts/alerts";
+    }
+
+    @GetMapping("/send/price/update")
+    public String sendPriceUpdate(Model model) {
+        //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(SyncStatus.PRICE_UPDATE));
+        UpdateInventoryProductsPriceRequest request = new UpdateInventoryProductsPriceRequest();
+        Inventory inventory = getInventoryService.getDefaultInventory();
+        request.setProducts(toSyncProducts.stream()
+                .map(Product::getEan)
+                .toList());
+        request.setRequest(UpdateInventoryProductsStock.builder()
+                .inventoryId(inventory.getInventoryId())
+                .productStockUpdate(toSyncProducts.stream()
+                        .map(product -> mapToProductStockUpdate(product, inventory))
+                        .toList())
+                .build());
+        UpdateInventoryProductsStockAndPriceResponse result = updateInventoryProductsPricesBaselinkerService.sendRequest(request);
         model.addAttribute("message", result.toString());
         return "database/alerts/alerts";
     }

@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class UpdateInventoryProductsStockResponse {
+public class UpdateInventoryProductsStockAndPriceResponse {
     private String status;
     private Integer counter;
     private String warnings;

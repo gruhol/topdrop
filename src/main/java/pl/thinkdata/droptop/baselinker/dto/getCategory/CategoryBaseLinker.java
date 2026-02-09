@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.baselinker.dto;
+package pl.thinkdata.droptop.baselinker.dto.getCategory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

@@ -25,4 +25,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(long categoryId, Collection<SyncStatus> statuses);
 
     List<Product> findTop1000ByExportLogIsNotNullAndSyncStatusIn(Collection<SyncStatus> statuses);
+
+    List<Product> findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(long l, List<SyncStatus> stockUpdate);
 }

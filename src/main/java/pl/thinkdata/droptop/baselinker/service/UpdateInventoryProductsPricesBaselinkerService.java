@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
@@ -15,9 +16,9 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UpdateInventoryProductsStockBaselinkerService
+public class UpdateInventoryProductsPricesBaselinkerService
         extends BaselinkerService
-        implements BaselinkerSendable<UpdateInventoryProductsStockAndPriceResponse, UpdateInventoryProductsStockRequest> {
+        implements BaselinkerSendable<UpdateInventoryProductsStockAndPriceResponse, UpdateInventoryProductsPriceRequest> {
 
     private final ProductRepository productRepository;
 
@@ -25,22 +26,22 @@ public class UpdateInventoryProductsStockBaselinkerService
 
     @PostConstruct
     private void initMethodName() {
-        super.methodName = "updateInventoryProductsStock";
+        super.methodName = "updateInventoryProductsPrices";
     }
 
     @Override
-    public UpdateInventoryProductsStockAndPriceResponse sendRequest(UpdateInventoryProductsStockRequest request) {
+    public UpdateInventoryProductsStockAndPriceResponse sendRequest(UpdateInventoryProductsPriceRequest request) {
         try {
             String jsonParams = new ObjectMapper().writeValueAsString(request.getRequest());
             ResponseEntity<String> response = getDataFromWebClient(jsonParams);
             return Optional.ofNullable(response)
                     .map(res -> {
-                        UpdateInventoryProductsStockAndPriceResponse updateInventoryStock = mapToResponse(res, UpdateInventoryProductsStockAndPriceResponse.class);
-                        if(updateInventoryStock.getCounter() == request.getProducts().size()) {
+                        UpdateInventoryProductsStockAndPriceResponse updateInventoryPrice = mapToResponse(res, UpdateInventoryProductsStockAndPriceResponse.class);
+                        if(updateInventoryPrice.getCounter() == request.getProducts().size()) {
                             productRepository.findByEanIn(request.getProducts())
                                     .forEach(prod -> prod.setSyncStatus(SyncStatus.SYNCED));
                         }
-                        return updateInventoryStock;
+                        return updateInventoryPrice;
                     })
                     .orElseThrow(() -> new RuntimeException("Error baselinker api"));
         } catch (JsonProcessingException e) {

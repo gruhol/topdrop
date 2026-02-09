@@ -4,9 +4,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import pl.thinkdata.droptop.baselinker.dto.CategoryBaseLinker;
+import pl.thinkdata.droptop.baselinker.dto.getCategory.CategoryBaseLinker;
 import pl.thinkdata.droptop.baselinker.dto.EmptyRequest;
-import pl.thinkdata.droptop.baselinker.dto.GetCategoryResponse;
+import pl.thinkdata.droptop.baselinker.dto.getCategory.GetCategoryResponse;
 
 import java.util.Optional;
 

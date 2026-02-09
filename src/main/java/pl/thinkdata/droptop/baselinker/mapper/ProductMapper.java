@@ -16,11 +16,11 @@ public class ProductMapper {
 
     public static Product map(pl.thinkdata.droptop.database.model.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
         String defultPriceGroupId = inventory.getDefaultPriceGroup().toString();
-//        String wholesalePriceId = priceGroups.stream()
-//                .filter(g -> g.getName().equals("hurtowa"))
-//                .map(id -> id.getPriceGroupId().toString())
-//                .findFirst()
-//                .orElse(defultPriceGroupId);
+        String wholesalePriceId = priceGroups.stream()
+                .filter(g -> g.getName().equals("hurtowa"))
+                .map(id -> id.getPriceGroupId().toString())
+                .findFirst()
+                .orElse(defultPriceGroupId);
         
         String defaultWarehouse = inventory.getDefaultWarehouse();
         String inventoryId = inventory.getInventoryId().toString();
@@ -28,9 +28,9 @@ public class ProductMapper {
         Map<String, Double> prices = new HashMap<>();
         prices.put(defultPriceGroupId, Optional.ofNullable(product.getPrice())
                 .orElse(0.0));
-//        prices.put(wholesalePriceId, Optional.ofNullable(product.getLatestOffer())
-//                .map(ProductOfferLog::getWholesaleGrossPrice)
-//                .orElse(0.0));
+        prices.put(wholesalePriceId, Optional.ofNullable(product.getLatestOffer())
+                .map(ProductOfferLog::getWholesaleGrossPrice)
+                .orElse(0.0));
         Map<String, Integer> stock = new HashMap<>();
         stock.put(defaultWarehouse, Optional.ofNullable(product.getLatestOffer())
                 .map(ProductOfferLog::getStock)
