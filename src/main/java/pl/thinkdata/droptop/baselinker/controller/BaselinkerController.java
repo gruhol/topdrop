@@ -6,9 +6,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
-import pl.thinkdata.droptop.baselinker.dto.Inventory;
+import pl.thinkdata.droptop.baselinker.dto.*;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.PriceGroup;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.ProductPriceUpdate;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPrice;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.*;
 import pl.thinkdata.droptop.baselinker.service.*;
@@ -24,11 +26,12 @@ import java.util.List;
 @RequestMapping("baselinker")
 public class BaselinkerController {
 
+    public static final String HURTOWA = "hurtowa";
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final UpdateInventoryProductsStockBaselinkerService updateInventoryProductsStockBaselinkerService;
     private final UpdateInventoryProductsPricesBaselinkerService updateInventoryProductsPricesBaselinkerService;
-    private final GetPriceGroupsBaselinkerService getPriceGroupsService;
+    private final GetPriceGroupsBaselinkerService getPriceGroupsBaselinkerService;
     private final ProductRepository productRepository;
     private final GetInventoryBaselinkerService getInventoryService;
 
@@ -105,13 +108,14 @@ public class BaselinkerController {
         List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(SyncStatus.PRICE_UPDATE));
         UpdateInventoryProductsPriceRequest request = new UpdateInventoryProductsPriceRequest();
         Inventory inventory = getInventoryService.getDefaultInventory();
+        GetPriceGroupsResponse priceGroups = getPriceGroupsBaselinkerService.sendRequest(new EmptyRequest());
         request.setProducts(toSyncProducts.stream()
                 .map(Product::getEan)
                 .toList());
-        request.setRequest(UpdateInventoryProductsStock.builder()
+        request.setRequest(UpdateInventoryProductsPrice.builder()
                 .inventoryId(inventory.getInventoryId())
-                .productStockUpdate(toSyncProducts.stream()
-                        .map(product -> mapToProductStockUpdate(product, inventory))
+                .productPriceUpdate(toSyncProducts.stream()
+                        .map(product -> mapToProductPriceUpdate(product, priceGroups))
                         .toList())
                 .build());
         UpdateInventoryProductsStockAndPriceResponse result = updateInventoryProductsPricesBaselinkerService.sendRequest(request);
@@ -125,6 +129,19 @@ public class BaselinkerController {
                 .stocks(List.of(WarehouseStock.builder()
                         .warehouseId(inventory.getDefaultWarehouse())
                         .stock(product.getLatestOffer().getStock())
+                        .build()))
+                .build();
+    }
+
+    private ProductPriceUpdate mapToProductPriceUpdate(Product product, GetPriceGroupsResponse priceGroups) {
+        return ProductPriceUpdate.builder()
+                .productId(product.getExportLog().getBaselinkerId())
+                .price(List.of(PriceGroup.builder()
+                        .priceGroupId(priceGroups.getPriceGroups().stream()
+                                .filter(name -> name.getName().equals(HURTOWA))
+                                .map(PriceGroupBaseLinker::getPriceGroupId)
+                                .findFirst().orElse(0L))
+                        .price(product.getLatestOffer().getWholesaleGrossPrice())
                         .build()))
                 .build();
     }

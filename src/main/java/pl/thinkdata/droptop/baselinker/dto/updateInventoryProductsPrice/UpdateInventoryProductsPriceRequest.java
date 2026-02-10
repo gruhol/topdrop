@@ -1,7 +1,6 @@
 package pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice;
 
 import lombok.*;
-import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStock;
 
 import java.util.List;
 
@@ -13,5 +12,5 @@ import java.util.List;
 public class UpdateInventoryProductsPriceRequest {
 
     private List<String> products;
-    private UpdateInventoryProductsStock request;
+    private UpdateInventoryProductsPrice request;
 }

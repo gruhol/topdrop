@@ -15,5 +15,5 @@ public class UpdateInventoryProductsPrice {
     @JsonProperty("inventory_id")
     private Long inventoryId;
     @JsonProperty("products")
-    private List<ProductPriceUpdate> productStockUpdate;
+    private List<ProductPriceUpdate> productPriceUpdate;
 }

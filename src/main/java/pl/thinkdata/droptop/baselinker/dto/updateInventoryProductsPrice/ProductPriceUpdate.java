@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.util.List;
 
+
 @Getter
 @Setter
 @Builder
@@ -11,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 public class ProductPriceUpdate {
     private long productId;
-    private List<PriceGroup> stocks;
+    private List<PriceGroup> price;
 }

@@ -8,6 +8,6 @@ import lombok.*;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class PriceGroup {
-    private String priceGroupId;
+    private long priceGroupId;
     private double price;
 }
