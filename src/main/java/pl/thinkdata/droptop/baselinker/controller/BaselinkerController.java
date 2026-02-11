@@ -52,12 +52,18 @@ public class BaselinkerController {
     public String sendProductsToBaseLinker(Model model) throws NotFoundFileToExportException {
 
         String message;
-        AddProductResponse result = addInventoryProductService.sendProducts();
-        if (result.getStatus().equals("SUCCESS")) {
-            message = "Utworzono o id: " + result.getProductId();
-        } else {
-            message = "Błąd.";
+        AddProductResponse result;
+        try {
+            result = addInventoryProductService.sendProducts();
+            if (result.getStatus().equals("SUCCESS")) {
+                message = "Utworzono o id: " + result.getProductId();
+            } else {
+                message = "Błąd.";
+            }
+        } catch (NotFoundFileToExportException e) {
+            message = "Brak nowych produktów do wysłania";
         }
+
         model.addAttribute("message", message);
         return "database/alerts/alerts";
     }
