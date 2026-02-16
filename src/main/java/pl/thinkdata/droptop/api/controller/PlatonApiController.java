@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.api.controller;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -75,6 +76,7 @@ public class PlatonApiController {
         return "api/get_products";
     }
 
+    @Transactional
     public int getStockFromApi(int pageSize) {
         int pageNumber = 1;
         int downloadCount = 0;
@@ -98,12 +100,13 @@ public class PlatonApiController {
                         .toList();
                 List<ProductOfferLog> productOfferLogs = productOfferLogRepository.saveAll(stockToSave);
 
-                List<Product> listProductUpdateStatus = productOfferLogs.stream()
-                        .map(ProductOfferLog::getProduct)
-                        .filter(Objects::nonNull)
-                        .peek(this::changeStatus)
-                        .toList();
-                productRepository.saveAll(listProductUpdateStatus);
+                Set<String> uniqueEans = productOfferLogs.stream()
+                        .map(ProductOfferLog::getProductEan)
+                        .collect(Collectors.toSet());
+                List<Product> products = productRepository.findByEanInWithOffers(uniqueEans);
+                products.forEach(this::changeStatus);
+
+                productRepository.saveAll(products);
                 totalStockSave += stockToSave.size();
             }
             total = Optional.ofNullable(data.getStock().getSummary())
@@ -211,9 +214,18 @@ public class PlatonApiController {
                         .toList();
                 ProductOfferLog now = sorted.get(0);
                 ProductOfferLog old = sorted.get(1);
-                if (productChangePriceAndStock(now, old)) p.setSyncStatus(SyncStatus.PRICE_STOCK_UPDATE);
-                if (productChangePrice(now, old)) p.setSyncStatus(SyncStatus.PRICE_UPDATE);
-                if (productChangeStock(now, old)) p.setSyncStatus(SyncStatus.STOCK_UPDATE);
+                if (productChangePriceAndStock(now, old)) {
+                    p.setSyncStatus(SyncStatus.PRICE_STOCK_UPDATE);
+                    return;
+                }
+                if (productChangePrice(now, old)) {
+                    p.setSyncStatus(SyncStatus.PRICE_UPDATE);
+                    return;
+                }
+                if (productChangeStock(now, old)) {
+                    p.setSyncStatus(SyncStatus.STOCK_UPDATE);
+                    return;
+                }
             }
             p.setSyncStatus(SyncStatus.TO_UPDATE);
         } else {
