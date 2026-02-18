@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.api.utils.CategoryGeneratorUtils;
 import pl.thinkdata.droptop.common.service.ImageService;
+import pl.thinkdata.droptop.database.model.GpsrData;
 import pl.thinkdata.droptop.database.model.Product;
 
 @Component
@@ -18,6 +19,8 @@ public class ProductMapper {
     private final CategoryGeneratorUtils categoryGeneratorUtils;
 
     public Product mapToProduct(ProductFromXml product, String url)  {
+
+
 
         return Product.builder()
                 .ean(product.getEan())
@@ -48,6 +51,16 @@ public class ProductMapper {
                 .approvalNumber(product.getApprovalNumber())
                 .pcn(product.getPcn())
                 .manufacturingCountryCode(product.getManufacturingCountryCode())
+                .gpsrSekcja(GpsrData.builder()
+                        .contractorName(product.getGpsr().getName())
+                        .contractorCountryCode(product.getGpsr().getCountryCode())
+                        .street(product.getGpsr().getStreet())
+                        .houseNumber(product.getGpsr().getHouse())
+                        .apartmentNumber(product.getGpsr().getApartment())
+                        .postalCode(product.getGpsr().getPostalCode())
+                        .city(product.getGpsr().getCity())
+                        .email(product.getGpsr().getEmail())
+                        .build())
                 .build();
     }
 }

@@ -74,6 +74,19 @@ public class Product {
     @Embedded
     private DateOperator dateOperator;
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "contractorName",        column = @Column(name = "gpsr_contractor_name")),
+            @AttributeOverride(name = "contractorCountryCode", column = @Column(name = "gpsr_contractor_country_code")),
+            @AttributeOverride(name = "street",                column = @Column(name = "gpsr_street")),
+            @AttributeOverride(name = "houseNumber",           column = @Column(name = "gpsr_house_number")),
+            @AttributeOverride(name = "apartmentNumber",       column = @Column(name = "gpsr_apartment_number")),
+            @AttributeOverride(name = "postalCode",            column = @Column(name = "gpsr_postal_code")),
+            @AttributeOverride(name = "city",                  column = @Column(name = "gpsr_city")),
+            @AttributeOverride(name = "email",                 column = @Column(name = "gpsr_email"))
+    })
+    private GpsrData gpsrSekcja;
+
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ProductOfferLog> offers;
 
