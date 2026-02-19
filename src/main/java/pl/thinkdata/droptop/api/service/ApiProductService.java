@@ -50,6 +50,7 @@ public class ApiProductService {
         existingProduct.setPcn(updatedProduct.getPcn());
         existingProduct.setManufacturingCountryCode(updatedProduct.getManufacturingCountryCode());
         existingProduct.setDateOperator(updatedProduct.getDateOperator());
+        existingProduct.setGpsrSekcja(updatedProduct.getGpsrSekcja());
 
         productRepository.save(existingProduct);
     }

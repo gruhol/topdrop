@@ -80,7 +80,7 @@ public class PlatonApiController {
     public int getStockFromApi(int pageSize) {
         int pageNumber = 1;
         int downloadCount = 0;
-        int total  = 0;
+        int total = 0;
         int totalStockSave = 0;
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
@@ -103,9 +103,19 @@ public class PlatonApiController {
                 Set<String> uniqueEans = productOfferLogs.stream()
                         .map(ProductOfferLog::getProductEan)
                         .collect(Collectors.toSet());
-                List<Product> products = productRepository.findByEanInWithOffers(uniqueEans);
-                products.forEach(this::changeStatus);
 
+                List<Product> products = productRepository.findByEanIn(uniqueEans);
+                List<ProductOfferLog> offers = productOfferLogRepository.findTop2OffersByEans(uniqueEans);
+
+                Map<String, List<ProductOfferLog>> offersByEan = offers.stream()
+                        .collect(Collectors.groupingBy(ProductOfferLog::getProductEan));
+
+                products.forEach(p -> {
+                    List<ProductOfferLog> productOffers = offersByEan.getOrDefault(p.getEan(), List.of());
+                    p.setOffers(productOffers);
+                });
+
+                products.forEach(this::changeStatus);
                 productRepository.saveAll(products);
                 totalStockSave += stockToSave.size();
             }

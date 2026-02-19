@@ -31,6 +31,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(long l, List<SyncStatus> stockUpdate);
 
-    @Query("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.offers WHERE p.ean IN :eans")
-    List<Product> findByEanInWithOffers(@Param("eans") Set<String> eans);
+    @Query("SELECT p FROM Product p WHERE p.ean IN :eans")
+    List<Product> findByEanIn(@Param("eans") Set<String> eans);
 }
