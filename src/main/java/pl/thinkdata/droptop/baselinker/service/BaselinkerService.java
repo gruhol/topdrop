@@ -36,6 +36,11 @@ public class BaselinkerService {
     public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
         //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
         List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
+        if (toSyncProducts.isEmpty()) {
+            return UpdateInventoryProductsStockAndPriceResponse.builder()
+                    .counter(0)
+                    .build();
+        }
         UpdateInventoryProductsPriceRequest request = new UpdateInventoryProductsPriceRequest();
         Inventory inventory = getInventoryService.getDefaultInventory();
         GetPriceGroupsResponse priceGroups = getPriceGroupsBaselinkerService.sendRequest(new EmptyRequest());
