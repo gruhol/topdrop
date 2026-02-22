@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
+import pl.thinkdata.droptop.database.model.Product;
 import pl.thinkdata.droptop.database.model.SyncStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,8 +39,9 @@ public class UpdateInventoryProductsPricesBaselinkerService
                     .map(res -> {
                         UpdateInventoryProductsStockAndPriceResponse updateInventoryPrice = mapToResponse(res, UpdateInventoryProductsStockAndPriceResponse.class);
                         if(updateInventoryPrice.getCounter() == request.getProducts().size()) {
-                            productRepository.findByEanIn(request.getProducts())
-                                    .forEach(prod -> prod.setSyncStatus(SyncStatus.SYNCED));
+                            List<Product> products = productRepository.findByEanIn(request.getProducts());
+                            products.forEach(prod -> prod.setSyncStatus(SyncStatus.SYNCED));
+                            productRepository.saveAll(products);
                         }
                         return updateInventoryPrice;
                     })

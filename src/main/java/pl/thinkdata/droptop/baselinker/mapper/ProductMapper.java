@@ -78,6 +78,21 @@ public class ProductMapper {
         reatures.put("series", product.getSeries());
         reatures.put("translator", product.getTranslator());
         reatures.put("releaseYear", product.getReleaseYear());
+        reatures.put("publisher", product.getPublisher());
+        reatures.put("coverType", product.getCoverType());
+        reatures.put("pagesNumber", String.valueOf(product.getPagesNumber()));
+        reatures.put("edition", String.valueOf(product.getEdition()));
+        reatures.put("approvalNumber", product.getApprovalNumber());
+        reatures.put("pcn", product.getPcn());
+        reatures.put("manufacturingCountryCode", product.getManufacturingCountryCode());
+        reatures.put("gpsr_contractorName", product.getGpsrSekcja().getContractorName());
+        reatures.put("gpsr_contractorCountryCode", product.getGpsrSekcja().getContractorCountryCode());
+        reatures.put("gpsr_street",  product.getGpsrSekcja().getStreet());
+        reatures.put("gpsr_houseNumber",  product.getGpsrSekcja().getHouseNumber());
+        reatures.put("gpsr_apartmentNumber", product.getGpsrSekcja().getApartmentNumber());
+        reatures.put("gpsr_postalCode",  product.getGpsrSekcja().getPostalCode());
+        reatures.put("gpsr_city", product.getGpsrSekcja().getCity());
+        reatures.put("gpsr_email", product.getGpsrSekcja().getEmail());
         textFields.setFeatures(reatures);
         return textFields;
     }

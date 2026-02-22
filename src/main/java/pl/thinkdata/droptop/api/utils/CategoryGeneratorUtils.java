@@ -2,11 +2,10 @@ package pl.thinkdata.droptop.api.utils;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.api.model.Category;
-import pl.thinkdata.droptop.api.repository.CategoryRepository;
+import pl.thinkdata.droptop.common.repository.CategoryRepository;
 
 import java.util.Optional;
 

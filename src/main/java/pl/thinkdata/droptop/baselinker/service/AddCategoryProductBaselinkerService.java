@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.api.model.Category;
-import pl.thinkdata.droptop.api.repository.CategoryRepository;
+import pl.thinkdata.droptop.common.repository.CategoryRepository;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryDto;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryRequest;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
@@ -15,8 +15,6 @@ import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor

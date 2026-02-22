@@ -27,7 +27,6 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     private final BaselinkerLogService baselinkerLogService;
     private final GetPriceGroupsBaselinkerService getPriceGroupsService;
     private final GetInventoryBaselinkerService getInventoryService;
-
     private final List<SyncStatus> newAndUpdateSyncStatus = Arrays.asList(SyncStatus.NEW, SyncStatus.TO_UPDATE);
     protected String methodName;
 
