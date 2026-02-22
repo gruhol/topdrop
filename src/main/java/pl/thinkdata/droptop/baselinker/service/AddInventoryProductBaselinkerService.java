@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AddInventoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
+public class AddInventoryProductBaselinkerService extends BaselinkerWebClientService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
 
     private final ProductRepository productRepository;
     private final BaselinkerLogService baselinkerLogService;

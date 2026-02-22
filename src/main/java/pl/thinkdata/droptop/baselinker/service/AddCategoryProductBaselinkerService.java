@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AddCategoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddCategoryResponse, AddCategoryRequest> {
+public class AddCategoryProductBaselinkerService extends BaselinkerWebClientService implements BaselinkerSendable<AddCategoryResponse, AddCategoryRequest> {
 
     private final CategoryRepository categoryRepository;
     private final GetCategoryProductBaselinkerService getCategoryProductBaselinkerService;

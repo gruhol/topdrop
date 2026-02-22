@@ -18,7 +18,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UpdateInventoryProductsStockBaselinkerService
-        extends BaselinkerService
+        extends BaselinkerWebClientService
         implements BaselinkerSendable<UpdateInventoryProductsStockAndPriceResponse, UpdateInventoryProductsStockRequest> {
 
     private final ProductRepository productRepository;

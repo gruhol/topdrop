@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class GetCategoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<GetCategoryResponse, EmptyRequest>{
+public class GetCategoryProductBaselinkerService extends BaselinkerWebClientService implements BaselinkerSendable<GetCategoryResponse, EmptyRequest>{
 
     protected String methodName;
 

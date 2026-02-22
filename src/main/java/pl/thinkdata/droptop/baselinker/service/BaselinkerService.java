@@ -1,40 +1,98 @@
 package pl.thinkdata.droptop.baselinker.service;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import pl.thinkdata.droptop.baselinker.dto.EmptyRequest;
+import pl.thinkdata.droptop.baselinker.dto.GetPriceGroupsResponse;
+import pl.thinkdata.droptop.baselinker.dto.Inventory;
+import pl.thinkdata.droptop.baselinker.dto.PriceGroupBaseLinker;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.PriceGroup;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.ProductPriceUpdate;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPrice;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.*;
+import pl.thinkdata.droptop.common.repository.ProductRepository;
+import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.SyncStatus;
 
+import java.util.List;
+
+import static pl.thinkdata.droptop.database.model.SyncStatus.PRICE_STOCK_UPDATE;
+import static pl.thinkdata.droptop.database.model.SyncStatus.PRICE_UPDATE;
+
+@Service
+@RequiredArgsConstructor
 public class BaselinkerService {
 
-    @Value("${baselinker.token}")
-    private String token;
+    public static final String HURTOWA = "hurtowa";
 
-    private String urlApi = "https://api.baselinker.com";
+    private final GetInventoryBaselinkerService getInventoryService;
+    private final GetPriceGroupsBaselinkerService getPriceGroupsBaselinkerService;
+    private final ProductRepository productRepository;
+    private final UpdateInventoryProductsPricesBaselinkerService updateInventoryProductsPricesBaselinkerService;
+    private final UpdateInventoryProductsStockBaselinkerService updateInventoryProductsStockBaselinkerService;
 
-    protected String methodName;
 
-    protected WebClient webClient;
+    public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
+        //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
+        UpdateInventoryProductsPriceRequest request = new UpdateInventoryProductsPriceRequest();
+        Inventory inventory = getInventoryService.getDefaultInventory();
+        GetPriceGroupsResponse priceGroups = getPriceGroupsBaselinkerService.sendRequest(new EmptyRequest());
+        request.setProducts(toSyncProducts.stream()
+                .map(Product::getEan)
+                .toList());
+        request.setRequest(UpdateInventoryProductsPrice.builder()
+                .inventoryId(inventory.getInventoryId())
+                .productPriceUpdate(toSyncProducts.stream()
+                        .map(product -> mapToProductPriceUpdate(product, priceGroups))
+                        .toList())
+                .build());
+        return updateInventoryProductsPricesBaselinkerService.sendRequest(request);
+    }
 
-    @PostConstruct
-    private void initWebClient() {
-        this.webClient = WebClient.builder()
-                .baseUrl(urlApi)
-                .defaultHeader("X-BLToken", token)
+    public UpdateInventoryProductsStockAndPriceResponse sendStockUpdate() {
+        //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(SyncStatus.STOCK_UPDATE));
+        if (toSyncProducts.isEmpty()) {
+            return UpdateInventoryProductsStockAndPriceResponse.builder()
+                    .counter(0)
+                    .build();
+        }
+        UpdateInventoryProductsStockRequest request = new UpdateInventoryProductsStockRequest();
+        Inventory inventory = getInventoryService.getDefaultInventory();
+        request.setProducts(toSyncProducts.stream()
+                .map(Product::getEan)
+                .toList());
+        request.setRequest(UpdateInventoryProductsStock.builder()
+                .inventoryId(inventory.getInventoryId())
+                .productStockUpdate(toSyncProducts.stream()
+                        .map(product -> mapToProductStockUpdate(product, inventory))
+                        .toList())
+                .build());
+        return updateInventoryProductsStockBaselinkerService.sendRequest(request);
+    }
+
+    private ProductPriceUpdate mapToProductPriceUpdate(Product product, GetPriceGroupsResponse priceGroups) {
+        return ProductPriceUpdate.builder()
+                .productId(product.getExportLog().getBaselinkerId())
+                .price(List.of(PriceGroup.builder()
+                        .priceGroupId(priceGroups.getPriceGroups().stream()
+                                .filter(name -> name.getName().equals(HURTOWA))
+                                .map(PriceGroupBaseLinker::getPriceGroupId)
+                                .findFirst().orElse(0L))
+                        .price(product.getLatestOffer().getWholesaleGrossPrice())
+                        .build()))
                 .build();
     }
 
-    ResponseEntity<String> getDataFromWebClient(String json) {
-        return webClient.post()
-                .uri("/connector.php")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters
-                        .fromFormData("method", methodName)
-                        .with("parameters", json))
-                .retrieve()
-                .toEntity(String.class)
-                .block();
+    private ProductStockUpdate mapToProductStockUpdate(Product product, Inventory inventory) {
+        return ProductStockUpdate.builder()
+                .productId(product.getExportLog().getBaselinkerId())
+                .stocks(List.of(WarehouseStock.builder()
+                        .warehouseId(inventory.getDefaultWarehouse())
+                        .stock(product.getLatestOffer().getStock())
+                        .build()))
+                .build();
     }
 }

@@ -18,7 +18,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UpdateInventoryProductsPricesBaselinkerService
-        extends BaselinkerService
+        extends BaselinkerWebClientService
         implements BaselinkerSendable<UpdateInventoryProductsStockAndPriceResponse, UpdateInventoryProductsPriceRequest> {
 
     private final ProductRepository productRepository;
@@ -40,7 +40,7 @@ public class UpdateInventoryProductsPricesBaselinkerService
                         UpdateInventoryProductsStockAndPriceResponse updateInventoryPrice = mapToResponse(res, UpdateInventoryProductsStockAndPriceResponse.class);
                         if(updateInventoryPrice.getCounter() == request.getProducts().size()) {
                             List<Product> products = productRepository.findByEanIn(request.getProducts());
-                            products.forEach(prod -> prod.setSyncStatus(SyncStatus.SYNCED));
+                            products.forEach(prod -> prod.setSyncStatus(getSyncStatus(prod)));
                             productRepository.saveAll(products);
                         }
                         return updateInventoryPrice;
@@ -49,5 +49,12 @@ public class UpdateInventoryProductsPricesBaselinkerService
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Serialization Error");
         }
+    }
+
+    private SyncStatus getSyncStatus(Product product) {
+        if (product.getSyncStatus().equals(SyncStatus.PRICE_STOCK_UPDATE)) {
+            return SyncStatus.STOCK_UPDATE;
+        }
+        return SyncStatus.SYNCED;
     }
 }
