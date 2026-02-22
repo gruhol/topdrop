@@ -92,6 +92,10 @@ public class BaselinkerController {
     public String sendStockUpdate(Model model) {
         //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
         List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(SyncStatus.STOCK_UPDATE));
+        if (toSyncProducts.isEmpty()) {
+            model.addAttribute("message", "Brak nowych produktów");
+            return "database/alerts/alerts";
+        }
         UpdateInventoryProductsStockRequest request = new UpdateInventoryProductsStockRequest();
         Inventory inventory = getInventoryService.getDefaultInventory();
         request.setProducts(toSyncProducts.stream()
