@@ -10,8 +10,10 @@ import pl.thinkdata.droptop.api.controller.PlatonApiController;
 import pl.thinkdata.droptop.api.dto.UpdateProductInfo;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
 import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
+import pl.thinkdata.droptop.baselinker.service.BaselinkerService;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 import pl.thinkdata.droptop.config.service.SystemSettingService;
 
@@ -29,6 +31,7 @@ public class BaselinkerExportScheduled {
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final PlatonApiController platonApiController;
+    private final BaselinkerService baselinkerService;
     private boolean sync_enabled = false;
 
     @PostConstruct
@@ -96,6 +99,22 @@ public class BaselinkerExportScheduled {
             log.info("Inport stanów z Platon: {} nowych rekordów.", stockUpdateCount);
         } else {
             log.info("Import stanów wyłączony. Data: {}", getCorrentDate());
+        }
+    }
+
+    @Scheduled(cron = "0 10/10 * * * *", zone = "Europe/Warsaw")
+    public void baselinkerEsportStock() {
+        if (sync_enabled) {
+            UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendStockUpdate();
+            if(result.getStatus().equals("SUCCESS")) log.info("Zaktualizowane stany: {} Data: {}", result.getCounter(), getCorrentDate());
+        }
+    }
+
+    @Scheduled(cron = "0 5/10 * * * *", zone = "Europe/Warsaw")
+    public void baselinkerEsportPrice() {
+        if (sync_enabled) {
+            UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendPriceUpdate();
+            if(result.getStatus().equals("SUCCESS")) log.info("Zaktualizowane ceny: {} Data: {}", result.getCounter(), getCorrentDate());
         }
     }
 
