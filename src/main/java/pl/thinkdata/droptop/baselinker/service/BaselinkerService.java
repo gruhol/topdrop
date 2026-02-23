@@ -35,7 +35,7 @@ public class BaselinkerService {
 
     public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
         //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
-        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(144L, List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
         if (toSyncProducts.isEmpty()) {
             return UpdateInventoryProductsStockAndPriceResponse.builder()
                     .counter(0)
@@ -58,7 +58,7 @@ public class BaselinkerService {
 
     public UpdateInventoryProductsStockAndPriceResponse sendStockUpdate() {
         //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
-        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(143L, List.of(SyncStatus.STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(144L, List.of(SyncStatus.STOCK_UPDATE));
         if (toSyncProducts.isEmpty()) {
             return UpdateInventoryProductsStockAndPriceResponse.builder()
                     .counter(0)

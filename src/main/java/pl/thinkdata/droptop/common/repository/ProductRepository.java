@@ -23,9 +23,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByEanIn(List<String> eans);
 
-    List<Product> findTop100ByExportLogIsNullAndSyncStatusIn(Collection<SyncStatus> statuses);
+    List<Product> findTop100BySyncStatusIn(Collection<SyncStatus> statuses);
 
-    List<Product> findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(long categoryId, Collection<SyncStatus> statuses);
+    List<Product> findTop100ByCategory_IdAndSyncStatusIn(long categoryId, Collection<SyncStatus> statuses);
 
     List<Product> findTop1000ByExportLogIsNotNullAndSyncStatusIn(Collection<SyncStatus> statuses);
 
