@@ -1,5 +1,7 @@
 package pl.thinkdata.droptop.baselinker.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,10 +10,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
+import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersRequest;
+import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
 import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.BaselinkerService;
+import pl.thinkdata.droptop.baselinker.service.GetOrdersBaselinkerService;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 
 import java.util.List;
@@ -24,6 +29,7 @@ public class BaselinkerController {
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final BaselinkerService baselinkerService;
+    private final GetOrdersBaselinkerService getOrdersBaselinkerService;
 
     @GetMapping("/send/product/{ean}")
     public String sendProductToBaseLinker(@PathVariable(value = "ean", required = true) String ean, Model model) {
@@ -89,6 +95,17 @@ public class BaselinkerController {
     public String sendPriceUpdate(Model model) {
         UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendPriceUpdate();
         model.addAttribute("message", result.toString());
+        return "database/alerts/alerts";
+    }
+
+    @GetMapping("/get/orders")
+    public String getOrders(Model model) throws JsonProcessingException {
+        GetOrdersResponse result = getOrdersBaselinkerService.sendRequest(new GetOrdersRequest());
+
+        ObjectMapper mapper = new ObjectMapper();
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+
+        model.addAttribute("message", json);
         return "database/alerts/alerts";
     }
 

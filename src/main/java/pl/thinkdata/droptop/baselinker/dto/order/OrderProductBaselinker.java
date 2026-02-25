@@ -1,76 +1,61 @@
 package pl.thinkdata.droptop.baselinker.dto.order;
 
-import jakarta.persistence.*;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
-
-@Entity
-@Table(name = "order_products")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class OrderProductBaselinker {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id", nullable = false)
-    private OrderBaselinker order;
-
-    @Column(name = "order_product_id", nullable = false, unique = true)
-    private Long orderProductId;
-
-    @Column(name = "storage", length = 50)
+    @JsonProperty("storage")
     private String storage;
 
-    @Column(name = "storage_id")
+    @JsonProperty("storage_id")
     private Long storageId;
 
-    @Column(name = "product_id", length = 100)
+    @JsonProperty("order_product_id")
+    private Long orderProductId;
+
+    @JsonProperty("product_id")
     private String productId;
 
-    @Column(name = "variant_id", length = 100)
+    @JsonProperty("variant_id")
     private String variantId;
 
-    @Column(name = "name", length = 500)
+    @JsonProperty("name")
     private String name;
 
-    @Column(name = "attributes", columnDefinition = "TEXT")
-    private String attributes;
-
-    @Column(name = "sku", length = 100)
+    @JsonProperty("sku")
     private String sku;
 
-    @Column(name = "ean", length = 50)
+    @JsonProperty("ean")
     private String ean;
 
-    @Column(name = "location", length = 100)
+    @JsonProperty("location")
     private String location;
 
-    @Column(name = "warehouse_id")
+    @JsonProperty("warehouse_id")
     private Long warehouseId;
 
-    @Column(name = "auction_id", length = 100)
+    @JsonProperty("auction_id")
     private String auctionId;
 
-    @Column(name = "price_brutto", precision = 10, scale = 2)
-    private BigDecimal priceBrutto;
+    @JsonProperty("attributes")
+    private String attributes;
 
-    @Column(name = "tax_rate", precision = 5, scale = 2)
-    private BigDecimal taxRate;
+    @JsonProperty("price_brutto")
+    private Float priceBrutto;
 
-    @Column(name = "quantity")
+    @JsonProperty("tax_rate")
+    private Float taxRate;
+
+    @JsonProperty("quantity")
     private Integer quantity;
 
-    @Column(name = "weight", precision = 8, scale = 3)
-    private BigDecimal weight;
+    @JsonProperty("weight")
+    private Float weight;
 
-    @Column(name = "bundle_id")
+    @JsonProperty("bundle_id")
     private Long bundleId;
 }

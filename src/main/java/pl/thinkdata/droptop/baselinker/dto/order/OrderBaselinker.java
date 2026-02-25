@@ -1,112 +1,187 @@
 package pl.thinkdata.droptop.baselinker.dto.order;
 
-import jakarta.persistence.*;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-@Entity
-@Table(name = "orders")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class OrderBaselinker {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+        @JsonProperty("order_id")
+        private Long orderId;
 
-    @Column(name = "order_id", nullable = false, unique = true)
-    private Long orderId;
+        @JsonProperty("shop_order_id")
+        private Long shopOrderId;
 
-    @Column(name = "shop_order_id")
-    private Long shopOrderId;
+        @JsonProperty("external_order_id")
+        private String externalOrderId;
 
-    @Column(name = "external_order_id")
-    private String externalOrderId;
+        @JsonProperty("order_source")
+        private String orderSource;
 
-    @Column(name = "order_source", length = 50)
-    private String orderSource;
+        @JsonProperty("order_source_id")
+        private Long orderSourceId;
 
-    @Column(name = "order_source_id")
-    private Long orderSourceId;
+        @JsonProperty("order_source_info")
+        private String orderSourceInfo;
 
-    @Column(name = "order_source_info")
-    private String orderSourceInfo;
+        @JsonProperty("order_status_id")
+        private Long orderStatusId;
 
-    @Column(name = "order_status_id")
-    private Long orderStatusId;
+        @JsonProperty("date_add")
+        private Long dateAdd;
 
-    @Column(name = "confirmed")
-    private boolean confirmed;
+        @JsonProperty("date_confirmed")
+        private Long dateConfirmed;
 
-    @Column(name = "date_confirmed")
-    private Instant dateConfirmed;
+        @JsonProperty("date_in_status")
+        private Long dateInStatus;
 
-    @Column(name = "date_add")
-    private Instant dateAdd;
+        @JsonProperty("confirmed")
+        private Boolean confirmed;
 
-    @Column(name = "date_in_status")
-    private Instant dateInStatus;
+        @JsonProperty("user_login")
+        private String userLogin;
 
-    @Column(name = "user_login", length = 100)
-    private String userLogin;
+        @JsonProperty("currency")
+        private String currency;
 
-    @Column(name = "phone", length = 30)
-    private String phone;
+        @JsonProperty("payment_method")
+        private String paymentMethod;
 
-    @Column(name = "email", length = 150)
-    private String email;
+        @JsonProperty("payment_method_cod")
+        private String paymentMethodCod;
 
-    @Column(name = "user_comments", columnDefinition = "TEXT")
-    private String userComments;
+        @JsonProperty("payment_done")
+        private Float paymentDone;
 
-    @Column(name = "admin_comments", columnDefinition = "TEXT")
-    private String adminComments;
+        @JsonProperty("user_comments")
+        private String userComments;
 
-    @Column(name = "currency", length = 10)
-    private String currency;
+        @JsonProperty("admin_comments")
+        private String adminComments;
 
-    @Column(name = "payment_method", length = 100)
-    private String paymentMethod;
+        @JsonProperty("email")
+        private String email;
 
-    @Column(name = "payment_method_cod", length = 5)
-    private String paymentMethodCod;
+        @JsonProperty("phone")
+        private String phone;
 
-    @Column(name = "payment_done", precision = 10, scale = 2)
-    private BigDecimal paymentDone;
+        @JsonProperty("delivery_method_id")
+        private Long deliveryMethodId;
 
-    @Embedded
-    private DeliveryInfoBaselinker delivery;
+        @JsonProperty("delivery_method")
+        private String deliveryMethod;
 
-    @Embedded
-    private InvoiceInfoBaselinker invoice;
+        @JsonProperty("delivery_price")
+        private Float deliveryPrice;
 
-    @Column(name = "extra_field_1", columnDefinition = "TEXT")
-    private String extraField1;
+        @JsonProperty("delivery_package_module")
+        private String deliveryPackageModule;
 
-    @Column(name = "extra_field_2", columnDefinition = "TEXT")
-    private String extraField2;
+        @JsonProperty("delivery_package_nr")
+        private String deliveryPackageNr;
 
-    @Column(name = "order_page", length = 300)
-    private String orderPage;
+        @JsonProperty("delivery_fullname")
+        private String deliveryFullname;
 
-    @Column(name = "pick_state")
-    private Integer pickState;
+        @JsonProperty("delivery_company")
+        private String deliveryCompany;
 
-    @Column(name = "pack_state")
-    private Integer packState;
+        @JsonProperty("delivery_address")
+        private String deliveryAddress;
 
-    @Column(name = "star")
-    private Integer star;
+        @JsonProperty("delivery_postcode")
+        private String deliveryPostcode;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<OrderProductBaselinker> products = new ArrayList<>();
+        @JsonProperty("delivery_city")
+        private String deliveryCity;
+
+        @JsonProperty("delivery_state")
+        private String deliveryState;
+
+        @JsonProperty("delivery_country")
+        private String deliveryCountry;
+
+        @JsonProperty("delivery_country_code")
+        private String deliveryCountryCode;
+
+        @JsonProperty("delivery_point_id")
+        private String deliveryPointId;
+
+        @JsonProperty("delivery_point_name")
+        private String deliveryPointName;
+
+        @JsonProperty("delivery_point_address")
+        private String deliveryPointAddress;
+
+        @JsonProperty("delivery_point_postcode")
+        private String deliveryPointPostcode;
+
+        @JsonProperty("delivery_point_city")
+        private String deliveryPointCity;
+
+        @JsonProperty("invoice_fullname")
+        private String invoiceFullname;
+
+        @JsonProperty("invoice_company")
+        private String invoiceCompany;
+
+        @JsonProperty("invoice_nip")
+        private String invoiceNip;
+
+        @JsonProperty("invoice_address")
+        private String invoiceAddress;
+
+        @JsonProperty("invoice_postcode")
+        private String invoicePostcode;
+
+        @JsonProperty("invoice_city")
+        private String invoiceCity;
+
+        @JsonProperty("invoice_state")
+        private String invoiceState;
+
+        @JsonProperty("invoice_country")
+        private String invoiceCountry;
+
+        @JsonProperty("invoice_country_code")
+        private String invoiceCountryCode;
+
+        @JsonProperty("want_invoice")
+        private String wantInvoice;
+
+        @JsonProperty("extra_field_1")
+        private String extraField1;
+
+        @JsonProperty("extra_field_2")
+        private String extraField2;
+
+        @JsonProperty("custom_extra_fields")
+        private Map<String, Object> customExtraFields;
+
+        @JsonProperty("order_page")
+        private String orderPage;
+
+        @JsonProperty("pick_state")
+        private Integer pickState;
+
+        @JsonProperty("pack_state")
+        private Integer packState;
+
+        @JsonProperty("star")
+        private Integer star;
+
+        @JsonProperty("commission")
+        private Commission commission;
+
+        @JsonProperty("connect_data")
+        private ConnectData connectData;
+
+        @JsonProperty("products")
+        private List<OrderProductBaselinker> products;
 }
