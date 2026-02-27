@@ -31,6 +31,8 @@ import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.*;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.database.model;
+package pl.thinkdata.droptop.database.model.product;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import pl.thinkdata.droptop.api.model.Category;
 import pl.thinkdata.droptop.baselinker.model.BaselinkerExportLog;
+import pl.thinkdata.droptop.database.model.ProductOfferLog;
 
 import java.util.Comparator;
 import java.util.List;

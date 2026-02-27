@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import pl.thinkdata.droptop.api.dto.catalog.ProductFromXml;
 import pl.thinkdata.droptop.api.utils.CategoryGeneratorUtils;
 import pl.thinkdata.droptop.common.service.ImageService;
-import pl.thinkdata.droptop.database.model.GpsrData;
-import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.product.GpsrData;
+import pl.thinkdata.droptop.database.model.product.Product;
 
 @Component
 @RequiredArgsConstructor

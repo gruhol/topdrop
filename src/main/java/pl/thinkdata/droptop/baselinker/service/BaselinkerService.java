@@ -1,24 +1,27 @@
 package pl.thinkdata.droptop.baselinker.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.EmptyRequest;
 import pl.thinkdata.droptop.baselinker.dto.GetPriceGroupsResponse;
 import pl.thinkdata.droptop.baselinker.dto.Inventory;
 import pl.thinkdata.droptop.baselinker.dto.PriceGroupBaseLinker;
+import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersRequest;
+import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.PriceGroup;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.ProductPriceUpdate;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPrice;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.*;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.database.model.Product;
-import pl.thinkdata.droptop.database.model.SyncStatus;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 
 import java.util.List;
 
-import static pl.thinkdata.droptop.database.model.SyncStatus.PRICE_STOCK_UPDATE;
-import static pl.thinkdata.droptop.database.model.SyncStatus.PRICE_UPDATE;
+import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_STOCK_UPDATE;
+import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_UPDATE;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class BaselinkerService {
     private final ProductRepository productRepository;
     private final UpdateInventoryProductsPricesBaselinkerService updateInventoryProductsPricesBaselinkerService;
     private final UpdateInventoryProductsStockBaselinkerService updateInventoryProductsStockBaselinkerService;
+    private final GetOrdersBaselinkerService getOrdersBaselinkerService;
 
 
     public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
@@ -76,6 +80,13 @@ public class BaselinkerService {
                         .toList())
                 .build());
         return updateInventoryProductsStockBaselinkerService.sendRequest(request);
+    }
+
+    public GetOrdersResponse getOrders() throws JsonProcessingException {
+        GetOrdersResponse getOrdersResponse = getOrdersBaselinkerService.sendRequest(new GetOrdersRequest());
+        if (getOrdersResponse.getStatus().equals("Success")) {
+            getOrdersResponse.getOrders().forEach(order -> {})
+        }
     }
 
     private ProductPriceUpdate mapToProductPriceUpdate(Product product, GetPriceGroupsResponse priceGroups) {

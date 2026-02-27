@@ -2,7 +2,7 @@ package pl.thinkdata.droptop.baselinker.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.product.Product;
 
 import java.time.LocalDateTime;
 

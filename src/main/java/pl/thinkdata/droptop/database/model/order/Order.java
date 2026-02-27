@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.baselinker.model;
+package pl.thinkdata.droptop.database.model.order;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,6 +7,7 @@ import pl.thinkdata.droptop.baselinker.dto.order.InvoiceInfoBaselinker;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,13 +50,13 @@ public class Order {
     private boolean confirmed;
 
     @Column(name = "date_confirmed")
-    private Instant dateConfirmed;
+    private LocalDateTime dateConfirmed;
 
     @Column(name = "date_add")
-    private Instant dateAdd;
+    private LocalDateTime dateAdd;
 
     @Column(name = "date_in_status")
-    private Instant dateInStatus;
+    private LocalDateTime dateInStatus;
 
     @Column(name = "user_login", length = 100)
     private String userLogin;

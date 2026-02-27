@@ -5,8 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import pl.thinkdata.droptop.database.model.Product;
-import pl.thinkdata.droptop.database.model.SyncStatus;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 
 import java.util.Collection;
 import java.util.List;

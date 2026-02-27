@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.baselinker.model;
+package pl.thinkdata.droptop.database.model.order;
 
 import jakarta.persistence.*;
 import lombok.*;

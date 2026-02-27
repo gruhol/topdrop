@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.model.BaselinkerExportLog;
 import pl.thinkdata.droptop.baselinker.repository.BaselinkerExportLogRepository;
-import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.product.Product;
 
 import java.time.LocalDateTime;
 

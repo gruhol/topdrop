@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.database.model;
+package pl.thinkdata.droptop.database.model.product;
 
 public enum SyncStatus {
     NEW,

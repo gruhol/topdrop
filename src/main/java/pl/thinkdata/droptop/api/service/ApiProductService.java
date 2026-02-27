@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.product.Product;
 
 import java.util.List;
 

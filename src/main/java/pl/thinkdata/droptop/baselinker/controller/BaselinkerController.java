@@ -29,7 +29,7 @@ public class BaselinkerController {
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final BaselinkerService baselinkerService;
-    private final GetOrdersBaselinkerService getOrdersBaselinkerService;
+
 
     @GetMapping("/send/product/{ean}")
     public String sendProductToBaseLinker(@PathVariable(value = "ean", required = true) String ean, Model model) {
@@ -100,7 +100,8 @@ public class BaselinkerController {
 
     @GetMapping("/get/orders")
     public String getOrders(Model model) throws JsonProcessingException {
-        GetOrdersResponse result = getOrdersBaselinkerService.sendRequest(new GetOrdersRequest());
+
+        GetOrdersResponse result = baselinkerService.getOrders();
 
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);

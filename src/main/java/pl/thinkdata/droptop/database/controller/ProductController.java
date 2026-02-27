@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
-import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.product.Product;
 import pl.thinkdata.droptop.database.service.ProductService;
 
 @Controller

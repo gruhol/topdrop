@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class ProductMapper {
 
-    public static Product map(pl.thinkdata.droptop.database.model.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
+    public static Product map(pl.thinkdata.droptop.database.model.product.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
         String defultPriceGroupId = inventory.getDefaultPriceGroup().toString();
         String wholesalePriceId = priceGroups.stream()
                 .filter(g -> g.getName().equals("hurtowa"))
@@ -67,7 +67,7 @@ public class ProductMapper {
                 .build();
     }
 
-    private static TextFields createTextFields(pl.thinkdata.droptop.database.model.Product product) {
+    private static TextFields createTextFields(pl.thinkdata.droptop.database.model.product.Product product) {
         TextFields textFields = new TextFields();
         textFields.setName(product.getTitle());
         textFields.setDescription(product.getDescription());

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockRequest;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.database.model.Product;
-import pl.thinkdata.droptop.database.model.SyncStatus;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 
 import java.util.List;
 import java.util.Optional;

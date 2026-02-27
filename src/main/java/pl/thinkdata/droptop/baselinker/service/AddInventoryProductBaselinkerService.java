@@ -12,8 +12,8 @@ import pl.thinkdata.droptop.baselinker.dto.*;
 import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.database.model.Product;
-import pl.thinkdata.droptop.database.model.SyncStatus;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,7 +37,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
 
 
     public AddProductResponse sendProduct(String ean) {
-        pl.thinkdata.droptop.database.model.Product product = productRepository.findByEan(ean)
+        Product product = productRepository.findByEan(ean)
                 .filter(p -> p.getSyncStatus().equals(SyncStatus.NEW) || p.getSyncStatus().equals(SyncStatus.TO_UPDATE))
                 .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu do aktualizacji"));
 
