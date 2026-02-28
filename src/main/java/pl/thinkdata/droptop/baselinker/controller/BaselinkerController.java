@@ -18,6 +18,7 @@ import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerServ
 import pl.thinkdata.droptop.baselinker.service.BaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.GetOrdersBaselinkerService;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
+import pl.thinkdata.droptop.database.model.order.Order;
 
 import java.util.List;
 
@@ -101,7 +102,7 @@ public class BaselinkerController {
     @GetMapping("/get/orders")
     public String getOrders(Model model) throws JsonProcessingException {
 
-        GetOrdersResponse result = baselinkerService.getOrders();
+        List<Order> result = baselinkerService.getOrders();
 
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);

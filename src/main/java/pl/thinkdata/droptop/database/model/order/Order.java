@@ -2,11 +2,8 @@ package pl.thinkdata.droptop.database.model.order;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pl.thinkdata.droptop.baselinker.dto.order.DeliveryInfoBaselinker;
-import pl.thinkdata.droptop.baselinker.dto.order.InvoiceInfoBaselinker;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,10 +83,10 @@ public class Order {
     private BigDecimal paymentDone;
 
     @Embedded
-    private DeliveryInfoBaselinker delivery;
+    private DeliveryInfo delivery;
 
     @Embedded
-    private InvoiceInfoBaselinker invoice;
+    private InvoiceInfo invoice;
 
     @Column(name = "extra_field_1", columnDefinition = "TEXT")
     private String extraField1;
@@ -111,5 +108,16 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
+    @Setter(AccessLevel.NONE)
     private List<OrderProduct> products = new ArrayList<>();
+
+    public void addProduct(OrderProduct product) {
+        products.add(product);
+        product.setOrder(this);
+    }
+
+    public void setProducts(List<OrderProduct> products) {
+        this.products.clear();
+        products.forEach(this::addProduct);
+    }
 }

@@ -15,9 +15,13 @@ import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateIn
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.*;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
+import pl.thinkdata.droptop.database.mapper.OrderMapper;
+import pl.thinkdata.droptop.database.model.order.Order;
 import pl.thinkdata.droptop.database.model.product.Product;
 import pl.thinkdata.droptop.database.model.product.SyncStatus;
+import pl.thinkdata.droptop.database.repository.OrderRepository;
 
+import java.util.Collections;
 import java.util.List;
 
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_STOCK_UPDATE;
@@ -35,6 +39,8 @@ public class BaselinkerService {
     private final UpdateInventoryProductsPricesBaselinkerService updateInventoryProductsPricesBaselinkerService;
     private final UpdateInventoryProductsStockBaselinkerService updateInventoryProductsStockBaselinkerService;
     private final GetOrdersBaselinkerService getOrdersBaselinkerService;
+    private final OrderMapper orderMapper;
+    private final OrderRepository orderRepository;
 
 
     public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
@@ -82,11 +88,15 @@ public class BaselinkerService {
         return updateInventoryProductsStockBaselinkerService.sendRequest(request);
     }
 
-    public GetOrdersResponse getOrders() throws JsonProcessingException {
+    public List<Order> getOrders() throws JsonProcessingException {
         GetOrdersResponse getOrdersResponse = getOrdersBaselinkerService.sendRequest(new GetOrdersRequest());
-        if (getOrdersResponse.getStatus().equals("Success")) {
-            getOrdersResponse.getOrders().forEach(order -> {})
+        if (getOrdersResponse.getStatus().equals("SUCCESS")) {
+            List<Order> orders = getOrdersResponse.getOrders().stream()
+                    .map(orderMapper::map)
+                    .toList();
+            return orderRepository.saveAll(orders);
         }
+        return Collections.emptyList();
     }
 
     private ProductPriceUpdate mapToProductPriceUpdate(Product product, GetPriceGroupsResponse priceGroups) {

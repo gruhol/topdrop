@@ -1,4 +1,4 @@
-package pl.thinkdata.droptop.baselinker.dto.order;
+package pl.thinkdata.droptop.database.model.order;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class InvoiceInfoBaselinker {
+public class InvoiceInfo {
 
     @Column(name = "invoice_fullname", length = 150)
     private String fullname;
