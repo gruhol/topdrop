@@ -1,52 +1,177 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="pl">
 <head>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Raport Importów</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
-</head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e94560;
+            --surface: #16213e;
+        }
 
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+            color: #2d3748;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--surface));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header .page-label {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-card .card-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8ecf0;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .products-table th {
+            background: #f8fafc;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            border: none;
+            padding: 0.85rem 1rem;
+            white-space: nowrap;
+        }
+
+        .products-table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            font-size: 0.88rem;
+            border-color: #f0f4f8;
+        }
+
+        .products-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .counter-badge {
+            background: rgba(255,255,255,0.15);
+            border-radius: 50px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.5px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.88rem;
+            color: #4a5568;
+        }
+
+        .info-card .info-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+        }
+    </style>
+</head>
 <body>
 
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <th:block th:insert="~{database/fragments/menu :: menu}"></th:block>
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="container">
+        <div>
+            <div class="page-label">Import</div>
+            <h1 class="mb-0 fw-bold">Raport Importów</h1>
+            <small class="opacity-50 counter-badge mt-2 d-inline-block">
+                <i class="bi bi-arrow-repeat me-1"></i>
+                Historia importów
+            </small>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- MENU -->
+    <div th:replace="~{database/fragments/menu :: menu}"></div>
+
+    <!-- INFO -->
+    <div class="info-card d-flex gap-4 flex-wrap">
+        <div>
+            <div class="info-label">Ostatnia aktualizacja produktów</div>
+            <div class="fw-semibold" th:text="${#temporals.format(lastUpdateProduct, 'yyyy-MM-dd HH:mm')}"></div>
+        </div>
+        <div>
+            <div class="info-label">Ostatnia aktualizacja stanów</div>
+            <div class="fw-semibold" th:text="${#temporals.format(lastUpdateStock, 'yyyy-MM-dd HH:mm')}"></div>
         </div>
     </div>
 
-    <h1>Lista importów</h1>
-    <div class="row">
-        <div class="col">
-            <p>Ostatnie aktualizacja produktów: <span th:text="${#temporals.format(lastUpdateProduct, 'yyyy-MM-dd HH:mm')}"></span></p>
-            <p>Ostatnie aktualizacja stanów: <span th:text="${#temporals.format(lastUpdateStock, 'yyyy-MM-dd HH:mm')}"></span></p>
+    <!-- TABLE -->
+    <div class="section-card">
+        <div class="card-header">
+            <i class="bi bi-table"></i> Lista importów
         </div>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table">
-            <tr>
-                <td>ID</td>
-                <td>Add products</td>
-                <td>Update products</td>
-                <td>Type import</td>
-                <td>Date</td>
-                <td>Status</td>
-                <td>Errors</td>
-            </tr>
-            <tr th:each="raport : ${raports}">
-                <td th:text="${raport.id}"></td>
-                <td th:text="${raport.importAddedRecord}"></td>
-                <td th:text="${raport.importUpdatedRecord}"></td>
-                <td th:text="${raport.importType}"></td>
-                <td th:text="${#temporals.format(raport.importDate, 'yyyy-MM-dd HH:mm')}"></td>
-                <td th:text="${raport.importStatus}"></td>
-                <td th:text="${raport.importErrorMessage}"></td>
-            </tr>
-        </table>
+        <div class="table-responsive">
+            <table class="table products-table mb-0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Dodane produkty</th>
+                    <th>Zaktualizowane produkty</th>
+                    <th>Typ importu</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Błędy</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="raport : ${raports}">
+                    <td class="text-muted fw-semibold" th:text="${raport.id}"></td>
+                    <td th:text="${raport.importAddedRecord}"></td>
+                    <td th:text="${raport.importUpdatedRecord}"></td>
+                    <td th:text="${raport.importType}"></td>
+                    <td th:text="${#temporals.format(raport.importDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${raport.importStatus}"></td>
+                    <td th:text="${raport.importErrorMessage}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

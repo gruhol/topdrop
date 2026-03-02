@@ -1,80 +1,228 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="pl">
 <head>
     <meta charset="utf-8"/>
-    <title>Baza produktów</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
-</head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Wyniki wyszukiwania</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e94560;
+            --surface: #16213e;
+        }
 
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+            color: #2d3748;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--surface));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header .page-label {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-card .card-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8ecf0;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .products-table th {
+            background: #f8fafc;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            border: none;
+            padding: 0.85rem 1rem;
+            white-space: nowrap;
+        }
+
+        .products-table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            font-size: 0.88rem;
+            border-color: #f0f4f8;
+        }
+
+        .products-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .search-box {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            padding: 0.5rem 1rem;
+            width: 280px;
+        }
+
+        .search-box::placeholder { color: rgba(255,255,255,0.5); }
+        .search-box:focus {
+            outline: none;
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.4);
+            color: white;
+        }
+
+        .pagination .page-link {
+            border-radius: 8px !important;
+            margin: 0 2px;
+            color: #4a5568;
+            border-color: #e2e8f0;
+            font-size: 0.85rem;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #cbd5e0;
+        }
+
+        .counter-badge {
+            background: rgba(255,255,255,0.15);
+            border-radius: 50px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
 <body>
 
-<div class="container">
-    <h1>Wynik wyszukiwania dla: <span th:text="${keywords}"></span></h1>
-    <div class="row">
-        <div class="col"><p>Wyszukano produktów: <span th:text="${products.totalElements}"></span></p></div>
-        <div class="col">
-            <form th:action="@{/search}">
-                <input type="text" name="keywords" class="form-control form-control-solid" placeholder="Szukaj..." id="generalSearch">
-            </form>
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="page-label">Wyszukiwanie</div>
+                <h1 class="mb-0 fw-bold">Wyniki dla: <span th:text="${keywords}"></span></h1>
+                <small class="opacity-50 counter-badge mt-2 d-inline-block">
+                    <i class="bi bi-box-seam me-1"></i>
+                    Produktów: <span th:text="${products.totalElements}">0</span>
+                </small>
+            </div>
+            <div>
+                <form th:action="@{/search}" class="d-flex gap-2">
+                    <input type="text" name="keywords" class="search-box"
+                           placeholder="&#x1F50D; Szukaj produktu..." id="generalSearch">
+                    <button type="submit" class="btn btn-light btn-sm px-3">Szukaj</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- MENU -->
+    <div th:replace="~{database/fragments/menu :: menu}"></div>
+
+    <div class="section-card">
+        <div class="card-header">
+            <i class="bi bi-table"></i> Lista produktów
+        </div>
+        <div class="table-responsive">
+            <table class="table products-table mb-0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>EAN</th>
+                    <th>ISBN</th>
+                    <th>Tytuł</th>
+                    <th>Status</th>
+                    <th>Wydawnictwo</th>
+                    <th>Typ</th>
+                    <th>Cena</th>
+                    <th>VAT</th>
+                    <th>Rabat %</th>
+                    <th>Cena hurtowa netto</th>
+                    <th>Cena hurtowa brutto</th>
+                    <th>Stan</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products.content}">
+                    <td class="text-muted fw-semibold" th:text="${product.id}"></td>
+                    <td th:text="${product.ean}"></td>
+                    <td th:text="${product.isbn}"></td>
+                    <td th:text="${product.title}"></td>
+                    <td th:text="${product.status}"></td>
+                    <td th:text="${product.publisher}"></td>
+                    <td th:text="${product.type}"></td>
+                    <td th:text="${product.price}"></td>
+                    <td th:text="${product.vat}"></td>
+                    <td th:text="${product?.LatestOffer?.discountPercent} ?: '0'"></td>
+                    <td th:text="${product?.LatestOffer?.wholesaleNetPrice} ?: '0'"></td>
+                    <td th:text="${product?.LatestOffer?.wholesaleGrossPrice} ?: '0'"></td>
+                    <td th:text="${product?.LatestOffer?.stock} ?: '0'"></td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table">
-            <tr>
-                <td>ID</td>
-                <td>EAN</td>
-                <td>ISBN</td>
-                <td>Title</td>
-                <td>Status</td>
-                <td>Wydawnictwo</td>
-                <td>Typ</td>
-                <td>Cena</td>
-                <td>Vat</td>
-                <td>Rabat %</td>
-                <td>Cena hurtowa</td>
-                <td>Cena hurtowa brutto</td>
-                <td>Stan</td>
-            </tr>
-            <tr th:each="product : ${products.content}">
-                <td th:text="${product.id}"></td>
-                <td th:text="${product.ean}"></td>
-                <td th:text="${product.isbn}"></td>
-                <td th:text="${product.title}"></td>
-                <td th:text="${product.status}"></td>
-                <td th:text="${product.publisher}"></td>
-                <td th:text="${product.type}"></td>
-                <td th:text="${product.price}"></td>
-                <td th:text="${product.vat}"></td>
-                <td th:text="${product?.LatestOffer?.discountPercent} ?: '0'"></td>
-                <td th:text="${product?.LatestOffer?.wholesaleNetPrice} ?: '0'"></td>
-                <td th:text="${product?.LatestOffer?.wholesaleGrossPrice} ?: '0'"></td>
-                <td th:text="${product?.LatestOffer?.stock} ?: '0'"></td>
-            </tr>
-        </table>
-    </div>
+    <!-- PAGINACJA -->
+    <nav th:if="${totalPages > 1}">
+        <ul class="pagination justify-content-center flex-wrap gap-1">
 
-    <nav aria-label="Page navigation example" th:if="${totalPages > 1}">
-        <ul class="pagination">
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/search(keywords=${keywords}, pageNumber=${currentPage - 1}, size=${pageSize})}">Poprzednia</a>
+                <a class="page-link" th:href="@{/admin/search(keywords=${keywords}, pageNumber=${currentPage - 1}, size=${pageSize})}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
             </li>
 
             <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                 class="page-item"
-                th:classappend="${i} == ${currentPage} ? 'active'">
+                th:classappend="${i == currentPage} ? 'active'">
                 <a class="page-link"
                    th:href="@{/admin/search(keywords=${keywords}, pageNumber=${i}, size=${pageSize})}"
-                   th:text="${i + 1}">1</a>
-
+                   th:text="${i + 1}"></a>
             </li>
 
             <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/search(keywords=${keywords}, pageNumber=${currentPage + 1}, size=${pageSize})}">Następna</a>
+                <a class="page-link" th:href="@{/admin/search(keywords=${keywords}, pageNumber=${currentPage + 1}, size=${pageSize})}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
             </li>
+
         </ul>
     </nav>
+
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
