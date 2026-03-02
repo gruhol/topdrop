@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Zamówienie #' + ${order.orderId}">Zamówienie</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e94560;
+            --surface: #16213e;
+            --card-bg: #0f3460;
+            --text-muted: #8892b0;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+            color: #2d3748;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--surface));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header .order-id {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-card .card-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8ecf0;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #718096;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 160px;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            color: #2d3748;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .products-table th {
+            background: #f8fafc;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            border: none;
+            padding: 0.85rem 1rem;
+        }
+
+        .products-table td {
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
+            font-size: 0.88rem;
+            border-color: #f0f4f8;
+        }
+
+        .products-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        .product-attr {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-top: 2px;
+        }
+
+        .summary-row {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .summary-row td {
+            border-top: 2px solid #e2e8f0 !important;
+            padding: 1rem !important;
+        }
+
+        .star-icon {
+            color: #f6c90e;
+        }
+
+        .star-icon.empty {
+            color: #cbd5e0;
+        }
+
+        .comments-box {
+            background: #f8fafc;
+            border-left: 3px solid #667eea;
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.88rem;
+            color: #4a5568;
+        }
+
+        .payment-done {
+            color: #38a169;
+            font-weight: 600;
+        }
+
+        .confirmed-yes { color: #38a169; }
+        .confirmed-no  { color: #e53e3e; }
+    </style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="order-id">Zamówienie</div>
+                <h1 class="mb-0 fw-bold" th:text="'#' + ${order.orderId}">#000000</h1>
+                Źródło: <small class="opacity-50" th:text="${order.orderSource}"></small>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Gwiazdki -->
+                <div th:if="${order.star != null}">
+                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                        <i th:class="${i <= order.star} ? 'bi bi-star-fill star-icon fs-5' : 'bi bi-star star-icon empty fs-5'"></i>
+                    </th:block>
+                </div>
+                <!-- Status potwierdzenia -->
+                <span th:if="${order.confirmed}"
+                      class="status-badge bg-success text-white">
+                    <i class="bi bi-check-circle me-1"></i>Potwierdzone
+                </span>
+                <span th:unless="${order.confirmed}"
+                      class="status-badge bg-warning text-dark">
+                    <i class="bi bi-clock me-1"></i>Niepotwierdzone
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- 3 KOLUMNY -->
+    <div class="row mb-2">
+
+        <!-- KLIENT + PŁATNOŚĆ -->
+        <div class="col-lg-4 col-md-12">
+
+            <!-- KLIENT -->
+            <div class="section-card">
+                <div class="card-header">
+                    <i class="bi bi-person"></i> Klient
+                </div>
+                <div class="card-body p-0 px-3">
+                    <div class="info-row" th:if="${order.userLogin != null}">
+                        <span class="info-label">Login</span>
+                        <span class="info-value" th:text="${order.userLogin}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.email != null}">
+                        <span class="info-label">E-mail</span>
+                        <span class="info-value" th:text="${order.email}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.phone != null}">
+                        <span class="info-label">Telefon</span>
+                        <span class="info-value">
+                        <a th:href="'tel:' + ${order.phone}" th:text="${order.phone}"></a>
+                    </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PŁATNOŚĆ -->
+            <div class="section-card">
+                <div class="card-header">
+                    <i class="bi bi-credit-card"></i> Płatność
+                </div>
+                <div class="card-body p-0 px-3">
+                    <div class="info-row" th:if="${order.paymentMethod != null}">
+                        <span class="info-label">Metoda</span>
+                        <span class="info-value" th:text="${order.paymentMethod}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.paymentMethodCod != null}">
+                        <span class="info-label">Pobranie</span>
+                        <span class="info-value" th:text="${order.paymentMethodCod}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.paymentDone != null}">
+                        <span class="info-label">Zapłacono</span>
+                        <span class="info-value payment-done"
+                              th:text="${#numbers.formatDecimal(order.paymentDone, 1, 2)} + ' ' + ${order.currency}">
+                    </span>
+                    </div>
+                    <div class="info-row" th:if="${order.currency != null}">
+                        <span class="info-label">Waluta</span>
+                        <span class="info-value" th:text="${order.currency}"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- DOSTAWA -->
+        <div class="col-lg-4 col-md-6">
+            <div class="section-card" th:if="${order.delivery != null}">
+                <div class="card-header">
+                    <i class="bi bi-truck"></i> Dostawa
+                </div>
+                <div class="card-body p-0 px-3">
+                    <div class="info-row" th:if="${order.delivery.method != null}">
+                        <span class="info-label">Metoda</span>
+                        <span class="info-value" th:text="${order.delivery.method}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.delivery.price != null}">
+                        <span class="info-label">Koszt</span>
+                        <span class="info-value"
+                              th:text="${#numbers.formatDecimal(order.delivery.price, 1, 2)} + ' ' + ${order.currency}">
+                    </span>
+                    </div>
+                    <div class="info-row" th:if="${order.delivery.fullname != null}">
+                        <span class="info-label">Odbiorca</span>
+                        <span class="info-value" th:text="${order.delivery.fullname}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.delivery.address != null}">
+                        <span class="info-label">Adres</span>
+                        <span class="info-value" th:text="${order.delivery.address}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.delivery.city != null}">
+                        <span class="info-label">Miasto</span>
+                        <span class="info-value"
+                              th:text="${order.delivery.postcode} + ' ' + ${order.delivery.city}">
+                    </span>
+                    </div>
+                    <div class="info-row" th:if="${order.delivery.countryCode != null}">
+                        <span class="info-label">Kraj</span>
+                        <span class="info-value" th:text="${order.delivery.countryCode}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAKTURA -->
+        <div class="col-lg-4 col-md-6">
+            <div class="section-card" th:if="${order.invoice != null}">
+                <div class="card-header">
+                    <i class="bi bi-receipt"></i> Faktura
+                </div>
+                <div class="card-body p-0 px-3">
+                    <div class="info-row" th:if="${order.invoice.fullname != null}">
+                        <span class="info-label">Firma / Imię</span>
+                        <span class="info-value" th:text="${order.invoice.fullname}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.invoice.nip != null}">
+                        <span class="info-label">NIP</span>
+                        <span class="info-value" th:text="${order.invoice.nip}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.invoice.address != null}">
+                        <span class="info-label">Adres</span>
+                        <span class="info-value" th:text="${order.invoice.address}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.invoice.city != null}">
+                        <span class="info-label">Miasto</span>
+                        <span class="info-value"
+                              th:text="${order.invoice.postcode} + ' ' + ${order.invoice.city}">
+                    </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- KONIEC 3 KOLUMN -->
+
+    <div class="row">
+        <p th:text="'Liczba produktów: ' + ${order.products.size()}"></p>
+
+        <!-- LEWA KOLUMNA -->
+        <div class="col-lg-8">
+
+            <!-- PRODUKTY -->
+            <div class="section-card">
+                <div class="card-header">
+                    <i class="bi bi-box-seam"></i> Produkty
+                </div>
+                <div class="table-responsive">
+                    <table class="table products-table mb-0">
+                        <thead>
+                        <tr>
+                            <th>Produkt</th>
+                            <th class="text-center">Szt.</th>
+                            <th class="text-end">Cena jedn.</th>
+                            <th class="text-end">Wartość</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="product : ${order.products}">
+                            <td>
+                                <div class="product-name" th:text="${product.name}">Nazwa produktu</div>
+                                <div class="product-attr" th:if="${product.sku != null}">
+                                    SKU: <span th:text="${product.sku}"></span>
+                                </div>
+                                <div class="product-attr" th:if="${product.ean != null}">
+                                    EAN: <span th:text="${product.ean}"></span>
+                                </div>
+                                <div class="product-attr" th:if="${product.attributes != null}"
+                                     th:text="${product.attributes}"></div>
+                            </td>
+                            <td class="text-center fw-semibold" th:text="${product.quantity}">0</td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(product.priceBrutto, 1, 2)} + ' ' + ${order.currency}">0.00</td>
+                            <td class="text-end fw-semibold"
+                                th:text="${#numbers.formatDecimal(product.priceBrutto * product.quantity, 1, 2)} + ' ' + ${order.currency}">
+                                0.00
+                            </td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        <tr class="summary-row">
+                            <td colspan="2" class="text-end text-muted">Łącznie:</td>
+                            <td class="text-center fw-bold"
+                                th:text="${#aggregates.sum(order.products.![quantity])} + ' szt.'">
+                            </td>
+                            <td class="text-end fw-bold text-success"
+                                th:text="${#numbers.formatDecimal(#aggregates.sum(order.products.![priceBrutto * quantity]), 1, 2)} + ' ' + ${order.currency}">
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- KOMENTARZE -->
+            <div class="section-card" th:if="${order.userComments != null or order.adminComments != null}">
+                <div class="card-header">
+                    <i class="bi bi-chat-left-text"></i> Komentarze
+                </div>
+                <div class="card-body">
+                    <div th:if="${order.userComments != null}" class="mb-3">
+                        <div class="info-label mb-1">Komentarz klienta</div>
+                        <div class="comments-box" th:text="${order.userComments}"></div>
+                    </div>
+                    <div th:if="${order.adminComments != null}">
+                        <div class="info-label mb-1">Komentarz admina</div>
+                        <div class="comments-box" style="border-color: #e94560;" th:text="${order.adminComments}"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PRAWA KOLUMNA -->
+        <div class="col-lg-4">
+
+            <!-- SZCZEGÓŁY ZAMÓWIENIA -->
+            <div class="section-card">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> Szczegóły
+                </div>
+                <div class="card-body p-0 px-3">
+                    <div class="info-row">
+                        <span class="info-label">ID zamówienia</span>
+                        <span class="info-value" th:text="${order.orderId}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.shopOrderId != null}">
+                        <span class="info-label">ID sklepu</span>
+                        <span class="info-value" th:text="${order.shopOrderId}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.externalOrderId != null}">
+                        <span class="info-label">ID zewnętrzne</span>
+                        <span class="info-value" th:text="${order.externalOrderId}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.orderSource != null}">
+                        <span class="info-label">Źródło</span>
+                        <span class="info-value" th:text="${order.orderSource}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.orderSourceInfo != null}">
+                        <span class="info-label">Info źródła</span>
+                        <span class="info-value" th:text="${order.orderSourceInfo}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Data dodania</span>
+                        <span class="info-value"
+                              th:text="${#temporals.format(order.dateAdd, 'dd.MM.yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.dateConfirmed != null}">
+                        <span class="info-label">Data potwierdzenia</span>
+                        <span class="info-value"
+                              th:text="${#temporals.format(order.dateConfirmed, 'dd.MM.yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.dateInStatus != null}">
+                        <span class="info-label">Data w statusie</span>
+                        <span class="info-value"
+                              th:text="${#temporals.format(order.dateInStatus, 'dd.MM.yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.pickState != null}">
+                        <span class="info-label">Stan kompletacji</span>
+                        <span class="info-value" th:text="${order.pickState}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.packState != null}">
+                        <span class="info-label">Stan pakowania</span>
+                        <span class="info-value" th:text="${order.packState}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXTRA FIELDS -->
+            <div class="section-card"
+                 th:if="${order.extraField1 != null or order.extraField2 != null}">
+                <div class="card-header">
+                    <i class="bi bi-sliders"></i> Dodatkowe informacje
+                </div>
+                <div class="card-body p-0 px-3">
+                    <div class="info-row" th:if="${order.extraField1 != null}">
+                        <span class="info-label">Extra 1</span>
+                        <span class="info-value" th:text="${order.extraField1}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.extraField2 != null}">
+                        <span class="info-label">Extra 2</span>
+                        <span class="info-value" th:text="${order.extraField2}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.orderPage != null}">
+                        <span>Strona zamówienia</span><br>
+                        <span>
+                            <a th:href="${order.orderPage}" target="_blank" th:text="${order.orderPage}"></a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

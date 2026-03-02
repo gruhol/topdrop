@@ -1,22 +1,27 @@
 <div th:fragment="menu" xmlns:th="http://www.w3.org/1999/xhtml">
-    <nav  class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Menu</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <nav class="navbar navbar-expand-lg mb-4" style="background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 0.75rem 1.5rem;">
+        <a class="navbar-brand fw-bold" href="#" style="color: #1a1a2e; letter-spacing: 1px;">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>Panel
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/products">Produkty</a>
+                    <a class="nav-link" href="/admin/products"><i class="bi bi-box-seam me-1"></i>Produkty</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/import-product-raport">Importy</a>
+                    <a class="nav-link" href="/admin/orders"><i class="bi bi-arrow-down-circle me-1"></i>Zamówienia</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/import-product-raport"><i class="bi bi-arrow-down-circle me-1"></i>Importy</a>
                 </li>
             </ul>
+            <div class="d-flex gap-2">
+                <a href="/api/getproducts" class="btn btn-sm btn-outline-success"><i class="bi bi-cloud-download me-1"></i>Pobierz produkty</a>
+                <a href="/api/getstocks" class="btn btn-sm btn-outline-info"><i class="bi bi-stack me-1"></i>Pobierz stany</a>
+            </div>
         </div>
-        <form class="d-flex" role="search">
-            <a href="/api/getproducts" class="btn btn-outline-success mx-2">Pobierz nowe produkty</a>
-            <a href="/api/getstocks" class="btn btn-outline-info mx-2">Pobierz nowe stany</a>
-        </form>
     </nav>
 </div>

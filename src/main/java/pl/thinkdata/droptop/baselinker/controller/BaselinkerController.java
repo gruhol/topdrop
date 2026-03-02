@@ -30,6 +30,7 @@ public class BaselinkerController {
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final BaselinkerService baselinkerService;
+    private final ObjectMapper objectMapper;
 
 
     @GetMapping("/send/product/{ean}")
@@ -101,15 +102,8 @@ public class BaselinkerController {
 
     @GetMapping("/get/orders")
     public String getOrders(Model model) throws JsonProcessingException {
-
         List<Order> result = baselinkerService.getOrders();
-
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-
-        model.addAttribute("message", json);
+        model.addAttribute("message", "Pobrano: " + result.size() + " nowych zamówień." );
         return "database/alerts/alerts";
     }
-
-
 }

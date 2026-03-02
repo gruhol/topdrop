@@ -25,6 +25,8 @@ public class ProductController {
     public String getAllProduct(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size,
                                 Model model) {
+        if (pageNumber < 0) pageNumber = 0;
+
         Pageable pageable = PageRequest.of(pageNumber, size);
         Page<Product> products = productService.getProducts(pageable);
         model.addAttribute("products", products);

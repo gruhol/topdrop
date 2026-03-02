@@ -93,6 +93,7 @@ public class BaselinkerService {
         if (getOrdersResponse.getStatus().equals("SUCCESS")) {
             List<Order> orders = getOrdersResponse.getOrders().stream()
                     .map(orderMapper::map)
+                    .filter(order -> orderRepository.findByOrderId(order.getOrderId()).isEmpty())
                     .toList();
             return orderRepository.saveAll(orders);
         }
