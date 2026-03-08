@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.thinkdata.droptop.database.model.order.Order;
+import pl.thinkdata.droptop.database.model.order.OrderProduct;
 import pl.thinkdata.droptop.database.service.OrderService;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -39,6 +42,16 @@ public class OrderController {
     public String getOrders(@PathVariable(value = "orderId", required = true) Long orderId, Model model) throws JsonProcessingException {
         Order order = orderService.getOrdersByOrderId(orderId);
         model.addAttribute("order", order );
+        return "database/order";
+    }
+
+    @GetMapping("order/send/{orderId}") //TODO
+    public String sendOrder(@PathVariable(value = "orderId", required = true) Long orderId, Model model) {
+        Order order = orderService.getOrdersByOrderId(orderId);
+        List<String> productsOrdered = order.getProducts().stream()
+                .map(OrderProduct::getEan)
+                .toList();
+
         return "database/order";
     }
 
