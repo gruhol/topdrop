@@ -89,7 +89,10 @@ public class BaselinkerService {
     }
 
     public List<Order> getOrders() throws JsonProcessingException {
-        GetOrdersResponse getOrdersResponse = getOrdersBaselinkerService.sendRequest(new GetOrdersRequest());
+        GetOrdersRequest params = GetOrdersRequest.builder()
+                .getUnconfirmedOrders(true)
+                .build();
+        GetOrdersResponse getOrdersResponse = getOrdersBaselinkerService.sendRequest(params);
         if (getOrdersResponse.getStatus().equals("SUCCESS")) {
             List<Order> orders = getOrdersResponse.getOrders().stream()
                     .map(orderMapper::map)

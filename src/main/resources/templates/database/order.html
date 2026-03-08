@@ -292,6 +292,14 @@
                         <span class="info-label">Kraj</span>
                         <span class="info-value" th:text="${order.delivery.countryCode}"></span>
                     </div>
+                    <div class="info-row" th:if="${order.delivery.pointId != null}">
+                        <span class="info-label">ID punktu dostawy</span>
+                        <span class="info-value" th:text="${order.delivery.pointId}"></span>
+                    </div>
+                    <div class="info-row" th:if="${order.delivery.pointName != null}">
+                        <span class="info-label">Punkt dostawy</span>
+                        <span class="info-value" th:text="${order.delivery.pointName}"></span>
+                    </div>
                 </div>
             </div>
         </div>

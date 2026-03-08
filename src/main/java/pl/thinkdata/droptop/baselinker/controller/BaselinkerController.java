@@ -10,13 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
-import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersRequest;
-import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
 import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.BaselinkerService;
-import pl.thinkdata.droptop.baselinker.service.GetOrdersBaselinkerService;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 import pl.thinkdata.droptop.database.model.order.Order;
 
