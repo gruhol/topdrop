@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import pl.thinkdata.droptop.api.service.CheckStockService;
+import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.order.Order;
 import pl.thinkdata.droptop.database.model.order.OrderProduct;
 import pl.thinkdata.droptop.database.service.OrderService;
@@ -23,6 +25,8 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final ProductRepository productRepository;
+    private final CheckStockService checkStockService;
 
     @GetMapping("/orders")
     public String getOrders(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
@@ -51,6 +55,10 @@ public class OrderController {
         List<String> productsOrdered = order.getProducts().stream()
                 .map(OrderProduct::getEan)
                 .toList();
+        List<Long> productInDatabase = productRepository.findByEanIn(productsOrdered).stream()
+                .map(lastOffer -> lastOffer.getLatestOffer().getSupplierId())
+                .toList();
+        boolean b = checkStockService.checkStockFromApi(productInDatabase);
 
         return "database/order";
     }

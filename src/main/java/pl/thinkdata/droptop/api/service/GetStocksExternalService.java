@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 
+import static java.util.Objects.isNull;
 import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
 import static pl.thinkdata.droptop.common.utils.PlatonXMLGenerator.*;
 
@@ -26,8 +27,11 @@ public class GetStocksExternalService extends BaseExternalService implements Ext
     @Override
     public PlatonResponse get(GetStocksDto getStocksDto) {
         String orderId = getTransactionId(getStocksDto.getTransactionNumber());
-        String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, orderId); //00000000-0000-2025-0426-000000000001
-        String parameters = prepareExportParameters(getStocksDto.getPageSize(),getStocksDto.getPageNo(), getStocksDto.getLastChangeDate());
+        String operationInfo = prepareOperationInfo("getStocks", platonApiMethodGetStocks, platonUser, platonPassword, orderId);
+        String parameters  = isNull(getStocksDto.getItems())
+                ? prepareExportParameters(getStocksDto.getPageSize(), getStocksDto.getPageNo(), getStocksDto.getLastChangeDate())
+                : prepareExportParametersWithItems(getStocksDto.getItems());
+
         String request = prepareRequest(operationInfo, parameters);
 
         try {

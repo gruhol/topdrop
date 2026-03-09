@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
-import pl.thinkdata.droptop.database.model.ProductOfferLog;
 
 import java.util.List;
 
@@ -19,22 +18,21 @@ public class CheckStockService {
     PlatonResponse data;
 
     @Transactional
-    public boolean getStockFromApi() {
+    public boolean checkStockFromApi(List<Long> productsSupplierIds) {
 
-            GetStocksDto getStocksDto = GetStocksDto.builder()
-                    .transactionNumber(1)
-                    .build();
-            this.data = getStockService.get(getStocksDto);
-
+            this.data = getStockService.get(getStocksDto(productsSupplierIds));
             if (data.getStock().getRecords() != null && !data.getStock().getRecords().isEmpty()) {
-                List<ProductOfferLog> stockToSave = data.getStock().getRecords().stream()
+                return data.getStock().getRecords().stream()
                         .map(record -> map(record, "platon"))
-                        .toList();
-
+                        .allMatch(stock -> stock.getStock() > 0);
             }
-
-            //TODO
-
         return false;
+    }
+
+    private GetStocksDto getStocksDto(List<Long> productsSupplierIds) {
+        return GetStocksDto.builder()
+                .transactionNumber(1)
+                .items(productsSupplierIds)
+                .build();
     }
 }
