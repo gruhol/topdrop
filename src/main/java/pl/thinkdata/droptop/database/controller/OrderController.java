@@ -11,22 +11,39 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
+import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
+import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
 import pl.thinkdata.droptop.api.service.CheckStockService;
+import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
+import pl.thinkdata.droptop.database.dto.AddressNumber;
 import pl.thinkdata.droptop.database.model.order.Order;
 import pl.thinkdata.droptop.database.model.order.OrderProduct;
 import pl.thinkdata.droptop.database.service.OrderService;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+
+import static org.apache.commons.lang3.Validate.notNull;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("admin")
 public class OrderController {
 
+    public static final int PACZKOMAT = 16;
+    public static final int KURIER = 42;
+    public static final int COMPANY = 0;
+    public static final int COSTUMER = 1;
+    public static final String ACCOUNT_NUMBER = "30418";
     private final OrderService orderService;
     private final ProductRepository productRepository;
     private final CheckStockService checkStockService;
+    private final GetOrderDropExternalService getOrderDropExternalService;
 
     @GetMapping("/orders")
     public String getOrders(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
@@ -58,9 +75,59 @@ public class OrderController {
         List<Long> productInDatabase = productRepository.findByEanIn(productsOrdered).stream()
                 .map(lastOffer -> lastOffer.getLatestOffer().getSupplierId())
                 .toList();
-        boolean b = checkStockService.checkStockFromApi(productInDatabase);
+        if (checkStockService.checkStockFromApi(productInDatabase)) {
+            DeliveryPoint deliveryPoint = prepareDeliveryPoint(order);
+            List<OrderLine> orderLines = prepareOrderLine(order);
+
+            OrderDropDto orderDropDto = OrderDropDto.builder()
+                    .orderNumber(order.getOrderId())
+                    .orderDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                    .accountNumber(ACCOUNT_NUMBER)
+                    .deliveryPoint(deliveryPoint)
+                    .orderLine(orderLines)
+                    .build();
+
+            PlatonResponse data = getOrderDropExternalService.get(orderDropDto);
+        }
+
 
         return "database/order";
+    }
+
+    private List<OrderLine> prepareOrderLine(Order order) {
+        return order.getProducts().stream().map(product ->
+                OrderLine.builder()
+                    .supplierItemCode(product.getEan())
+                    .orderedQuantity(product.getQuantity())
+                    .build()
+            ).toList();
+    }
+
+    private DeliveryPoint prepareDeliveryPoint(Order order) {
+        AddressNumber address = AddressNumber.of(order.getDelivery().getPointAddress());
+        int deliveryMethod = isPaczkomat(order.getDelivery().getPointName()) ? PACZKOMAT : KURIER;
+
+        return DeliveryPoint.builder()
+                .customerKind(order.getInvoice().isWantInvoice() ? COMPANY : COSTUMER)
+                .name(order.getUserLogin())
+                .surname(order.getDelivery().getFullname())
+                .street(address.street())
+                .homeNumber(address.houseNumber())
+                .flatNumber(address.flatNumber())
+                .cityName(order.getDelivery().getCity())
+                .postCode(order.getDelivery().getPostcode())
+                .post(order.getDelivery().getCity())
+                .email(order.getEmail())
+                .phone(order.getPhone())
+                .country(order.getDelivery().getCountry())
+                .deliveryMethod(deliveryMethod)
+                .machineName(order.getDelivery().getPointId())
+                .build();
+    }
+
+    private boolean isPaczkomat(String input) {
+        String firstWord = input.trim().split("\\s+")[0];
+        return firstWord.equalsIgnoreCase("Paczkomat");
     }
 
 }

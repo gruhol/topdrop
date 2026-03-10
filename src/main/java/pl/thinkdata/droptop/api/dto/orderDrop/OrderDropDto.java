@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class OrderDropDto {
-    private String orderNumber;
+    private Long orderNumber;
     private String orderDate;
     private String orderRemarks;
     private String accountNumber;
