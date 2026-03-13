@@ -299,7 +299,7 @@ public class PlatonApiController {
                 .build();
 
         OrderDropDto orderDropDto = OrderDropDto.builder()
-                .orderNumber(idOrder)
+                .orderNumber(Long.valueOf(idOrder))
                 .orderDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .accountNumber("30418")
                 .deliveryPoint(deliveryPoint)

@@ -197,6 +197,14 @@
     </div>
 </div>
 
+<div th:if="${successMessage}" class="container mt-3">
+    <div id="orderSuccessAlert" class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Zamknij"></button>
+    </div>
+</div>
+
 <div class="container pb-5">
 
     <!-- 3 KOLUMNY -->
@@ -496,5 +504,13 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const alertEl = document.getElementById('orderSuccessAlert');
+    if (alertEl) {
+        setTimeout(() => {
+            bootstrap.Alert.getOrCreateInstance(alertEl).close();
+        }, 5000);
+    }
+</script>
 </body>
 </html>

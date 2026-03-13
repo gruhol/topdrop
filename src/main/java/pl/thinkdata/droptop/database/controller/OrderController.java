@@ -25,10 +25,7 @@ import pl.thinkdata.droptop.database.service.OrderService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
-
-import static org.apache.commons.lang3.Validate.notNull;
 
 @Controller
 @RequiredArgsConstructor
@@ -69,6 +66,7 @@ public class OrderController {
     @GetMapping("order/send/{orderId}") //TODO
     public String sendOrder(@PathVariable(value = "orderId", required = true) Long orderId, Model model) {
         Order order = orderService.getOrdersByOrderId(orderId);
+        model.addAttribute("order", order);
         List<String> productsOrdered = order.getProducts().stream()
                 .map(OrderProduct::getEan)
                 .toList();
@@ -89,8 +87,7 @@ public class OrderController {
 
             PlatonResponse data = getOrderDropExternalService.get(orderDropDto);
         }
-
-
+        model.addAttribute("successMessage", "Zamówienie wysłane");
         return "database/order";
     }
 
