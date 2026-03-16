@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class GetInventoryBaselinkerService extends BaselinkerService implements BaselinkerSendable<GetInventoryResponse, EmptyRequest>{
+public class GetInventoryBaselinkerService extends BaselinkerWebClientService implements BaselinkerSendable<GetInventoryResponse, EmptyRequest>{
 
     protected String methodName;
 

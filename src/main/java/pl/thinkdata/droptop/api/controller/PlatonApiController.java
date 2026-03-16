@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.api.controller;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
@@ -30,12 +31,15 @@ import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.common.service.ImageService;
 import pl.thinkdata.droptop.database.model.*;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 import pl.thinkdata.droptop.database.repository.ImportRaportRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -74,10 +78,11 @@ public class PlatonApiController {
         return "api/get_products";
     }
 
+    @Transactional
     public int getStockFromApi(int pageSize) {
         int pageNumber = 1;
         int downloadCount = 0;
-        int total  = 0;
+        int total = 0;
         int totalStockSave = 0;
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
@@ -97,12 +102,23 @@ public class PlatonApiController {
                         .toList();
                 List<ProductOfferLog> productOfferLogs = productOfferLogRepository.saveAll(stockToSave);
 
-                List<Product> listProductUpdateStatus = productOfferLogs.stream()
-                        .map(ProductOfferLog::getProduct)
-                        .filter(Objects::nonNull)
-                        .peek(this::changeStatus)
-                        .toList();
-                productRepository.saveAll(listProductUpdateStatus);
+                Set<String> uniqueEans = productOfferLogs.stream()
+                        .map(ProductOfferLog::getProductEan)
+                        .collect(Collectors.toSet());
+
+                List<Product> products = productRepository.findByEanIn(uniqueEans);
+                List<ProductOfferLog> offers = productOfferLogRepository.findTop2OffersByEans(uniqueEans);
+
+                Map<String, List<ProductOfferLog>> offersByEan = offers.stream()
+                        .collect(Collectors.groupingBy(ProductOfferLog::getProductEan));
+
+                products.forEach(p -> {
+                    List<ProductOfferLog> productOffers = offersByEan.getOrDefault(p.getEan(), List.of());
+                    p.setOffers(productOffers);
+                });
+
+                products.forEach(this::changeStatus);
+                productRepository.saveAll(products);
                 totalStockSave += stockToSave.size();
             }
             total = Optional.ofNullable(data.getStock().getSummary())
@@ -161,7 +177,9 @@ public class PlatonApiController {
                 .map(Product::getEan)
                 .toList();
 
-        Set<String> findEanInBase = productRepository.findByEanIn(dowloadEans).stream()
+        Set<String> findEanInBase = IntStream.range(0, (dowloadEans.size() + 999) / 1000)
+                .mapToObj(i -> dowloadEans.subList(i * 1000, Math.min((i + 1) * 1000, dowloadEans.size())))
+                .flatMap(batch -> productRepository.findByEanIn(batch).stream())
                 .map(Product::getEan)
                 .collect(Collectors.toSet());
 
@@ -272,7 +290,7 @@ public class PlatonApiController {
                 .build();
 
         OrderDropDto orderDropDto = OrderDropDto.builder()
-                .orderNumber(idOrder)
+                .orderNumber(Long.valueOf(idOrder))
                 .orderDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .accountNumber("30418")
                 .deliveryPoint(deliveryPoint)

@@ -9,5 +9,5 @@ import lombok.*;
 @AllArgsConstructor
 public class AddProductRequest {
     private Product productDto;
-    private pl.thinkdata.droptop.database.model.Product product;
+    private pl.thinkdata.droptop.database.model.product.Product product;
 }

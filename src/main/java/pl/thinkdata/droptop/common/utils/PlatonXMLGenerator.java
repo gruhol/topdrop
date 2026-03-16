@@ -70,6 +70,31 @@ public class PlatonXMLGenerator {
         return encodeBase64(externalOperationParams);
     }
 
+    public static String prepareExportParametersWithItems(List<Long> items) {
+        StringBuilder rows = new StringBuilder();
+        for (Long item : items) {
+            rows.append("<row><Item>").append(item).append("</Item></row>");
+        }
+
+        String parametersTemplate = """
+                            <Export>
+                            <csItems>
+                            %s
+                            </csItems>
+                            </Export>
+                            """;
+
+        String parameters = String.format(parametersTemplate, rows);
+        String externalOperationParamsTemplate = """
+                    <ExternalOperationParams>
+                        <Params>%s</Params>
+                    </ExternalOperationParams>
+                    """;
+
+        String externalOperationParams = String.format(externalOperationParamsTemplate, encodeBase64(parameters));
+        return encodeBase64(externalOperationParams);
+    }
+
     public static String prepareDocumentOrder(OrderDropDto dto) {
         String orderHeader = prepareOrderHeader(dto);
         String deliveryPoint = prepareDeliveryPoint(dto.getDeliveryPoint());

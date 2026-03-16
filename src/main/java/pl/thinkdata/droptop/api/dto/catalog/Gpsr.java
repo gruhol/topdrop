@@ -1,9 +1,12 @@
 package pl.thinkdata.droptop.api.dto.catalog;
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+@Getter
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Gpsr {
 
@@ -11,7 +14,7 @@ public class Gpsr {
     private String name;
 
     @XmlElement(name = "c")
-    private String country;
+    private String countryCode;
 
     @XmlElement(name = "s")
     private String street;
@@ -27,4 +30,7 @@ public class Gpsr {
 
     @XmlElement(name = "p")
     private String city;
+
+    @XmlElement(name = "e")
+    private String email;
 }

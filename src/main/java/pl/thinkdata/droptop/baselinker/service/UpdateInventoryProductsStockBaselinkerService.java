@@ -6,18 +6,20 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockRequest;
-import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockResponse;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.database.model.SyncStatus;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UpdateInventoryProductsStockBaselinkerService
-        extends BaselinkerService
-        implements BaselinkerSendable<UpdateInventoryProductsStockResponse, UpdateInventoryProductsStockRequest> {
+        extends BaselinkerWebClientService
+        implements BaselinkerSendable<UpdateInventoryProductsStockAndPriceResponse, UpdateInventoryProductsStockRequest> {
 
     private final ProductRepository productRepository;
 
@@ -29,16 +31,17 @@ public class UpdateInventoryProductsStockBaselinkerService
     }
 
     @Override
-    public UpdateInventoryProductsStockResponse sendRequest(UpdateInventoryProductsStockRequest request) {
+    public UpdateInventoryProductsStockAndPriceResponse sendRequest(UpdateInventoryProductsStockRequest request) {
         try {
             String jsonParams = new ObjectMapper().writeValueAsString(request.getRequest());
             ResponseEntity<String> response = getDataFromWebClient(jsonParams);
             return Optional.ofNullable(response)
                     .map(res -> {
-                        UpdateInventoryProductsStockResponse updateInventoryStock = mapToResponse(res, UpdateInventoryProductsStockResponse.class);
+                        UpdateInventoryProductsStockAndPriceResponse updateInventoryStock = mapToResponse(res, UpdateInventoryProductsStockAndPriceResponse.class);
                         if(updateInventoryStock.getCounter() == request.getProducts().size()) {
-                            productRepository.findByEanIn(request.getProducts())
-                                    .forEach(prod -> prod.setSyncStatus(SyncStatus.SYNCED));
+                            List<Product> products = productRepository.findByEanIn(request.getProducts());
+                            products.forEach(prod -> prod.setSyncStatus(SyncStatus.SYNCED));
+                            productRepository.saveAll(products);
                         }
                         return updateInventoryStock;
                     })

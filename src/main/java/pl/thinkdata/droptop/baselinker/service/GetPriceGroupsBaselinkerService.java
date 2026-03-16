@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class GetPriceGroupsBaselinkerService extends BaselinkerService implements BaselinkerSendable<GetPriceGroupsResponse, EmptyRequest>{
+public class GetPriceGroupsBaselinkerService extends BaselinkerWebClientService implements BaselinkerSendable<GetPriceGroupsResponse, EmptyRequest>{
 
     protected String methodName;
 

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,4 +19,5 @@ public class GetStocksDto {
     private int pageNo;
     private LocalDateTime lastChangeDate;
     private int transactionNumber;
+    private List<Long> items;
 }

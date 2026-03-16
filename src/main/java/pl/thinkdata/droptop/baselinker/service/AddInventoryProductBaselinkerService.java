@@ -12,8 +12,8 @@ import pl.thinkdata.droptop.baselinker.dto.*;
 import pl.thinkdata.droptop.baselinker.mapper.ProductMapper;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
-import pl.thinkdata.droptop.database.model.Product;
-import pl.thinkdata.droptop.database.model.SyncStatus;
+import pl.thinkdata.droptop.database.model.product.Product;
+import pl.thinkdata.droptop.database.model.product.SyncStatus;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,13 +21,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AddInventoryProductBaselinkerService extends BaselinkerService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
+public class AddInventoryProductBaselinkerService extends BaselinkerWebClientService implements BaselinkerSendable<AddProductResponse, AddProductRequest> {
 
     private final ProductRepository productRepository;
     private final BaselinkerLogService baselinkerLogService;
     private final GetPriceGroupsBaselinkerService getPriceGroupsService;
     private final GetInventoryBaselinkerService getInventoryService;
-
     private final List<SyncStatus> newAndUpdateSyncStatus = Arrays.asList(SyncStatus.NEW, SyncStatus.TO_UPDATE);
     protected String methodName;
 
@@ -38,7 +37,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
 
 
     public AddProductResponse sendProduct(String ean) {
-        pl.thinkdata.droptop.database.model.Product product = productRepository.findByEan(ean)
+        Product product = productRepository.findByEan(ean)
                 .filter(p -> p.getSyncStatus().equals(SyncStatus.NEW) || p.getSyncStatus().equals(SyncStatus.TO_UPDATE))
                 .orElseThrow(() -> new IllegalArgumentException("Nie ma takiego produktu do aktualizacji"));
 
@@ -62,9 +61,9 @@ public class AddInventoryProductBaselinkerService extends BaselinkerService impl
     }
 
     @Transactional
-    public AddProductResponse sendProducts() throws NotFoundFileToExportException {
-        List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndSyncStatusIn(newAndUpdateSyncStatus);
-        //List<Product> productsToSend = productRepository.findTop100ByExportLogIsNullAndCategory_IdAndSyncStatusIn(143L,newAndUpdateSyncStatus); // only one category
+    public AddProductResponse  sendProducts() throws NotFoundFileToExportException {
+        //List<Product> productsToSend = productRepository.findTop100BySyncStatusIn(newAndUpdateSyncStatus);
+        List<Product> productsToSend = productRepository.findTop100ByCategory_IdAndSyncStatusIn(144L,newAndUpdateSyncStatus); // only one category
         Inventory inventory = getInventoryService.getDefaultInventory();
         GetPriceGroupsResponse priceGroups = getPriceGroupsService.sendRequest(new EmptyRequest());
 

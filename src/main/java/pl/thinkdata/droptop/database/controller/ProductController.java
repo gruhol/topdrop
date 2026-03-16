@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
-import pl.thinkdata.droptop.database.model.Product;
+import pl.thinkdata.droptop.database.model.product.Product;
 import pl.thinkdata.droptop.database.service.ProductService;
 
 @Controller
@@ -25,6 +25,8 @@ public class ProductController {
     public String getAllProduct(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
                                 @RequestParam(value = "size", required = false, defaultValue = "10") int size,
                                 Model model) {
+        if (pageNumber < 0) pageNumber = 0;
+
         Pageable pageable = PageRequest.of(pageNumber, size);
         Page<Product> products = productService.getProducts(pageable);
         model.addAttribute("products", products);

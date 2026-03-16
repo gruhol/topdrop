@@ -14,13 +14,13 @@ import java.util.Optional;
 
 public class ProductMapper {
 
-    public static Product map(pl.thinkdata.droptop.database.model.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
+    public static Product map(pl.thinkdata.droptop.database.model.product.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
         String defultPriceGroupId = inventory.getDefaultPriceGroup().toString();
-//        String wholesalePriceId = priceGroups.stream()
-//                .filter(g -> g.getName().equals("hurtowa"))
-//                .map(id -> id.getPriceGroupId().toString())
-//                .findFirst()
-//                .orElse(defultPriceGroupId);
+        String wholesalePriceId = priceGroups.stream()
+                .filter(g -> g.getName().equals("hurtowa"))
+                .map(id -> id.getPriceGroupId().toString())
+                .findFirst()
+                .orElse(defultPriceGroupId);
         
         String defaultWarehouse = inventory.getDefaultWarehouse();
         String inventoryId = inventory.getInventoryId().toString();
@@ -28,9 +28,9 @@ public class ProductMapper {
         Map<String, Double> prices = new HashMap<>();
         prices.put(defultPriceGroupId, Optional.ofNullable(product.getPrice())
                 .orElse(0.0));
-//        prices.put(wholesalePriceId, Optional.ofNullable(product.getLatestOffer())
-//                .map(ProductOfferLog::getWholesaleGrossPrice)
-//                .orElse(0.0));
+        prices.put(wholesalePriceId, Optional.ofNullable(product.getLatestOffer())
+                .map(ProductOfferLog::getWholesaleGrossPrice)
+                .orElse(0.0));
         Map<String, Integer> stock = new HashMap<>();
         stock.put(defaultWarehouse, Optional.ofNullable(product.getLatestOffer())
                 .map(ProductOfferLog::getStock)
@@ -67,7 +67,7 @@ public class ProductMapper {
                 .build();
     }
 
-    private static TextFields createTextFields(pl.thinkdata.droptop.database.model.Product product) {
+    private static TextFields createTextFields(pl.thinkdata.droptop.database.model.product.Product product) {
         TextFields textFields = new TextFields();
         textFields.setName(product.getTitle());
         textFields.setDescription(product.getDescription());
@@ -78,6 +78,21 @@ public class ProductMapper {
         reatures.put("series", product.getSeries());
         reatures.put("translator", product.getTranslator());
         reatures.put("releaseYear", product.getReleaseYear());
+        reatures.put("publisher", product.getPublisher());
+        reatures.put("coverType", product.getCoverType());
+        reatures.put("pagesNumber", String.valueOf(product.getPagesNumber()));
+        reatures.put("edition", String.valueOf(product.getEdition()));
+        reatures.put("approvalNumber", product.getApprovalNumber());
+        reatures.put("pcn", product.getPcn());
+        reatures.put("manufacturingCountryCode", product.getManufacturingCountryCode());
+        reatures.put("gpsr_contractorName", product.getGpsrSekcja().getContractorName());
+        reatures.put("gpsr_contractorCountryCode", product.getGpsrSekcja().getContractorCountryCode());
+        reatures.put("gpsr_street",  product.getGpsrSekcja().getStreet());
+        reatures.put("gpsr_houseNumber",  product.getGpsrSekcja().getHouseNumber());
+        reatures.put("gpsr_apartmentNumber", product.getGpsrSekcja().getApartmentNumber());
+        reatures.put("gpsr_postalCode",  product.getGpsrSekcja().getPostalCode());
+        reatures.put("gpsr_city", product.getGpsrSekcja().getCity());
+        reatures.put("gpsr_email", product.getGpsrSekcja().getEmail());
         textFields.setFeatures(reatures);
         return textFields;
     }
