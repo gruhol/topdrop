@@ -51,8 +51,6 @@ public class BaselinkerExportScheduled {
             } catch (Exception e) {
                 log.info("Nieoczekiwany błąd w zadaniu Baselinker export: {}", e.getMessage());
             }
-        } else {
-            log.info("Eksport is stop: {}", getCorrentDate());
         }
     }
 
@@ -77,8 +75,6 @@ public class BaselinkerExportScheduled {
                         .forEach(message::append);
             }
             log.info("Category export -> {} ", message);
-        } else {
-            log.info("Eksport category is stop: {}", getCorrentDate());
         }
     }
 
@@ -87,8 +83,6 @@ public class BaselinkerExportScheduled {
         if (sync_enabled) {
             UpdateProductInfo info = platonApiController.getProductsFromApi(10000);
             log.info("Inport produktów z Platon: nowe produty {}, zaaktualizowane: {}", info.getNewprod() ,info.getUpdate());
-        } else {
-            log.info("Import produktów wyłączony. Data: {}", getCorrentDate());
         }
     }
 
@@ -97,12 +91,10 @@ public class BaselinkerExportScheduled {
         if (sync_enabled) {
             int stockUpdateCount = platonApiController.getStockFromApi(10000);
             log.info("Inport stanów z Platon: {} nowych rekordów.", stockUpdateCount);
-        } else {
-            log.info("Import stanów wyłączony. Data: {}", getCorrentDate());
         }
     }
 
-    @Scheduled(cron = "0 10/10 * * * *", zone = "Europe/Warsaw")
+    //@Scheduled(cron = "0 10/10 * * * *", zone = "Europe/Warsaw")
     public void baselinkerEsportStock() {
         if (sync_enabled) {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendStockUpdate();
@@ -110,7 +102,7 @@ public class BaselinkerExportScheduled {
         }
     }
 
-    @Scheduled(cron = "0 5/10 * * * *", zone = "Europe/Warsaw")
+    //@Scheduled(cron = "0 5/10 * * * *", zone = "Europe/Warsaw")
     public void baselinkerEsportPrice() {
         if (sync_enabled) {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendPriceUpdate();
@@ -123,7 +115,6 @@ public class BaselinkerExportScheduled {
         if (result.getStatus().equals("SUCCESS")) {
             log.info("Utworzono o id: {} Data: {}", result.getProductId(), getCorrentDate());
         } else {
-
             log.info("Bład wysłania produktu o id: {} Data: {}, Error: {}", result.getProductId(), getCorrentDate(), result.getError_message());
         }
     }

@@ -1,6 +1,5 @@
 package pl.thinkdata.droptop.baselinker.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -15,7 +14,6 @@ import pl.thinkdata.droptop.baselinker.service.AddCategoryProductBaselinkerServi
 import pl.thinkdata.droptop.baselinker.service.AddInventoryProductBaselinkerService;
 import pl.thinkdata.droptop.baselinker.service.BaselinkerService;
 import pl.thinkdata.droptop.common.exception.NotFoundFileToExportException;
-import pl.thinkdata.droptop.database.model.order.Order;
 
 import java.util.List;
 
@@ -94,13 +92,6 @@ public class BaselinkerController {
     public String sendPriceUpdate(Model model) {
         UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendPriceUpdate();
         model.addAttribute("message", result.toString());
-        return "database/alerts/alerts";
-    }
-
-    @GetMapping("/get/orders")
-    public String getOrders(Model model) throws JsonProcessingException {
-        List<Order> result = baselinkerService.getOrders();
-        model.addAttribute("message", "Pobrano: " + result.size() + " nowych zamówień." );
         return "database/alerts/alerts";
     }
 }
