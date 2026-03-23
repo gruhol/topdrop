@@ -55,8 +55,22 @@ public class GetOrderDropExternalService extends BaseExternalService implements 
 
                 if (innerBase64 != null) {
                     String secondLevelDecoded = decodeBase64(innerBase64);
+                    String errorMessage = extractXMLByTag(secondLevelDecoded, "ErrorMessage");
+                    if (errorMessage != null) {
+                        orderSendLog.setStatus("ERROR");
+                        orderSendLog.setErrorMessage(errorMessage);
+                        orderSendLog.setResponse(secondLevelDecoded);
+                        orderSendLogRepository.save(orderSendLog);
+                        return createPlatonResponse(errorMessage);
+                    }
                     String hashresult = extractXMLByTag(secondLevelDecoded, RESULT);
                     result = decodeBase64(hashresult);
+                    if (result == null) {
+                        orderSendLog.setStatus("ERROR");
+                        orderSendLog.setErrorMessage(secondLevelDecoded);
+                        orderSendLogRepository.save(orderSendLog);
+                        return createPlatonResponse(secondLevelDecoded);
+                    }
                     StringReader reader = new StringReader(result);
                     orderSendLog.setStatus("SUCCESS");
                     orderSendLog.setResponse(result);
