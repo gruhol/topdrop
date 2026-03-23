@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface OrderSendLogRepository extends JpaRepository<OrderSendLog, Long> {
-    List<OrderSendLog> findByOrderNumber(Long orderNumber);
+    List<OrderSendLog> findByOrderNumberOrderByRequestDateDesc(Long orderNumber);
 }

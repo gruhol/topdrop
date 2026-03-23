@@ -21,6 +21,7 @@ import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.dto.AddressNumber;
 import pl.thinkdata.droptop.database.model.order.Order;
 import pl.thinkdata.droptop.database.model.order.OrderProduct;
+import pl.thinkdata.droptop.database.repository.OrderSendLogRepository;
 import pl.thinkdata.droptop.database.service.OrderService;
 
 import java.time.LocalDateTime;
@@ -41,6 +42,7 @@ public class OrderController {
     private final ProductRepository productRepository;
     private final CheckStockService checkStockService;
     private final GetOrderDropExternalService getOrderDropExternalService;
+    private final OrderSendLogRepository orderSendLogRepository;
 
     @GetMapping("/orders")
     public String getOrders(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
@@ -59,7 +61,8 @@ public class OrderController {
     @GetMapping("/order/{orderId}")
     public String getOrders(@PathVariable(value = "orderId", required = true) Long orderId, Model model) throws JsonProcessingException {
         Order order = orderService.getOrdersByOrderId(orderId);
-        model.addAttribute("order", order );
+        model.addAttribute("order", order);
+        model.addAttribute("sendLogs", orderSendLogRepository.findByOrderNumberOrderByRequestDateDesc(orderId));
         return "database/order";
     }
 

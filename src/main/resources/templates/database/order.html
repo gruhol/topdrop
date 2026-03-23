@@ -163,6 +163,37 @@
 
         .confirmed-yes { color: #38a169; }
         .confirmed-no  { color: #e53e3e; }
+
+        .log-table th {
+            background: #f8fafc;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            border: none;
+            padding: 0.75rem 1rem;
+        }
+
+        .log-table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            font-size: 0.82rem;
+            border-color: #f0f4f8;
+        }
+
+        .log-pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.75rem;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -501,6 +532,52 @@
 
         </div>
     </div>
+    <!-- LOGI WYSYŁKI -->
+    <div class="row mt-2" th:if="${sendLogs != null and !sendLogs.isEmpty()}">
+        <div class="col-12">
+            <div class="section-card">
+                <div class="card-header">
+                    <i class="bi bi-journal-text"></i> Logi wysyłki do dostawcy
+                    <span class="badge bg-secondary ms-2" th:text="${sendLogs.size()}"></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table log-table mb-0">
+                        <thead>
+                        <tr>
+                            <th style="width:160px">Data</th>
+                            <th style="width:100px">Status</th>
+                            <th>Request</th>
+                            <th>Response</th>
+                            <th>Błąd</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="log : ${sendLogs}">
+                            <td th:text="${#temporals.format(log.requestDate, 'dd.MM.yyyy HH:mm:ss')}"></td>
+                            <td>
+                                <span th:text="${log.status}"
+                                      th:classappend="${log.status == 'SUCCESS'} ? 'badge bg-success text-white' : 'badge bg-danger text-white'">
+                                </span>
+                            </td>
+                            <td>
+                                <pre class="log-pre" th:text="${log.request}"></pre>
+                            </td>
+                            <td>
+                                <pre class="log-pre" th:text="${log.response}"></pre>
+                            </td>
+                            <td>
+                                <span th:if="${log.errorMessage != null}"
+                                      class="text-danger small" th:text="${log.errorMessage}"></span>
+                                <span th:unless="${log.errorMessage != null}" class="text-muted">—</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
