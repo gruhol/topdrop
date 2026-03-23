@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import pl.thinkdata.droptop.api.dto.checkOrderStatus.CheckOrderStatusDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
 import pl.thinkdata.droptop.api.service.CheckStockService;
+import pl.thinkdata.droptop.api.service.GetCheckOrderStatusExternalService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.dto.AddressNumber;
@@ -42,6 +44,7 @@ public class OrderController {
     private final ProductRepository productRepository;
     private final CheckStockService checkStockService;
     private final GetOrderDropExternalService getOrderDropExternalService;
+    private final GetCheckOrderStatusExternalService getCheckOrderStatusExternalService;
     private final OrderSendLogRepository orderSendLogRepository;
 
     @GetMapping("/orders")
@@ -63,6 +66,21 @@ public class OrderController {
         Order order = orderService.getOrdersByOrderId(orderId);
         model.addAttribute("order", order);
         model.addAttribute("sendLogs", orderSendLogRepository.findByOrderNumberOrderByRequestDateDesc(orderId));
+        return "database/order";
+    }
+
+    @GetMapping("order/checkstatus/{orderId}")
+    public String checkOrderStatus(@PathVariable(value = "orderId") Long orderId, Model model) {
+        Order order = orderService.getOrdersByOrderId(orderId);
+        CheckOrderStatusDto dto = CheckOrderStatusDto.builder()
+                .orderNumber(orderId)
+                .accountNumber(ACCOUNT_NUMBER)
+                .transactionNumber(orderId.intValue())
+                .build();
+        PlatonResponse platonResponse = getCheckOrderStatusExternalService.get(dto);
+        model.addAttribute("order", order);
+        model.addAttribute("sendLogs", orderSendLogRepository.findByOrderNumberOrderByRequestDateDesc(orderId));
+        model.addAttribute("successMessage", "Sprawdzono status zamówienia");
         return "database/order";
     }
 

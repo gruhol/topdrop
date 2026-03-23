@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.common.utils;
 
+import pl.thinkdata.droptop.api.dto.checkOrderStatus.CheckOrderStatusDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
@@ -125,6 +126,28 @@ public class PlatonXMLGenerator {
         return encodeBase64(externalOperationParams);
     }
 
+
+    public static String prepareCheckOrderStatus(CheckOrderStatusDto dto) {
+        String checkOrderStatusTemplate = """
+                <Document-Order>
+                    <Order-Header>
+                        <OrderNumber>%s</OrderNumber>
+                        <AccountNumber>%s</AccountNumber>
+                        <SendLinkedOrders>0</SendLinkedOrders>
+                        <SendShipmentInfo>1</SendShipmentInfo>
+                        <SendLogisticUnitsInfo>0</SendLogisticUnitsInfo>
+                    </Order-Header>
+                </Document-Order>
+                """;
+        String parameters = String.format(checkOrderStatusTemplate, dto.getOrderNumber(), dto.getAccountNumber());
+        String externalOperationParamsTemplate = """
+                    <ExternalOperationParams>
+                        <Params>%s</Params>
+                    </ExternalOperationParams>
+                    """;
+        String externalOperationParams = String.format(externalOperationParamsTemplate, encodeBase64(parameters));
+        return encodeBase64(externalOperationParams);
+    }
 
     private static String prepareOrderLine(List<OrderLine> orderLines) {
         StringBuilder result = new StringBuilder();
