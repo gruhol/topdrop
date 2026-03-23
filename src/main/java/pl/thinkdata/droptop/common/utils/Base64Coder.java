@@ -8,6 +8,7 @@ import java.util.Base64;
 public class Base64Coder {
 
     public static String decodeBase64(String toDecode) {
+        if (toDecode == null) return null;
         try {
             byte[] decodedBytes = Base64.getDecoder().decode(toDecode);
             return new String(decodedBytes);

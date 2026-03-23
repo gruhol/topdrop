@@ -65,13 +65,10 @@ public class GetOrderDropExternalService extends BaseExternalService implements 
                             .documentOrderResponse((DocumentOrderResponse) unmarshaller.unmarshal(reader))
                             .build();
                 }
-                StringReader reader = new StringReader(result);
                 orderSendLog.setStatus("SUCCESS");
                 orderSendLog.setResponse(responseBody);
                 orderSendLogRepository.save(orderSendLog);
-                return PlatonResponse.builder()
-                        .documentOrderResponse((DocumentOrderResponse) unmarshaller.unmarshal(reader))
-                        .build();
+                return createPlatonResponse(responseBody);
 
             } else if (response != null) {
                 String errorMsg = "Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody();

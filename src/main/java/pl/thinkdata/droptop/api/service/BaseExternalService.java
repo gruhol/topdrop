@@ -79,6 +79,7 @@ public class BaseExternalService {
     }
 
     static String extractXMLByTag(String xml, String tagName) {
+        if (xml == null) return null;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
