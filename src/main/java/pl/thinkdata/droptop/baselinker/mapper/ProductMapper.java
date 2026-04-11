@@ -70,7 +70,7 @@ public class ProductMapper {
     private static TextFields createTextFields(pl.thinkdata.droptop.database.model.product.Product product) {
         TextFields textFields = new TextFields();
         textFields.setName(product.getTitle());
-        textFields.setDescription(product.getDescription());
+        textFields.setDescription(buildDescription(product));
         Map<String, String> reatures = new HashMap<>();
         reatures.put("releaseDate", product.getReleaseDate());
         reatures.put("status", product.getStatus());
@@ -95,5 +95,16 @@ public class ProductMapper {
         reatures.put("gpsr_email", product.getGpsrSekcja().getEmail());
         textFields.setFeatures(reatures);
         return textFields;
+    }
+
+    private static String buildDescription(pl.thinkdata.droptop.database.model.product.Product product) {
+        String base = Optional.ofNullable(product.getDescription()).orElse("");
+        String gpsr = "\n\nPodmiot odpowiedzialny:\n" +
+                "Nazwa firmy: " + product.getManufacturingCountryCode() + "\n" +
+                "Kraj: " + product.getGpsrSekcja().getContractorCountryCode() + "\n" +
+                "Adres: " + product.getGpsrSekcja().getStreet() + " " + product.getGpsrSekcja().getHouseNumber() + " / " + product.getGpsrSekcja().getApartmentNumber() + "\n" +
+                product.getGpsrSekcja().getPostalCode() + " " + product.getGpsrSekcja().getCity() + "\n" +
+                "Email: " + product.getGpsrSekcja().getEmail();
+        return base + gpsr;
     }
 }
