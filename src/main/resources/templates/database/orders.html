@@ -118,6 +118,19 @@
             font-size: 0.82rem;
             letter-spacing: 0.5px;
         }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.65rem;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+
+        .platon-to-realize  { background-color: #3182ce; }
+        .platon-in-progress { background-color: #d69e2e; }
     </style>
 </head>
 <body>
@@ -161,6 +174,7 @@
                     <th>Order ID</th>
                     <th>Data</th>
                     <th>Klient</th>
+                    <th>Status</th>
                     <th class="text-end">Wartość</th>
                     <th class="text-center">Akcja</th>
                 </tr>
@@ -173,6 +187,43 @@
                         <div class="fw-500" th:text="${order.userLogin}"></div>
                         <small class="text-muted" th:text="${order.phone}"></small><br>
                         <small class="text-muted" th:text="${order.email}"></small>
+                    </td>
+                    <td>
+                        <!-- Status potwierdzenia -->
+                        <div>
+                            <span th:if="${order.confirmed}" class="status-badge bg-success text-white">
+                                <i class="bi bi-check-circle me-1"></i>Potwierdzone
+                            </span>
+                            <span th:unless="${order.confirmed}" class="status-badge bg-warning text-dark">
+                                <i class="bi bi-clock me-1"></i>Niepotwierdzone
+                            </span>
+                        </div>
+                        <!-- Status Platon -->
+                        <div th:if="${order.platonOrderStatus != null}" class="mt-1">
+                            <span th:with="s=${order.platonOrderStatus}"
+                                  th:class="${s == 'To accounting'} ? 'status-badge bg-secondary text-white'
+                                          : (${s == 'To realize'}   ? 'status-badge platon-to-realize text-white'
+                                          : (${s == 'In progress'}  ? 'status-badge platon-in-progress text-white'
+                                          : (${s == 'Canceled'}     ? 'status-badge bg-danger text-white'
+                                          : (${s == 'Closed'}       ? 'status-badge bg-success text-white'
+                                          :                           'status-badge bg-light text-dark'))))">
+                                <i th:class="${order.platonOrderStatus == 'To accounting'} ? 'bi bi-hourglass-split me-1'
+                                            : (${order.platonOrderStatus == 'To realize'}  ? 'bi bi-check2-circle me-1'
+                                            : (${order.platonOrderStatus == 'In progress'} ? 'bi bi-gear me-1'
+                                            : (${order.platonOrderStatus == 'Canceled'}    ? 'bi bi-x-circle me-1'
+                                            : (${order.platonOrderStatus == 'Closed'}      ? 'bi bi-bag-check me-1'
+                                            :                                                'bi bi-cloud me-1'))))"></i>
+                                Platon:
+                                <span th:switch="${order.platonOrderStatus}">
+                                    <span th:case="'To accounting'">Przyjęte</span>
+                                    <span th:case="'To realize'">Do realizacji</span>
+                                    <span th:case="'In progress'">W realizacji</span>
+                                    <span th:case="'Canceled'">Anulowane</span>
+                                    <span th:case="'Closed'">Zamknięto</span>
+                                    <span th:case="*" th:text="${order.platonOrderStatus}"></span>
+                                </span>
+                            </span>
+                        </div>
                     </td>
                     <td class="text-end fw-semibold"
                         th:text="${#numbers.formatDecimal(#aggregates.sum(order.products.![priceBrutto * quantity]), 1, 2)} + ' PLN'">

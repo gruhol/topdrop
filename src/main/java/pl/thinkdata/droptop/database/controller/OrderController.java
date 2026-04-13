@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import pl.thinkdata.droptop.api.dto.PlatonResponse;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.thinkdata.droptop.api.dto.checkOrderStatus.CheckOrderStatusDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
@@ -70,24 +70,20 @@ public class OrderController {
     }
 
     @GetMapping("order/checkstatus/{orderId}")
-    public String checkOrderStatus(@PathVariable(value = "orderId") Long orderId, Model model) {
-        Order order = orderService.getOrdersByOrderId(orderId);
+    public String checkOrderStatus(@PathVariable(value = "orderId") Long orderId, RedirectAttributes redirectAttributes) {
         CheckOrderStatusDto dto = CheckOrderStatusDto.builder()
                 .orderNumber(orderId)
                 .accountNumber(ACCOUNT_NUMBER)
                 .transactionNumber(orderId.intValue())
                 .build();
-        PlatonResponse platonResponse = getCheckOrderStatusExternalService.get(dto);
-        model.addAttribute("order", order);
-        model.addAttribute("sendLogs", orderSendLogRepository.findByOrderNumberOrderByRequestDateDesc(orderId));
-        model.addAttribute("successMessage", "Sprawdzono status zamówienia");
-        return "database/order";
+        getCheckOrderStatusExternalService.get(dto);
+        redirectAttributes.addFlashAttribute("successMessage", "Sprawdzono status zamówienia");
+        return "redirect:/admin/order/" + orderId;
     }
 
-    @GetMapping("order/send/{orderId}") //TODO
-    public String sendOrder(@PathVariable(value = "orderId", required = true) Long orderId, Model model) {
+    @GetMapping("order/send/{orderId}")
+    public String sendOrder(@PathVariable(value = "orderId") Long orderId, RedirectAttributes redirectAttributes) {
         Order order = orderService.getOrdersByOrderId(orderId);
-        model.addAttribute("order", order);
         List<String> productsOrdered = order.getProducts().stream()
                 .map(OrderProduct::getEan)
                 .toList();
@@ -106,10 +102,10 @@ public class OrderController {
                     .orderLine(orderLines)
                     .build();
 
-            PlatonResponse data = getOrderDropExternalService.get(orderDropDto);
+            getOrderDropExternalService.get(orderDropDto);
         }
-        model.addAttribute("successMessage", "Zamówienie wysłane");
-        return "database/order";
+        redirectAttributes.addFlashAttribute("successMessage", "Zamówienie wysłane");
+        return "redirect:/admin/order/" + orderId;
     }
 
     private List<OrderLine> prepareOrderLine(Order order) {

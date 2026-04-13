@@ -43,6 +43,9 @@ public class Order {
     @Column(name = "order_status_id")
     private Long orderStatusId;
 
+    @Column(name = "platon_order_status", length = 50)
+    private String platonOrderStatus;
+
     @Column(name = "confirmed")
     private boolean confirmed;
 

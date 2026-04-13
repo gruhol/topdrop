@@ -133,9 +133,7 @@ public class PlatonXMLGenerator {
                     <Order-Header>
                         <OrderNumber>%s</OrderNumber>
                         <AccountNumber>%s</AccountNumber>
-                        <SendLinkedOrders>0</SendLinkedOrders>
                         <SendShipmentInfo>1</SendShipmentInfo>
-                        <SendLogisticUnitsInfo>0</SendLogisticUnitsInfo>
                     </Order-Header>
                 </Document-Order>
                 """;

@@ -5,10 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
 import pl.thinkdata.droptop.api.dto.checkOrderStatus.CheckOrderStatusDto;
-import pl.thinkdata.droptop.database.model.order.OrderSendLog;
-import pl.thinkdata.droptop.database.repository.OrderSendLogRepository;
+import pl.thinkdata.droptop.database.model.order.Order;
+import pl.thinkdata.droptop.database.repository.OrderRepository;
 
-import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
 import static pl.thinkdata.droptop.common.utils.PlatonXMLGenerator.*;
@@ -17,13 +17,13 @@ import static pl.thinkdata.droptop.common.utils.PlatonXMLGenerator.*;
 public class GetCheckOrderStatusExternalService extends BaseExternalService implements ExternalServiceable<CheckOrderStatusDto> {
 
     private final String platonApiMethodCheckOrderStatus;
-    private final OrderSendLogRepository orderSendLogRepository;
+    private final OrderRepository orderRepository;
 
     public GetCheckOrderStatusExternalService(
             @Value("${platon.api.method.checkorderstatus}") String platonApiMethodCheckOrderStatus,
-            OrderSendLogRepository orderSendLogRepository) {
+            OrderRepository orderRepository) {
         this.platonApiMethodCheckOrderStatus = platonApiMethodCheckOrderStatus;
-        this.orderSendLogRepository = orderSendLogRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -33,12 +33,6 @@ public class GetCheckOrderStatusExternalService extends BaseExternalService impl
         String parameters = prepareCheckOrderStatus(dto);
         String request = prepareRequest(operationInfo, parameters);
 
-        OrderSendLog orderSendLog = orderSendLogRepository.save(OrderSendLog.builder()
-                .orderNumber(dto.getOrderNumber())
-                .request(request)
-                .requestDate(LocalDateTime.now())
-                .status("PENDING")
-                .build());
         try {
             ResponseEntity<String> response = getDataFromWebClient(request);
 
@@ -50,41 +44,39 @@ public class GetCheckOrderStatusExternalService extends BaseExternalService impl
                     String secondLevelDecoded = decodeBase64(innerBase64);
                     String errorMessage = extractXMLByTag(secondLevelDecoded, "ErrorMessage");
                     if (errorMessage != null) {
-                        orderSendLog.setStatus("ERROR");
-                        orderSendLog.setErrorMessage(errorMessage);
-                        orderSendLog.setResponse(secondLevelDecoded);
-                        orderSendLogRepository.save(orderSendLog);
                         return createPlatonResponse(errorMessage);
                     }
-                    orderSendLog.setStatus("SUCCESS");
-                    orderSendLog.setResponse(secondLevelDecoded);
-                    orderSendLogRepository.save(orderSendLog);
+                    saveOrderStatus(dto.getOrderNumber(), secondLevelDecoded);
                     return createPlatonResponse(secondLevelDecoded);
                 }
-
-                orderSendLog.setStatus("SUCCESS");
-                orderSendLog.setResponse(responseBody);
-                orderSendLogRepository.save(orderSendLog);
                 return createPlatonResponse(responseBody);
 
             } else if (response != null) {
                 String errorMsg = "Status: " + response.getStatusCode() + "\nResponse:\n" + response.getBody();
-                orderSendLog.setStatus("ERROR");
-                orderSendLog.setErrorMessage(errorMsg);
-                orderSendLogRepository.save(orderSendLog);
                 return createPlatonResponse(errorMsg);
             } else {
-                orderSendLog.setStatus("ERROR");
-                orderSendLog.setErrorMessage("Response not found");
-                orderSendLogRepository.save(orderSendLog);
                 return createPlatonResponse("Response not found");
             }
 
         } catch (Exception e) {
-            orderSendLog.setStatus("ERROR");
-            orderSendLog.setErrorMessage(e.getMessage());
-            orderSendLogRepository.save(orderSendLog);
             return getPlatonExceptionResponse(e);
         }
+    }
+
+    private void saveOrderStatus(Long orderNumber, String responseXml) {
+        String resultBase64 = extractXMLByTag(responseXml, RESULT);
+        if (resultBase64 == null) {
+            return;
+        }
+        String orderResponseXml = decodeBase64(resultBase64);
+        String orderStatus = extractXMLByTag(orderResponseXml, "OrderStatus");
+        if (orderStatus == null) {
+            return;
+        }
+        Optional<Order> orderOpt = orderRepository.findByOrderId(orderNumber);
+        orderOpt.ifPresent(order -> {
+            order.setPlatonOrderStatus(orderStatus);
+            orderRepository.save(order);
+        });
     }
 }
