@@ -14,6 +14,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BaseExternalService {
     public static final String EXTERNAL_OPERATION_INVOKE_RESULT = "ExternalOperationInvokeResult";
@@ -76,6 +78,24 @@ public class BaseExternalService {
         String monthDay = String.format("%02d%02d", reqTime.getMonthValue(), reqTime.getDayOfMonth());
         String formattedOrderNumber = String.format("%012d", orderNumber);
         return String.join("-", fixedPrefix, year, monthDay, formattedOrderNumber);
+    }
+
+    static List<String> extractAllXMLByTag(String xml, String tagName) {
+        List<String> results = new ArrayList<>();
+        if (xml == null) return results;
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new ByteArrayInputStream(xml.getBytes()));
+            NodeList nodes = document.getElementsByTagName(tagName);
+            for (int i = 0; i < nodes.getLength(); i++) {
+                results.add(nodes.item(i).getTextContent().trim());
+            }
+        } catch (Exception e) {
+            System.err.println("Błąd parsowania XML: " + e.getMessage() + e.getLocalizedMessage());
+        }
+        return results;
     }
 
     static String extractXMLByTag(String xml, String tagName) {

@@ -8,6 +8,7 @@ import pl.thinkdata.droptop.api.dto.checkOrderStatus.CheckOrderStatusDto;
 import pl.thinkdata.droptop.database.model.order.Order;
 import pl.thinkdata.droptop.database.repository.OrderRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
@@ -73,9 +74,13 @@ public class GetCheckOrderStatusExternalService extends BaseExternalService impl
         if (orderStatus == null) {
             return;
         }
+        List<String> packageNumbers = extractAllXMLByTag(orderResponseXml, "PackageNumber");
+        String packageNumberValue = packageNumbers.isEmpty() ? null : String.join(",", packageNumbers);
+
         Optional<Order> orderOpt = orderRepository.findByOrderId(orderNumber);
         orderOpt.ifPresent(order -> {
             order.setPlatonOrderStatus(orderStatus);
+            order.setPlatonPackageNumber(packageNumberValue);
             orderRepository.save(order);
         });
     }

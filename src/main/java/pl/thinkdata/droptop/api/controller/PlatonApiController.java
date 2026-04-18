@@ -289,7 +289,7 @@ public class PlatonApiController {
                 .email("dabrowskiw@gmail.com")
                 .phone("+48662078402")
                 .country("PL")
-                .deliveryMethod(16)
+                .deliveryMethod(42)
                 .machineName("WAW430M")
                 .build();
 
