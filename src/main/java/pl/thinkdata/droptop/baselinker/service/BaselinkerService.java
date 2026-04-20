@@ -7,6 +7,8 @@ import pl.thinkdata.droptop.baselinker.dto.EmptyRequest;
 import pl.thinkdata.droptop.baselinker.dto.GetPriceGroupsResponse;
 import pl.thinkdata.droptop.baselinker.dto.Inventory;
 import pl.thinkdata.droptop.baselinker.dto.PriceGroupBaseLinker;
+import pl.thinkdata.droptop.baselinker.dto.createPackageManual.PackageRequest;
+import pl.thinkdata.droptop.baselinker.dto.createPackageManual.PackageResponse;
 import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersRequest;
 import pl.thinkdata.droptop.baselinker.dto.order.GetOrdersResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.PriceGroup;
@@ -21,8 +23,11 @@ import pl.thinkdata.droptop.database.model.product.Product;
 import pl.thinkdata.droptop.database.model.product.SyncStatus;
 import pl.thinkdata.droptop.database.repository.OrderRepository;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_STOCK_UPDATE;
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_UPDATE;
@@ -41,6 +46,7 @@ public class BaselinkerService {
     private final GetOrdersBaselinkerService getOrdersBaselinkerService;
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
+    private final CreatePackageManualBaselinkerService createPackageManualBaselinkerService;
 
 
     public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
@@ -101,6 +107,33 @@ public class BaselinkerService {
             return orderRepository.saveAll(orders);
         }
         return Collections.emptyList();
+    }
+
+    public PackageResponse sendPackage(Long idOrder) {
+        Optional<Order> order = orderRepository.findByOrderId(idOrder);
+        if (order.isEmpty()) {
+            return PackageResponse.builder()
+                    .status("ERROR")
+                    .errorCode("Order not found")
+                    .errorMessage("Order not found")
+                    .build();
+        } else {
+            List<String> shippingNumbers = order.map(number -> Arrays.asList(number.getPlatonPackageNumber().split(",")))
+                    .orElse(Collections.emptyList());
+            PackageRequest request = PackageRequest.builder()
+                    .orderId(order.get().getOrderId())
+                    .courierCode(order.get().getDelivery().getMethod())
+                    .packageNumber(shippingNumbers.isEmpty() ? null : shippingNumbers.get(0))
+                    .pickupDate(Instant.now().getEpochSecond())
+                    .build();
+            PackageResponse packageResponse = null;
+            try {
+                packageResponse = createPackageManualBaselinkerService.sendRequest(request);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            return packageResponse;
+        }
     }
 
     private ProductPriceUpdate mapToProductPriceUpdate(Product product, GetPriceGroupsResponse priceGroups) {

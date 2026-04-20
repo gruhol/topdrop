@@ -12,6 +12,7 @@ import pl.thinkdata.droptop.api.dto.stock.Stock;
 @Builder
 public class PlatonResponse {
     private String message;
+    private boolean error;
     private Stock stock;
     private Catalog catalog;
     private DocumentOrderResponse documentOrderResponse;

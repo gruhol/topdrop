@@ -47,6 +47,15 @@ public class GetCheckOrderStatusExternalService extends BaseExternalService impl
                     if (errorMessage != null) {
                         return createPlatonResponse(errorMessage);
                     }
+                    String resultBase64 = extractXMLByTag(secondLevelDecoded, RESULT);
+                    if (resultBase64 != null) {
+                        String orderResponseXml = decodeBase64(resultBase64);
+                        String responseType = extractXMLByTag(orderResponseXml, "ResponseType");
+                        if (responseType != null && responseType.startsWith("-")) {
+                            String responseMessage = extractXMLByTag(orderResponseXml, "ResponseMessage");
+                            return createPlatonErrorResponse(responseMessage != null ? responseMessage : "Błąd Platon (kod: " + responseType + ")");
+                        }
+                    }
                     saveOrderStatus(dto.getOrderNumber(), secondLevelDecoded);
                     return createPlatonResponse(secondLevelDecoded);
                 }

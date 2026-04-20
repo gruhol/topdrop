@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import pl.thinkdata.droptop.api.dto.PlatonResponse;
 import pl.thinkdata.droptop.api.dto.checkOrderStatus.CheckOrderStatusDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.DeliveryPoint;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
@@ -76,8 +77,12 @@ public class OrderController {
                 .accountNumber(ACCOUNT_NUMBER)
                 .transactionNumber(orderId.intValue())
                 .build();
-        getCheckOrderStatusExternalService.get(dto);
-        redirectAttributes.addFlashAttribute("successMessage", "Sprawdzono status zamówienia");
+        PlatonResponse response = getCheckOrderStatusExternalService.get(dto);
+        if (response.isError()) {
+            redirectAttributes.addFlashAttribute("errorMessage", response.getMessage());
+        } else {
+            redirectAttributes.addFlashAttribute("successMessage", "Sprawdzono status zamówienia");
+        }
         return "redirect:/admin/order/" + orderId;
     }
 

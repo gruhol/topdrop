@@ -1,7 +1,6 @@
 package pl.thinkdata.droptop.baselinker.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,8 +26,6 @@ public class BaselinkerController {
     private final AddInventoryProductBaselinkerService addInventoryProductService;
     private final AddCategoryProductBaselinkerService addCategoryProductService;
     private final BaselinkerService baselinkerService;
-    private final ObjectMapper objectMapper;
-
 
     @GetMapping("/send/product/{ean}")
     public String sendProductToBaseLinker(@PathVariable(value = "ean", required = true) String ean, Model model) {

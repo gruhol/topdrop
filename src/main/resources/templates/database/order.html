@@ -277,6 +277,14 @@
     </div>
 </div>
 
+<div th:if="${errorMessage}" class="container mt-3">
+    <div id="orderErrorAlert" class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-x-circle-fill me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Zamknij"></button>
+    </div>
+</div>
+
 <div class="container pb-5">
 
     <!-- 3 KOLUMNY -->
@@ -573,6 +581,56 @@
 
         </div>
     </div>
+    <!-- STATUS PLATON -->
+    <div class="row mt-2" th:if="${order.platonOrderStatus != null or order.platonPackageNumber != null}">
+        <div class="col-12">
+            <div class="section-card">
+                <div class="card-header">
+                    <i class="bi bi-cloud-check"></i> Status Platon
+                </div>
+                <div class="table-responsive">
+                    <table class="table products-table mb-0">
+                        <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Nr listu przewozowego</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <span th:if="${order.platonOrderStatus != null}"
+                                      th:with="s=${order.platonOrderStatus}"
+                                      th:class="${s == 'To accounting'} ? 'badge bg-secondary'
+                                              : (${s == 'To realize'}   ? 'badge platon-to-realize'
+                                              : (${s == 'In progress'}  ? 'badge platon-in-progress'
+                                              : (${s == 'Canceled'}     ? 'badge bg-danger'
+                                              : (${s == 'Closed'}       ? 'badge bg-success'
+                                              :                           'badge bg-light text-dark'))))">
+                                    <span th:switch="${order.platonOrderStatus}">
+                                        <span th:case="'To accounting'">Przyjęte</span>
+                                        <span th:case="'To realize'">Do realizacji</span>
+                                        <span th:case="'In progress'">W realizacji</span>
+                                        <span th:case="'Canceled'">Anulowane</span>
+                                        <span th:case="'Closed'">Zamknięto</span>
+                                        <span th:case="*" th:text="${order.platonOrderStatus}"></span>
+                                    </span>
+                                </span>
+                                <span th:unless="${order.platonOrderStatus != null}" class="text-muted">—</span>
+                            </td>
+                            <td>
+                                <span th:if="${order.platonPackageNumber != null}"
+                                      th:text="${order.platonPackageNumber}" class="fw-semibold"></span>
+                                <span th:unless="${order.platonPackageNumber != null}" class="text-muted">—</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- LOGI WYSYŁKI -->
     <div class="row mt-2" th:if="${sendLogs != null and !sendLogs.isEmpty()}">
         <div class="col-12">
@@ -657,6 +715,12 @@
         setTimeout(() => {
             bootstrap.Alert.getOrCreateInstance(alertEl).close();
         }, 5000);
+    }
+    const errorAlertEl = document.getElementById('orderErrorAlert');
+    if (errorAlertEl) {
+        setTimeout(() => {
+            bootstrap.Alert.getOrCreateInstance(errorAlertEl).close();
+        }, 8000);
     }
 </script>
 </body>

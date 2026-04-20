@@ -60,6 +60,13 @@ public class BaseExternalService {
                 .build();
     }
 
+    static PlatonResponse createPlatonErrorResponse(String message) {
+        return PlatonResponse.builder()
+                .message(message)
+                .error(true)
+                .build();
+    }
+
     static PlatonResponse getPlatonExceptionResponse(Exception e) {
         if (e instanceof WebClientResponseException webClientException) {
             String responseBody = webClientException.getResponseBodyAsString();
