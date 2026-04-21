@@ -20,6 +20,8 @@ import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
 import pl.thinkdata.droptop.api.service.CheckStockService;
 import pl.thinkdata.droptop.api.service.GetCheckOrderStatusExternalService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
+import pl.thinkdata.droptop.baselinker.dto.createPackageManual.PackageResponse;
+import pl.thinkdata.droptop.baselinker.service.BaselinkerService;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.dto.AddressNumber;
 import pl.thinkdata.droptop.database.model.order.Order;
@@ -47,6 +49,7 @@ public class OrderController {
     private final GetOrderDropExternalService getOrderDropExternalService;
     private final GetCheckOrderStatusExternalService getCheckOrderStatusExternalService;
     private final OrderSendLogRepository orderSendLogRepository;
+    private final BaselinkerService baselinkerService;
 
     @GetMapping("/orders")
     public String getOrders(@RequestParam(value = "pageNumber", required = false, defaultValue = "0") int pageNumber,
@@ -110,6 +113,14 @@ public class OrderController {
             getOrderDropExternalService.get(orderDropDto);
         }
         redirectAttributes.addFlashAttribute("successMessage", "Zamówienie wysłane");
+        return "redirect:/admin/order/" + orderId;
+    }
+
+    @GetMapping("/package/send/{orderId}")
+    public String sendPackage(@PathVariable(value = "orderId") Long orderId, RedirectAttributes redirectAttributes) {
+        Order order = orderService.getOrdersByOrderId(orderId);
+        PackageResponse packageResponse = baselinkerService.sendPackage(order.getOrderId());
+        redirectAttributes.addFlashAttribute("successMessage", "Status wysłania paczki: " + packageResponse.getStatus());
         return "redirect:/admin/order/" + orderId;
     }
 

@@ -620,7 +620,12 @@
                             </td>
                             <td>
                                 <span th:if="${order.platonPackageNumber != null}"
-                                      th:text="${order.platonPackageNumber}" class="fw-semibold"></span>
+                                      th:text="${order.platonPackageNumber}" class="fw-semibold me-2"></span>
+                                <a th:if="${order.platonPackageNumber != null}"
+                                   th:href="@{'/admin/package/send/' + ${order.orderId}}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up me-1"></i>Wyślij Nr Paczki
+                                </a>
                                 <span th:unless="${order.platonPackageNumber != null}" class="text-muted">—</span>
                             </td>
                         </tr>
