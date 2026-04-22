@@ -51,8 +51,6 @@ public class BaselinkerExportScheduled {
             } catch (Exception e) {
                 log.info("Nieoczekiwany błąd w zadaniu Baselinker export: {}", e.getMessage());
             }
-        } else {
-            log.info("Eksport is stop: {}", getCorrentDate());
         }
     }
 
