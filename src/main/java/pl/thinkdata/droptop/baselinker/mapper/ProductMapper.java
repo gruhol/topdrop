@@ -6,6 +6,7 @@ import pl.thinkdata.droptop.baselinker.dto.Product;
 import pl.thinkdata.droptop.baselinker.dto.TextFields;
 import pl.thinkdata.droptop.baselinker.model.BaselinkerExportLog;
 import pl.thinkdata.droptop.database.model.ProductOfferLog;
+import pl.thinkdata.droptop.database.model.product.GpsrData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -105,13 +106,15 @@ public class ProductMapper {
         String base = Optional.ofNullable(product.getDescription()).orElse("");
         String gpsr = "";
         if (!isNull(product.getGpsrSekcja())) {
-            String apartmentNumber = product.getGpsrSekcja().getApartmentNumber() == null ? "" : " / " + product.getGpsrSekcja().getApartmentNumber();
+            GpsrData g = product.getGpsrSekcja();
+            String houseNumber = g.getHouseNumber() == null ? "" : " " + g.getHouseNumber();
+            String apartmentNumber = g.getApartmentNumber() == null ? "" : " / " + g.getApartmentNumber();
             gpsr = "\n\nPodmiot odpowiedzialny:\n" +
-                    "Nazwa firmy: " + product.getGpsrSekcja().getContractorName() + "\n" +
-                    "Kraj: " + product.getGpsrSekcja().getContractorCountryCode() + "\n" +
-                    "Adres: " + product.getGpsrSekcja().getStreet() + " " + product.getGpsrSekcja().getHouseNumber() + apartmentNumber + "\n" +
-                    product.getGpsrSekcja().getPostalCode() + " " + product.getGpsrSekcja().getCity() + "\n" +
-                    "Email: " + product.getGpsrSekcja().getEmail();
+                    "Nazwa firmy: " + Optional.ofNullable(g.getContractorName()).orElse("") + "\n" +
+                    "Kraj: " + Optional.ofNullable(g.getContractorCountryCode()).orElse("") + "\n" +
+                    "Adres: " + Optional.ofNullable(g.getStreet()).orElse("") + houseNumber + apartmentNumber + "\n" +
+                    Optional.ofNullable(g.getPostalCode()).orElse("") + " " + Optional.ofNullable(g.getCity()).orElse("") + "\n" +
+                    "Email: " + Optional.ofNullable(g.getEmail()).orElse("");
         }
         return base + gpsr;
     }
