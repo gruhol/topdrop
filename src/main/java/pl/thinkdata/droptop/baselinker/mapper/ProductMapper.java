@@ -105,10 +105,11 @@ public class ProductMapper {
         String base = Optional.ofNullable(product.getDescription()).orElse("");
         String gpsr = "";
         if (!isNull(product.getGpsrSekcja())) {
+            String apartmentNumber = product.getGpsrSekcja().getApartmentNumber() == null ? "" : " / " + product.getGpsrSekcja().getApartmentNumber();
             gpsr = "\n\nPodmiot odpowiedzialny:\n" +
-                    "Nazwa firmy: " + product.getManufacturingCountryCode() + "\n" +
+                    "Nazwa firmy: " + product.getGpsrSekcja().getContractorName() + "\n" +
                     "Kraj: " + product.getGpsrSekcja().getContractorCountryCode() + "\n" +
-                    "Adres: " + product.getGpsrSekcja().getStreet() + " " + product.getGpsrSekcja().getHouseNumber() + " / " + product.getGpsrSekcja().getApartmentNumber() + "\n" +
+                    "Adres: " + product.getGpsrSekcja().getStreet() + " " + product.getGpsrSekcja().getHouseNumber() + apartmentNumber + "\n" +
                     product.getGpsrSekcja().getPostalCode() + " " + product.getGpsrSekcja().getCity() + "\n" +
                     "Email: " + product.getGpsrSekcja().getEmail();
         }
