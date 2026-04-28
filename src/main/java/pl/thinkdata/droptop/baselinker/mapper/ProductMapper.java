@@ -103,12 +103,15 @@ public class ProductMapper {
 
     private static String buildDescription(pl.thinkdata.droptop.database.model.product.Product product) {
         String base = Optional.ofNullable(product.getDescription()).orElse("");
-        String gpsr = "\n\nPodmiot odpowiedzialny:\n" +
-                "Nazwa firmy: " + product.getManufacturingCountryCode() + "\n" +
-                "Kraj: " + product.getGpsrSekcja().getContractorCountryCode() + "\n" +
-                "Adres: " + product.getGpsrSekcja().getStreet() + " " + product.getGpsrSekcja().getHouseNumber() + " / " + product.getGpsrSekcja().getApartmentNumber() + "\n" +
-                product.getGpsrSekcja().getPostalCode() + " " + product.getGpsrSekcja().getCity() + "\n" +
-                "Email: " + product.getGpsrSekcja().getEmail();
+        String gpsr = "";
+        if (!isNull(product.getGpsrSekcja())) {
+            gpsr = "\n\nPodmiot odpowiedzialny:\n" +
+                    "Nazwa firmy: " + product.getManufacturingCountryCode() + "\n" +
+                    "Kraj: " + product.getGpsrSekcja().getContractorCountryCode() + "\n" +
+                    "Adres: " + product.getGpsrSekcja().getStreet() + " " + product.getGpsrSekcja().getHouseNumber() + " / " + product.getGpsrSekcja().getApartmentNumber() + "\n" +
+                    product.getGpsrSekcja().getPostalCode() + " " + product.getGpsrSekcja().getCity() + "\n" +
+                    "Email: " + product.getGpsrSekcja().getEmail();
+        }
         return base + gpsr;
     }
 }
