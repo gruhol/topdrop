@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 public class ProductMapper {
 
     public static Product map(pl.thinkdata.droptop.database.model.product.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
@@ -85,14 +87,16 @@ public class ProductMapper {
         reatures.put("approvalNumber", product.getApprovalNumber());
         reatures.put("pcn", product.getPcn());
         reatures.put("manufacturingCountryCode", product.getManufacturingCountryCode());
-        reatures.put("gpsr_contractorName", product.getGpsrSekcja().getContractorName());
-        reatures.put("gpsr_contractorCountryCode", product.getGpsrSekcja().getContractorCountryCode());
-        reatures.put("gpsr_street",  product.getGpsrSekcja().getStreet());
-        reatures.put("gpsr_houseNumber",  product.getGpsrSekcja().getHouseNumber());
-        reatures.put("gpsr_apartmentNumber", product.getGpsrSekcja().getApartmentNumber());
-        reatures.put("gpsr_postalCode",  product.getGpsrSekcja().getPostalCode());
-        reatures.put("gpsr_city", product.getGpsrSekcja().getCity());
-        reatures.put("gpsr_email", product.getGpsrSekcja().getEmail());
+        if (!isNull(product.getGpsrSekcja())) {
+            reatures.put("gpsr_contractorName", product.getGpsrSekcja().getContractorName());
+            reatures.put("gpsr_contractorCountryCode", product.getGpsrSekcja().getContractorCountryCode());
+            reatures.put("gpsr_street", product.getGpsrSekcja().getStreet());
+            reatures.put("gpsr_houseNumber", product.getGpsrSekcja().getHouseNumber());
+            reatures.put("gpsr_apartmentNumber", product.getGpsrSekcja().getApartmentNumber());
+            reatures.put("gpsr_postalCode", product.getGpsrSekcja().getPostalCode());
+            reatures.put("gpsr_city", product.getGpsrSekcja().getCity());
+            reatures.put("gpsr_email", product.getGpsrSekcja().getEmail());
+        }
         textFields.setFeatures(reatures);
         return textFields;
     }
