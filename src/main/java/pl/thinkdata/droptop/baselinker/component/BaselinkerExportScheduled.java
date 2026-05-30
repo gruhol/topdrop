@@ -104,7 +104,8 @@ public class BaselinkerExportScheduled {
     public void baselinkerEsportStock() {
         if (sync_enabled) {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendStockUpdate();
-            if(result.getStatus().equals("SUCCESS")) log.info("Zaktualizowane stany: {} Data: {}", result.getCounter(), getCorrentDate());
+            if("SUCCESS".equals(result.getStatus())) log.info("Zaktualizowane stany: {} Data: {}", result.getCounter(), getCorrentDate());
+            else log.warn("Błąd aktualizacji stanów: status={} Data: {}", result.getStatus(), getCorrentDate());
         }
     }
 
@@ -112,13 +113,14 @@ public class BaselinkerExportScheduled {
     public void baselinkerEsportPrice() {
         if (sync_enabled) {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendPriceUpdate();
-            if(result.getStatus().equals("SUCCESS")) log.info("Zaktualizowane ceny: {} Data: {}", result.getCounter(), getCorrentDate());
+            if("SUCCESS".equals(result.getStatus())) log.info("Zaktualizowane ceny: {} Data: {}", result.getCounter(), getCorrentDate());
+            else log.warn("Błąd aktualizacji cen: status={} Data: {}", result.getStatus(), getCorrentDate());
         }
     }
 
     public void sendProductsToBaseLinker() throws NotFoundFileToExportException {
         AddProductResponse result = addInventoryProductService.sendProducts();
-        if (result.getStatus().equals("SUCCESS")) {
+        if ("SUCCESS".equals(result.getStatus())) {
             log.info("Utworzono o id: {} Data: {}", result.getProductId(), getCorrentDate());
         } else {
 
