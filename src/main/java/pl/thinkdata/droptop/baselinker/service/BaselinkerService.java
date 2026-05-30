@@ -54,6 +54,7 @@ public class BaselinkerService {
         List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(144L, List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
         if (toSyncProducts.isEmpty()) {
             return UpdateInventoryProductsStockAndPriceResponse.builder()
+                    .status("EMPTY")
                     .counter(0)
                     .build();
         }
