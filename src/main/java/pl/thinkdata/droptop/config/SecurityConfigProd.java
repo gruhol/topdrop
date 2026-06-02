@@ -19,7 +19,7 @@ public class SecurityConfigProd {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login").permitAll()
+                        .requestMatchers("/", "/csv", "/login").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
                 .formLogin(Customizer.withDefaults())

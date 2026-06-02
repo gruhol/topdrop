@@ -20,7 +20,7 @@ public class SecurityConfigDev {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login").permitAll()
+                        .requestMatchers("/", "/csv", "/login").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
