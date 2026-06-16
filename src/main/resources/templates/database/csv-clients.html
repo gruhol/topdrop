@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Klienci CSV</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --surface: #16213e;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+            color: #2d3748;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--surface));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header .page-label {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-card .card-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8ecf0;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .clients-table th {
+            background: #f8fafc;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            border: none;
+            padding: 0.85rem 1rem;
+            white-space: nowrap;
+        }
+
+        .clients-table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            font-size: 0.88rem;
+            border-color: #f0f4f8;
+        }
+
+        .clients-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .url-cell {
+            max-width: 320px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .hash-cell {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #718096;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .counter-badge {
+            background: rgba(255,255,255,0.15);
+            border-radius: 50px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* modal confirm */
+        #confirmModal .modal-header {
+            background: #fff3f3;
+            border-bottom: 1px solid #ffd5d5;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="page-label">CSV</div>
+                <h1 class="mb-0 fw-bold">Klienci CSV</h1>
+                <small class="opacity-50 counter-badge mt-2 d-inline-block">
+                    <i class="bi bi-people me-1"></i>
+                    Klientów: <span th:text="${#lists.size(clients)}">0</span>
+                </small>
+            </div>
+            <div>
+                <button class="btn btn-light fw-semibold" data-bs-toggle="modal" data-bs-target="#clientModal"
+                        onclick="openAddModal()">
+                    <i class="bi bi-plus-lg me-1"></i>Dodaj klienta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- MENU -->
+    <div th:replace="~{database/fragments/menu :: menu}"></div>
+
+    <div class="section-card">
+        <div class="card-header">
+            <i class="bi bi-table"></i> Lista klientów CSV
+        </div>
+        <div class="table-responsive">
+            <table class="table clients-table mb-0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Logo</th>
+                    <th>URL</th>
+                    <th>Hash</th>
+                    <th class="text-center">Link CSV</th>
+                    <th class="text-center">Akcje</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="client : ${clients}">
+                    <td class="text-muted" th:text="${client.id}"></td>
+                    <td><span class="fw-semibold" th:text="${client.logo}"></span></td>
+                    <td class="url-cell">
+                        <a th:href="${client.url}" th:text="${client.url}" target="_blank"
+                           class="text-decoration-none text-primary"></a>
+                    </td>
+                    <td class="hash-cell" th:text="${client.hash}"></td>
+                    <td class="text-center">
+                        <a th:href="@{/csv/download/{hash}(hash=${client.hash})}"
+                           class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-cloud-download me-1"></i>Pobierz CSV
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="openEditModal(this)"
+                                    th:data-id="${client.id}"
+                                    th:data-logo="${client.logo}"
+                                    th:data-url="${client.url}"
+                                    th:data-hash="${client.hash}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    onclick="openDeleteConfirm(this)"
+                                    th:data-id="${client.id}"
+                                    th:data-logo="${client.logo}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: Dodaj / Edytuj -->
+<div class="modal fade" id="clientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="clientForm" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clientModalTitle">Dodaj klienta CSV</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Logo <small class="text-muted">(max 20 znaków)</small></label>
+                        <input type="text" name="logo" id="fieldLogo" class="form-control" maxlength="20" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">URL</label>
+                        <input type="text" name="url" id="fieldUrl" class="form-control" maxlength="512" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Hash</label>
+                        <input type="text" name="hash" id="fieldHash" class="form-control" maxlength="255" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary" id="clientModalSubmit">Zapisz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Potwierdzenie usunięcia -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Usuń klienta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-3">
+                <p class="mb-1">Czy na pewno chcesz usunąć klienta</p>
+                <p class="fw-bold fs-5" id="confirmClientName"></p>
+                <p class="text-muted small mb-0">Tej operacji nie można cofnąć.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                <form id="deleteForm" method="post">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Usuń
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openAddModal() {
+        document.getElementById('clientModalTitle').textContent = 'Dodaj klienta CSV';
+        document.getElementById('clientModalSubmit').textContent = 'Dodaj';
+        document.getElementById('clientForm').action = '/admin/csv-clients';
+        document.getElementById('fieldLogo').value = '';
+        document.getElementById('fieldUrl').value = '';
+        document.getElementById('fieldHash').value = '';
+    }
+
+    function openEditModal(btn) {
+        const id   = btn.dataset.id;
+        const logo = btn.dataset.logo;
+        const url  = btn.dataset.url;
+        const hash = btn.dataset.hash;
+        document.getElementById('clientModalTitle').textContent = 'Edytuj klienta CSV';
+        document.getElementById('clientModalSubmit').textContent = 'Zapisz zmiany';
+        document.getElementById('clientForm').action = '/admin/csv-clients/' + id + '/edit';
+        document.getElementById('fieldLogo').value = logo;
+        document.getElementById('fieldUrl').value = url;
+        document.getElementById('fieldHash').value = hash;
+        new bootstrap.Modal(document.getElementById('clientModal')).show();
+    }
+
+    function openDeleteConfirm(btn) {
+        document.getElementById('confirmClientName').textContent = btn.dataset.logo;
+        document.getElementById('deleteForm').action = '/admin/csv-clients/' + btn.dataset.id + '/delete';
+        new bootstrap.Modal(document.getElementById('confirmModal')).show();
+    }
+</script>
+</body>
+</html>

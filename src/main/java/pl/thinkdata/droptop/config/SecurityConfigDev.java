@@ -24,7 +24,6 @@ public class SecurityConfigDev {
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
