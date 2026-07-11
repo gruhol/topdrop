@@ -11,7 +11,7 @@ public interface BaselinkerSendable<RES, REQ> {
         try {
             return new ObjectMapper().readValue(response.getBody(), clazz);
         } catch (Exception e) {
-            throw new RuntimeException("Deserialization Error", e);
+            throw new RuntimeException("Deserialization Error: " + clazz.getName() , e);
         }
     }
 
