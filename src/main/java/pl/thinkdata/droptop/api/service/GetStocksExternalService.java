@@ -35,10 +35,8 @@ public class GetStocksExternalService extends BaseExternalService implements Ext
                 : prepareExportParametersWithItems(getStocksDto.getItems());
 
         String request = prepareRequest(operationInfo, parameters);
-        log.info("Zapytanie getStock: {}", request);
         try {
             ResponseEntity<String> response = getDataFromWebClient(request);
-            log.info("Odpowiedź: {}", response);
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 String responseBody = response.getBody();
