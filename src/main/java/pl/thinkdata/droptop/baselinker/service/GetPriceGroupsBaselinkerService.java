@@ -21,7 +21,7 @@ public class GetPriceGroupsBaselinkerService extends BaselinkerWebClientService 
 
     public Long getIdDefaultPriceGroup() {
         GetPriceGroupsResponse response = sendRequest(new EmptyRequest());
-        return response.getPriceGroups().stream()
+        return response.getPriceGroups().values().stream()
                 .filter(PriceGroupBaseLinker::getIsDefault)
                 .map(PriceGroupBaseLinker::getPriceGroupId)
                 .findFirst()
