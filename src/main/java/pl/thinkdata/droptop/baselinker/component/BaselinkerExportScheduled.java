@@ -49,7 +49,7 @@ public class BaselinkerExportScheduled {
             } catch (NotFoundFileToExportException e) {
                 log.info("Brak nowych produktów do exportu");
             } catch (Exception e) {
-                log.info("Nieoczekiwany błąd w zadaniu Baselinker export: {}", e.getMessage());
+                log.info("Nieoczekiwany błąd w zadaniu Baselinker export: {}, {}", e.getMessage(), e.fillInStackTrace().toString());
             }
         }
     }
