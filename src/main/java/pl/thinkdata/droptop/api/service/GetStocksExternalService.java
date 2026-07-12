@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.api.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import static java.util.Objects.isNull;
 import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
 import static pl.thinkdata.droptop.common.utils.PlatonXMLGenerator.*;
 
+@Slf4j
 @Service
 public class GetStocksExternalService extends BaseExternalService implements ExternalServiceable<GetStocksDto> {
 
@@ -36,6 +38,7 @@ public class GetStocksExternalService extends BaseExternalService implements Ext
 
         try {
             ResponseEntity<String> response = getDataFromWebClient(request);
+            log.info("Zapytanie getStock: {}", response);
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
                 String responseBody = response.getBody();
