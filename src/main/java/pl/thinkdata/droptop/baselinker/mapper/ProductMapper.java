@@ -7,14 +7,14 @@ import pl.thinkdata.droptop.baselinker.dto.TextFields;
 import pl.thinkdata.droptop.baselinker.model.BaselinkerExportLog;
 import pl.thinkdata.droptop.database.model.ProductOfferLog;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class ProductMapper {
 
-    public static Product map(pl.thinkdata.droptop.database.model.product.Product product, Inventory inventory, Collection<PriceGroupBaseLinker> priceGroups) {
+    public static Product map(pl.thinkdata.droptop.database.model.product.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
         String defultPriceGroupId = inventory.getDefaultPriceGroup().toString();
         String wholesalePriceId = priceGroups.stream()
                 .filter(g -> g.getName().equals("hurtowa"))

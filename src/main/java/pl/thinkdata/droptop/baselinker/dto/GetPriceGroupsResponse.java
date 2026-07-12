@@ -3,7 +3,7 @@ package pl.thinkdata.droptop.baselinker.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.util.Map;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,5 +15,5 @@ public class GetPriceGroupsResponse {
     private String status;
 
     @JsonProperty("price_groups")
-    private Map<String, PriceGroupBaseLinker> priceGroups;
+    private List<PriceGroupBaseLinker> priceGroups;
 }

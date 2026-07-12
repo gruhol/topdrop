@@ -142,7 +142,7 @@ public class BaselinkerService {
         return ProductPriceUpdate.builder()
                 .productId(product.getExportLog().getBaselinkerId())
                 .price(List.of(PriceGroup.builder()
-                        .priceGroupId(priceGroups.getPriceGroups().values().stream()
+                        .priceGroupId(priceGroups.getPriceGroups().stream()
                                 .filter(name -> name.getName().equals(HURTOWA))
                                 .map(PriceGroupBaseLinker::getPriceGroupId)
                                 .findFirst().orElse(0L))
