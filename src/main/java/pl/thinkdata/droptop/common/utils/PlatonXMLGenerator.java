@@ -6,12 +6,15 @@ import pl.thinkdata.droptop.api.dto.orderDrop.OrderDropDto;
 import pl.thinkdata.droptop.api.dto.orderDrop.OrderLine;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.util.Objects.isNull;
 import static pl.thinkdata.droptop.common.utils.Base64Coder.encodeBase64;
 
 public class PlatonXMLGenerator {
+
+    private static final DateTimeFormatter LAST_CHANGED_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public static String prepareRequest(String operationInfo, String parameters) {
         String soapXmlTemple =
@@ -59,7 +62,7 @@ public class PlatonXMLGenerator {
 
         String parameters = isNull(lastChangedDate)
                 ? String.format(parametersTemplate, pageSize, pageNo)
-                : String.format(parametersTemplateWithLastChangedDate, pageSize, pageNo, lastChangedDate);
+                : String.format(parametersTemplateWithLastChangedDate, pageSize, pageNo, LAST_CHANGED_DATE_FORMATTER.format(lastChangedDate));
 
         String externalOperationParamsTemplate = """
                     <ExternalOperationParams>
