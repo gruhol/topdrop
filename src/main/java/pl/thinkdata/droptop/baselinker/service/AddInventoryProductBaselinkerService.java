@@ -45,7 +45,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
         GetPriceGroupsResponse priceGroups = getPriceGroupsService.sendRequest(new EmptyRequest());
 
         AddProductRequest request = AddProductRequest.builder()
-                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups()))
+                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups().values()))
                 .product(product)
                 .build();
 
@@ -73,7 +73,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
         Set<AddProductResponse> productsSend = productsToSend.stream()
                 .map(product -> new RequestWithProduct(
                         AddProductRequest.builder()
-                                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups()))
+                                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups().values()))
                                 .product(product)
                                 .build(),
                         product
