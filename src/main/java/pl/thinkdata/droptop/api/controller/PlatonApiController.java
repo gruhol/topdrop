@@ -113,7 +113,7 @@ public class PlatonApiController {
                         .collect(Collectors.groupingBy(ProductOfferLog::getProductEan));
 
                 products.forEach(p -> {
-                    List<ProductOfferLog> productOffers = offersByEan.getOrDefault(p.getEan(), List.of());
+                    List<ProductOfferLog> productOffers = offersByEan.getOrDefault(p.getEan(), new ArrayList<>());
                     p.setOffers(productOffers);
                 });
 
