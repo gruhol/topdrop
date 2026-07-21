@@ -23,7 +23,7 @@ public class ProductMapper {
 
 
         return Product.builder()
-                .ean(product.getEan())
+                .ean(sanitizeEan(product.getEan()))
                 .isbn(product.getIsbn())
                 .title(product.getTitle())
                 .releaseDate(product.getReleaseDate())
@@ -62,5 +62,12 @@ public class ProductMapper {
                         .email(product.getGpsr().getEmail())
                         .build())
                 .build();
+    }
+
+    private String sanitizeEan(String ean) {
+        if (ean == null) {
+            return null;
+        }
+        return ean.trim().replaceAll("(?U)[\\p{C}\\p{Z}]", "");
     }
 }
