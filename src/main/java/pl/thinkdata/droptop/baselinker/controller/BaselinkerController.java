@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import pl.thinkdata.droptop.baselinker.dto.AddProductResponse;
 import pl.thinkdata.droptop.baselinker.dto.addCategory.AddCategoryResponse;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.UpdateInventoryProductsStockAndPriceResponse;
@@ -95,9 +96,9 @@ public class BaselinkerController {
     }
 
     @GetMapping("/get/orders")
-    public String getOrders(Model model) throws JsonProcessingException {
+    @ResponseBody
+    public String getOrders() throws JsonProcessingException {
         List<Order> result = baselinkerService.getOrders();
-        model.addAttribute("message", "Pobrano: " + result.size() + " nowych zamówień." );
-        return "database/alerts/alerts";
+        return "Pobrano: " + result.size() + " nowych zamówień.";
     }
 }
