@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Ustawienia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --accent: #e94560;
+            --surface: #16213e;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+            color: #2d3748;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--surface));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .page-header .page-label {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-card .card-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e8ecf0;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings-table th {
+            background: #f8fafc;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #718096;
+            font-weight: 600;
+            border: none;
+            padding: 0.85rem 1rem;
+            white-space: nowrap;
+        }
+
+        .settings-table td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+            font-size: 0.88rem;
+            border-color: #f0f4f8;
+        }
+
+        .settings-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .config-key {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="container">
+        <div>
+            <div class="page-label">Konfiguracja</div>
+            <h1 class="mb-0 fw-bold">Ustawienia</h1>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <!-- MENU -->
+    <div th:replace="~{database/fragments/menu :: menu}"></div>
+
+    <!-- FLASH MESSAGES -->
+    <div class="alert alert-success" role="alert" th:if="${message}" th:text="${message}"></div>
+    <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}"></div>
+
+    <!-- LISTA USTAWIEŃ -->
+    <div class="section-card">
+        <div class="card-header">
+            <i class="bi bi-sliders"></i> Ustawienia systemowe
+        </div>
+        <div class="table-responsive">
+            <table class="table settings-table mb-0">
+                <thead>
+                <tr>
+                    <th>Klucz</th>
+                    <th>Wartość</th>
+                    <th>Typ</th>
+                    <th>Opis</th>
+                    <th class="text-center">Akcja</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="setting : ${settings}">
+                    <td class="config-key" th:text="${setting.key}"></td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" name="value"
+                               th:form="${'settings-form-' + setting.id}"
+                               th:value="${setting.value}" required="required"/>
+                    </td>
+                    <td>
+                        <select class="form-select form-select-sm" name="valueType"
+                                th:form="${'settings-form-' + setting.id}">
+                            <option value="STRING" th:selected="${setting.valueType == 'STRING'}">STRING</option>
+                            <option value="BOOLEAN" th:selected="${setting.valueType == 'BOOLEAN'}">BOOLEAN</option>
+                            <option value="INTEGER" th:selected="${setting.valueType == 'INTEGER'}">INTEGER</option>
+                            <option value="DOUBLE" th:selected="${setting.valueType == 'DOUBLE'}">DOUBLE</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" name="description"
+                               th:form="${'settings-form-' + setting.id}"
+                               th:value="${setting.description}"/>
+                    </td>
+                    <td class="text-center">
+                        <form th:id="${'settings-form-' + setting.id}"
+                              th:action="@{'/admin/settings/' + ${setting.id}}" method="post" class="d-inline"></form>
+                        <button type="submit" class="btn btn-sm btn-primary px-3"
+                                th:form="${'settings-form-' + setting.id}">
+                            <i class="bi bi-check-lg me-1"></i>Zapisz
+                        </button>
+                        <form th:id="${'settings-delete-form-' + setting.id}"
+                              th:action="@{'/admin/settings/' + ${setting.id} + '/delete'}" method="post" class="d-inline"></form>
+                        <button type="submit" class="btn btn-sm btn-outline-danger px-3"
+                                th:form="${'settings-delete-form-' + setting.id}"
+                                onclick="return confirm('Na pewno usunąć to ustawienie?');">
+                            <i class="bi bi-trash me-1"></i>Usuń
+                        </button>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(settings)}">
+                    <td colspan="5" class="text-center text-muted py-4">Brak ustawień.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- DODAWANIE NOWEGO USTAWIENIA -->
+    <div class="section-card">
+        <div class="card-header">
+            <i class="bi bi-plus-circle"></i> Dodaj nowe ustawienie
+        </div>
+        <div class="p-3">
+            <form th:action="@{/admin/settings}" method="post" class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label small text-muted mb-1">Klucz</label>
+                    <input type="text" class="form-control form-control-sm" name="key" required="required"/>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label small text-muted mb-1">Wartość</label>
+                    <input type="text" class="form-control form-control-sm" name="value" required="required"/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Typ</label>
+                    <select class="form-select form-select-sm" name="valueType">
+                        <option value="STRING">STRING</option>
+                        <option value="BOOLEAN">BOOLEAN</option>
+                        <option value="INTEGER">INTEGER</option>
+                        <option value="DOUBLE">DOUBLE</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label small text-muted mb-1">Opis</label>
+                    <input type="text" class="form-control form-control-sm" name="description"/>
+                </div>
+                <div class="col-12 col-md-2">
+                    <button type="submit" class="btn btn-sm btn-success w-100">
+                        <i class="bi bi-plus-lg me-1"></i>Dodaj
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

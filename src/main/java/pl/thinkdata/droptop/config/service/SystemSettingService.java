@@ -5,11 +5,45 @@ import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.config.model.SystemSetting;
 import pl.thinkdata.droptop.config.repository.SystemSettingRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SystemSettingService {
 
     private final SystemSettingRepository repo;
+
+    public List<SystemSetting> findAll() {
+        return repo.findAllByOrderByKeyAsc();
+    }
+
+    public SystemSetting update(Long id, String value, String valueType, String description) {
+        SystemSetting setting = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ustawienia o id: " + id));
+        setting.setValue(value);
+        setting.setValueType(valueType);
+        setting.setDescription(description);
+        return repo.save(setting);
+    }
+
+    public SystemSetting create(String key, String value, String valueType, String description) {
+        if (repo.findByKey(key).isPresent()) {
+            throw new IllegalArgumentException("Klucz '" + key + "' już istnieje.");
+        }
+        SystemSetting setting = new SystemSetting();
+        setting.setKey(key);
+        setting.setValue(value);
+        setting.setValueType(valueType);
+        setting.setDescription(description);
+        return repo.save(setting);
+    }
+
+    public void delete(Long id) {
+        if (!repo.existsById(id)) {
+            throw new IllegalArgumentException("Nie znaleziono ustawienia o id: " + id);
+        }
+        repo.deleteById(id);
+    }
 
     public <T> T getValue(String key, Class<T> type) {
         String value = repo.findByKey(key)
