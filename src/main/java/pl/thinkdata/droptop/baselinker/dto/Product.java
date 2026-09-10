@@ -2,6 +2,7 @@ package pl.thinkdata.droptop.baselinker.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 @Getter
@@ -22,7 +23,7 @@ public class Product {
     private double average_cost;
     private String manufacturer_id;
     private String category_id;
-    private Map<String, Double> prices;
+    private Map<String, BigDecimal> prices;
     private Map<String, Integer> stock;
     private Map<String, String> locations;
     private TextFields text_fields;

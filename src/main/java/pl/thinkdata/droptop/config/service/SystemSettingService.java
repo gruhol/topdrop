@@ -11,23 +11,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SystemSettingService {
 
-    private final SystemSettingRepository repo;
+    private final SystemSettingRepository systemSettingRepository;
 
     public List<SystemSetting> findAll() {
-        return repo.findAllByOrderByKeyAsc();
+        return systemSettingRepository.findAllByOrderByKeyAsc();
     }
 
     public SystemSetting update(Long id, String value, String valueType, String description) {
-        SystemSetting setting = repo.findById(id)
+        SystemSetting setting = systemSettingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono ustawienia o id: " + id));
         setting.setValue(value);
         setting.setValueType(valueType);
         setting.setDescription(description);
-        return repo.save(setting);
+        return systemSettingRepository.save(setting);
     }
 
     public SystemSetting create(String key, String value, String valueType, String description) {
-        if (repo.findByKey(key).isPresent()) {
+        if (systemSettingRepository.findByKey(key).isPresent()) {
             throw new IllegalArgumentException("Klucz '" + key + "' już istnieje.");
         }
         SystemSetting setting = new SystemSetting();
@@ -35,18 +35,18 @@ public class SystemSettingService {
         setting.setValue(value);
         setting.setValueType(valueType);
         setting.setDescription(description);
-        return repo.save(setting);
+        return systemSettingRepository.save(setting);
     }
 
     public void delete(Long id) {
-        if (!repo.existsById(id)) {
+        if (!systemSettingRepository.existsById(id)) {
             throw new IllegalArgumentException("Nie znaleziono ustawienia o id: " + id);
         }
-        repo.deleteById(id);
+        systemSettingRepository.deleteById(id);
     }
 
     public <T> T getValue(String key, Class<T> type) {
-        String value = repo.findByKey(key)
+        String value = systemSettingRepository.findByKey(key)
                 .map(SystemSetting::getValue)
                 .orElseThrow(() -> new IllegalArgumentException("Brak klucza: " + key));
 

@@ -27,6 +27,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
     private final BaselinkerLogService baselinkerLogService;
     private final GetPriceGroupsBaselinkerService getPriceGroupsService;
     private final GetInventoryBaselinkerService getInventoryService;
+    private final ProductMapper productMapper;
     private final List<SyncStatus> newAndUpdateSyncStatus = Arrays.asList(SyncStatus.NEW, SyncStatus.TO_UPDATE);
     protected String methodName;
 
@@ -45,7 +46,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
         GetPriceGroupsResponse priceGroups = getPriceGroupsService.sendRequest(new EmptyRequest());
 
         AddProductRequest request = AddProductRequest.builder()
-                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups()))
+                .productDto(productMapper.map(product, inventory, priceGroups.getPriceGroups()))
                 .product(product)
                 .build();
 
@@ -73,7 +74,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
         Set<AddProductResponse> productsSend = productsToSend.stream()
                 .map(product -> new RequestWithProduct(
                         AddProductRequest.builder()
-                                .productDto(ProductMapper.map(product, inventory, priceGroups.getPriceGroups()))
+                                .productDto(productMapper.map(product, inventory, priceGroups.getPriceGroups()))
                                 .product(product)
                                 .build(),
                         product
