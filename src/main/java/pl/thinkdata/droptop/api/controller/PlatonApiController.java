@@ -26,7 +26,7 @@ import pl.thinkdata.droptop.api.service.ApiProductService;
 import pl.thinkdata.droptop.api.service.GetOrderDropExternalService;
 import pl.thinkdata.droptop.api.service.GetPublicationsExternalService;
 import pl.thinkdata.droptop.api.service.GetStocksExternalService;
-import pl.thinkdata.droptop.common.mapper.ProductMapper;
+import pl.thinkdata.droptop.common.mapper.PlatonProductMapper;
 import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.common.service.ImageService;
@@ -58,7 +58,7 @@ public class PlatonApiController {
     private final GetOrderDropExternalService getOrderDropExternalService;
     private final ApiProductService apiProductService;
     private final ProductOfferLogRepository productOfferLogRepository;
-    private final ProductMapper productMapper;
+    private final PlatonProductMapper platonProductMapper;
     private final ImageService imageService;
 
     PlatonResponse data;
@@ -166,7 +166,7 @@ public class PlatonApiController {
                     .map(Rc::getProducts)
                     .orElse(Collections.emptyList());
             productFromXmls.stream()
-                    .map(p -> productMapper.mapToProduct(p, covertUrl))
+                    .map(p -> platonProductMapper.mapToProduct(p, covertUrl))
                     .filter(Objects::nonNull)
                     .forEach(dowloadProducts::add);
             log.info("Pobrano z platona: {}", dowloadProducts.size());

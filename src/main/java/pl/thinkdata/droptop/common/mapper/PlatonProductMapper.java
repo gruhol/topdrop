@@ -11,7 +11,7 @@ import pl.thinkdata.droptop.database.model.product.Product;
 
 @Component
 @RequiredArgsConstructor
-public class ProductMapper {
+public class PlatonProductMapper {
 
     public static final String PRODUCT = "product";
 
@@ -19,8 +19,6 @@ public class ProductMapper {
     private final CategoryGeneratorUtils categoryGeneratorUtils;
 
     public Product mapToProduct(ProductFromXml product, String url)  {
-
-
 
         return Product.builder()
                 .ean(sanitizeEan(product.getEan()))
