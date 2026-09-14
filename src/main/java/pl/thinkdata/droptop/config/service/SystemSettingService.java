@@ -6,6 +6,7 @@ import pl.thinkdata.droptop.config.model.SystemSetting;
 import pl.thinkdata.droptop.config.repository.SystemSettingRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,19 @@ public class SystemSettingService {
             throw new IllegalArgumentException("Nie znaleziono ustawienia o id: " + id);
         }
         systemSettingRepository.deleteById(id);
+    }
+
+    public Optional<String> findValue(String key) {
+        return systemSettingRepository.findByKey(key).map(SystemSetting::getValue);
+    }
+
+    public void upsertValue(String key, String value, String valueType, String description) {
+        SystemSetting setting = systemSettingRepository.findByKey(key).orElseGet(SystemSetting::new);
+        setting.setKey(key);
+        setting.setValue(value);
+        setting.setValueType(valueType);
+        setting.setDescription(description);
+        systemSettingRepository.save(setting);
     }
 
     public <T> T getValue(String key, Class<T> type) {

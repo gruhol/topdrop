@@ -1,16 +1,17 @@
 package pl.thinkdata.droptop.allegro.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import pl.thinkdata.droptop.allegro.dto.FeePreviewRequest;
 import pl.thinkdata.droptop.allegro.dto.FeePreviewResponse;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -23,30 +24,49 @@ public class AllegroFeeService extends AllegroWebClientService {
      * Suma prowizji Allegro dla danej kategorii i ceny sprzedaży brutto.
      */
     public BigDecimal getCommission(String categoryId, BigDecimal price) {
-        FeePreviewResponse response = webClient.post()
-                .uri("/pricing/offer-fee-preview")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authService.getAccessToken())
-                .bodyValue(FeePreviewRequest.of(categoryId, price))
-                .retrieve()
-                .bodyToMono(FeePreviewResponse.class)
-                .block();
+        FeePreviewRequest requestBody = FeePreviewRequest.of(categoryId, price);
+        String rawBody;
+        try {
+            rawBody = webClient.post()
+                    .uri("/pricing/offer-fee-preview")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + authService.getAccessToken())
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+        } catch (WebClientResponseException e) {
+            String requestJson = toJsonQuietly(requestBody);
+            log.error("Allegro /pricing/offer-fee-preview zwróciło {} dla żądania {}: {}",
+                    e.getStatusCode(), requestJson, e.getResponseBodyAsString());
+            throw new RuntimeException("Allegro API error " + e.getStatusCode() + ": " + e.getResponseBodyAsString(), e);
+        }
 
-        FeePreviewResponse.Quote quote = Optional.ofNullable(response)
-                .map(FeePreviewResponse::quotes)
-                .flatMap(quotes -> quotes.stream().findFirst())
+        FeePreviewResponse response;
+        try {
+            response = new ObjectMapper().readValue(rawBody, FeePreviewResponse.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Błąd parsowania odpowiedzi Allegro: " + rawBody, e);
+        }
+
+        List<FeePreviewResponse.Fee> commissions = Optional.ofNullable(response)
+                .map(FeePreviewResponse::commissions)
+                .filter(list -> !list.isEmpty())
                 .orElseThrow(() -> new RuntimeException(
-                        "Błąd pobrania prowizji Allegro dla kategorii: " + categoryId));
+                        "Błąd pobrania prowizji Allegro dla kategorii: " + categoryId + ", odpowiedź: " + rawBody));
 
-        List<FeePreviewResponse.Fee> allFees = Stream.of(quote.fees(), quote.commissions())
-                .filter(list -> list != null)
-                .flatMap(List::stream)
-                .toList();
+        commissions.forEach(fee -> log.info("Opłata Allegro [{}] {}: {} {}",
+                fee.type(), fee.name(), fee.fee().amount(), fee.fee().currency()));
 
-        allFees.forEach(fee -> log.info("Opłata Allegro [{}] {}: {} {}",
-                fee.type(), fee.name(), fee.value().amount(), fee.value().currency()));
-
-        return allFees.stream()
-                .map(fee -> fee.value().amount())
+        return commissions.stream()
+                .map(fee -> fee.fee().amount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private static String toJsonQuietly(Object value) {
+        try {
+            return new ObjectMapper().writeValueAsString(value);
+        } catch (Exception e) {
+            return String.valueOf(value);
+        }
     }
 }
