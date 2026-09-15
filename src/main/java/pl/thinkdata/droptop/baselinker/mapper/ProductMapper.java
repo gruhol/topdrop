@@ -1,8 +1,10 @@
 package pl.thinkdata.droptop.baselinker.mapper;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import pl.thinkdata.droptop.allegro.service.AllegroPriceCalculator;
 import pl.thinkdata.droptop.baselinker.dto.Inventory;
 import pl.thinkdata.droptop.baselinker.dto.PriceGroupBaseLinker;
 import pl.thinkdata.droptop.baselinker.dto.Product;
@@ -12,6 +14,7 @@ import pl.thinkdata.droptop.config.service.SystemSettingService;
 import pl.thinkdata.droptop.database.model.ProductOfferLog;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +26,18 @@ import java.util.Optional;
 public class ProductMapper {
 
     private final SystemSettingService systemSettingService;
+    private final AllegroPriceCalculator allegroPriceCalculator;
+
+    private BigDecimal packingCost;
+    private BigDecimal baselinkerOrderCost;
+    private BigDecimal global_margin;
+
+    @PostConstruct
+    void init() {
+        packingCost = BigDecimal.valueOf(systemSettingService.getValue("packing_cost", Double.class));
+        baselinkerOrderCost = BigDecimal.valueOf(systemSettingService.getValue("baselinker_markup_per_order", Double.class));
+        global_margin = BigDecimal.valueOf(systemSettingService.getValue("global_margin", Double.class));
+    }
 
     public Product map(pl.thinkdata.droptop.database.model.product.Product product, Inventory inventory, List<PriceGroupBaseLinker> priceGroups) {
         String defultPriceGroupId = inventory.getDefaultPriceGroup().toString();
@@ -39,8 +54,7 @@ public class ProductMapper {
         prices.put(defultPriceGroupId, Optional.of(BigDecimal.valueOf(product.getPrice()))
                 .orElse(BigDecimal.ZERO));
         prices.put(wholesalePriceId, Optional.ofNullable(product.getLatestOffer())
-                .map(ProductOfferLog::getWholesaleGrossPrice)
-                .map(this::calculateWholesalesPrice)
+                .map(p -> calculateWholesalesPrice(p.getProductEan(), p.getWholesaleNetPrice(), p.getWholesaleGrossPrice()))
                 .orElse(BigDecimal.ZERO));
         Map<String, Integer> stock = new HashMap<>();
         stock.put(defaultWarehouse, Optional.ofNullable(product.getLatestOffer())
@@ -108,9 +122,22 @@ public class ProductMapper {
         return textFields;
     }
 
-    private BigDecimal calculateWholesalesPrice(double price) {
-        BigDecimal packingCost = BigDecimal.valueOf(systemSettingService.getValue("packing_cost", Double.class));
-        BigDecimal baselinkerOrderCost = BigDecimal.valueOf(systemSettingService.getValue("baselinker_markup_per_order", Double.class));
-        return BigDecimal.valueOf(price).add(packingCost).add(baselinkerOrderCost);
+    private BigDecimal calculateWholesalesPrice(String ean, double nettPrice, double grossPrice) {
+        BigDecimal nett = BigDecimal.valueOf(nettPrice);
+
+        // stawka VAT wyliczona z pary nett/gross, więc działa dla 23%, 8%, 5%...
+        BigDecimal vatMultiplier = BigDecimal.valueOf(grossPrice)
+                .divide(nett, 6, RoundingMode.HALF_UP);
+
+        // baza netto = cena × (1 + marża) + koszt zamówienia + pakowanie
+        BigDecimal baseNett = nett
+                .multiply(BigDecimal.ONE.add(global_margin))
+                .add(baselinkerOrderCost)
+                .add(packingCost);
+
+        BigDecimal baseGross = baseNett.multiply(vatMultiplier);
+
+        return allegroPriceCalculator.calculatePriceWithCommission(ean, baseGross)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 }

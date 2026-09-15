@@ -3,7 +3,6 @@ package pl.thinkdata.droptop.allegro.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.thinkdata.droptop.allegro.dto.AllegroPriceResult;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,7 +22,7 @@ public class AllegroPriceCalculator {
      * od ceny bazowej podnosi cenę, a z nią prowizję. Iterujemy do momentu,
      * aż cena przestanie się zmieniać (zwykle 2-3 iteracje).
      */
-    public AllegroPriceResult calculatePriceWithCommission(String ean, BigDecimal basePrice) {
+    public BigDecimal calculatePriceWithCommission(String ean, BigDecimal basePrice) {
         String categoryId = categoryService.getCategoryIdByEan(ean);
 
         BigDecimal base = basePrice.setScale(2, RoundingMode.HALF_UP);
@@ -39,9 +38,6 @@ public class AllegroPriceCalculator {
             finalPrice = newPrice;
         }
 
-        log.info("EAN: {}, kategoria: {}, cena bazowa: {}, prowizja: {}, cena końcowa: {}",
-                ean, categoryId, base, commission, finalPrice);
-
-        return new AllegroPriceResult(ean, categoryId, base, commission, finalPrice);
+        return finalPrice;
     }
 }
