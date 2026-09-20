@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.api.controller;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +60,7 @@ public class PlatonApiController {
     private final ProductOfferLogRepository productOfferLogRepository;
     private final PlatonProductMapper platonProductMapper;
     private final ImageService imageService;
+    private final EntityManager entityManager;
 
     PlatonResponse data;
 
@@ -119,6 +121,9 @@ public class PlatonApiController {
                 products.forEach(this::changeStatus);
                 productRepository.saveAll(products);
                 totalStockSave += stockToSave.size();
+
+                entityManager.flush();
+                entityManager.clear();
             }
             total = Optional.ofNullable(data.getStock().getSummary())
                     .map(Summary::getTotal)
@@ -227,6 +232,11 @@ public class PlatonApiController {
 
         productRepository.saveAll(listOfSaveProducts);
         productRepository.saveAll(productToUpdate);
+
+        // saveAll() już zacommitował i sflushował zmiany we własnej transakcji;
+        // clear() tylko zwalnia z pamięci encje zarządzane przez EntityManager
+        // (który przy open-in-view=true żyje przez cały czas trwania żądania HTTP).
+        entityManager.clear();
 
         return UpdateProductInfo.builder()
                 .newprod(listOfSaveProducts.size())
