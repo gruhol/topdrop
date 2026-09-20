@@ -137,7 +137,8 @@ public class PlatonApiController {
         int pageNumber = 1;
         int downloadCount = 0;
         int total;
-        List<Product> dowloadProducts = new ArrayList<>();
+        int totalNew = 0;
+        int totalUpdated = 0;
 
         do {
             this.data = getPublictionService.get(getRequestDto(pageSize, pageNumber));
@@ -148,7 +149,7 @@ public class PlatonApiController {
                     .orElse("");
 
             if (!isNull(data.getMessage())) {
-                saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.PRODUCT);
+                saveImportRaport("Error", data.getMessage(), totalNew, totalUpdated, ImportTypeEnu.PRODUCT);
                 break;
             }
             downloadCount += pageSize;
@@ -161,31 +162,49 @@ public class PlatonApiController {
                     .map(Catalog::getRc)
                     .map(Rc::getProducts)
                     .orElse(Collections.emptyList());
-            productFromXmls.stream()
+            List<Product> pageProducts = productFromXmls.stream()
                     .map(p -> platonProductMapper.mapToProduct(p, covertUrl))
                     .filter(Objects::nonNull)
-                    .forEach(dowloadProducts::add);
-            log.info("Pobrano z platona: {}", dowloadProducts.size());
+                    .toList();
+
+            UpdateProductInfo pageResult = saveProductPage(pageProducts);
+            totalNew += pageResult.getNewprod();
+            totalUpdated += pageResult.getUpdate();
+
+            log.info("Pobrano i zapisano z Platona: {} (łącznie nowych: {}, zaktualizowanych: {})",
+                    downloadCount, totalNew, totalUpdated);
         }
         while (total > downloadCount);
 
-        log.info("Pobrano wszystkie strony z Platona: {} produktów. Rozpoczynam przetwarzanie.", dowloadProducts.size());
+        if (isNull(this.data.getMessage())) {
+            saveImportRaport("OK", null, totalNew, totalUpdated, ImportTypeEnu.PRODUCT);
+        }
+        return UpdateProductInfo.builder()
+                .newprod(totalNew)
+                .update(totalUpdated)
+                .build();
+    }
 
-        List<String> dowloadEans = dowloadProducts.stream()
+    private UpdateProductInfo saveProductPage(List<Product> pageProducts) {
+        if (pageProducts.isEmpty()) {
+            return UpdateProductInfo.builder().newprod(0).update(0).build();
+        }
+
+        List<String> pageEans = pageProducts.stream()
                 .map(Product::getEan)
                 .distinct()
                 .toList();
 
         Map<String, Product> existingByEan = new HashMap<>();
-        for (int i = 0; i < dowloadEans.size(); i += 1000) {
-            List<String> batch = dowloadEans.subList(i, Math.min(i + 1000, dowloadEans.size()));
+        for (int i = 0; i < pageEans.size(); i += 1000) {
+            List<String> batch = pageEans.subList(i, Math.min(i + 1000, pageEans.size()));
             productRepository.findByEanIn(batch).forEach(p -> existingByEan.put(p.getEan(), p));
         }
 
         Map<String, Product> newByEan = new LinkedHashMap<>();
         Map<String, Product> updateByEan = new LinkedHashMap<>();
 
-        for (Product downloaded : dowloadProducts) {
+        for (Product downloaded : pageProducts) {
             String ean = downloaded.getEan();
             Product existing = existingByEan.get(ean);
             if (existing != null) {
@@ -206,17 +225,9 @@ public class PlatonApiController {
         List<Product> listOfSaveProducts = new ArrayList<>(newByEan.values());
         List<Product> productToUpdate = new ArrayList<>(updateByEan.values());
 
-        log.info("Przetworzono produkty: {} nowych, {} do aktualizacji. Zapisuję do bazy.",
-                listOfSaveProducts.size(), productToUpdate.size());
-
         productRepository.saveAll(listOfSaveProducts);
         productRepository.saveAll(productToUpdate);
 
-        log.info("Zapisano {} nowych i {} zaktualizowanych produktów.", listOfSaveProducts.size(), productToUpdate.size());
-
-        if (isNull(this.data.getMessage())) {
-            saveImportRaport("OK", null, listOfSaveProducts.size(), productToUpdate.size(), ImportTypeEnu.PRODUCT);
-        }
         return UpdateProductInfo.builder()
                 .newprod(listOfSaveProducts.size())
                 .update(productToUpdate.size())
