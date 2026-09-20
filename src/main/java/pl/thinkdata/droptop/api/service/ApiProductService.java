@@ -1,29 +1,14 @@
 package pl.thinkdata.droptop.api.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.model.product.Product;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ApiProductService {
 
-    private final ProductRepository productRepository;
-
-    public void updateAll(List<Product> updatedProducts) {
-        for (Product product : updatedProducts) {
-            updateProductByEan(product.getEan(), product);
-        }
-    }
-
-    public void updateProductByEan(String ean, Product updatedProduct) {
-        Product existingProduct = productRepository.findByEan(ean)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with EAN: " + ean));
-
+    public void applyFields(Product existingProduct, Product updatedProduct) {
         existingProduct.setTitle(updatedProduct.getTitle());
         existingProduct.setIsbn(updatedProduct.getIsbn());
         existingProduct.setReleaseDate(updatedProduct.getReleaseDate());
@@ -51,7 +36,5 @@ public class ApiProductService {
         existingProduct.setManufacturingCountryCode(updatedProduct.getManufacturingCountryCode());
         existingProduct.setDateOperator(updatedProduct.getDateOperator());
         existingProduct.setGpsrSekcja(updatedProduct.getGpsrSekcja());
-
-        productRepository.save(existingProduct);
     }
 }

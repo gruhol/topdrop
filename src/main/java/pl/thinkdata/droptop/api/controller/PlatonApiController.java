@@ -39,7 +39,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -138,10 +137,7 @@ public class PlatonApiController {
         int pageNumber = 1;
         int downloadCount = 0;
         int total;
-        List<Product> listOfSaveProducts = new ArrayList<>();
         List<Product> dowloadProducts = new ArrayList<>();
-        Set<String> notDuplatedDownloadEan = new HashSet<>();
-        List<Product> productToUpdate = new ArrayList<>();
 
         do {
             this.data = getPublictionService.get(getRequestDto(pageSize, pageNumber));
@@ -173,32 +169,50 @@ public class PlatonApiController {
         }
         while (total > downloadCount);
 
+        log.info("Pobrano wszystkie strony z Platona: {} produktów. Rozpoczynam przetwarzanie.", dowloadProducts.size());
+
         List<String> dowloadEans = dowloadProducts.stream()
                 .map(Product::getEan)
+                .distinct()
                 .toList();
 
-        Set<String> findEanInBase = IntStream.range(0, (dowloadEans.size() + 999) / 1000)
-                .mapToObj(i -> dowloadEans.subList(i * 1000, Math.min((i + 1) * 1000, dowloadEans.size())))
-                .flatMap(batch -> productRepository.findByEanIn(batch).stream())
-                .map(Product::getEan)
-                .collect(Collectors.toSet());
-
-        for (Product prod : dowloadProducts) {
-            if (findEanInBase.contains(prod.getEan())) {
-                prod.setSyncStatus(SyncStatus.TO_UPDATE);
-                productToUpdate.add(prod);
-            } else if (notDuplatedDownloadEan.contains(prod.getEan())) {
-                prod.setSyncStatus(SyncStatus.TO_UPDATE);
-                productToUpdate.add(prod);
-            } else {
-                prod.setSyncStatus(SyncStatus.NEW);
-                listOfSaveProducts.add(prod);
-            }
-            notDuplatedDownloadEan.add(prod.getEan());
+        Map<String, Product> existingByEan = new HashMap<>();
+        for (int i = 0; i < dowloadEans.size(); i += 1000) {
+            List<String> batch = dowloadEans.subList(i, Math.min(i + 1000, dowloadEans.size()));
+            productRepository.findByEanIn(batch).forEach(p -> existingByEan.put(p.getEan(), p));
         }
 
+        Map<String, Product> newByEan = new LinkedHashMap<>();
+        Map<String, Product> updateByEan = new LinkedHashMap<>();
+
+        for (Product downloaded : dowloadProducts) {
+            String ean = downloaded.getEan();
+            Product existing = existingByEan.get(ean);
+            if (existing != null) {
+                apiProductService.applyFields(existing, downloaded);
+                existing.setSyncStatus(SyncStatus.TO_UPDATE);
+                updateByEan.put(ean, existing);
+            } else {
+                Product staged = newByEan.get(ean);
+                if (staged != null) {
+                    apiProductService.applyFields(staged, downloaded);
+                } else {
+                    downloaded.setSyncStatus(SyncStatus.NEW);
+                    newByEan.put(ean, downloaded);
+                }
+            }
+        }
+
+        List<Product> listOfSaveProducts = new ArrayList<>(newByEan.values());
+        List<Product> productToUpdate = new ArrayList<>(updateByEan.values());
+
+        log.info("Przetworzono produkty: {} nowych, {} do aktualizacji. Zapisuję do bazy.",
+                listOfSaveProducts.size(), productToUpdate.size());
+
         productRepository.saveAll(listOfSaveProducts);
-        apiProductService.updateAll(productToUpdate);
+        productRepository.saveAll(productToUpdate);
+
+        log.info("Zapisano {} nowych i {} zaktualizowanych produktów.", listOfSaveProducts.size(), productToUpdate.size());
 
         if (isNull(this.data.getMessage())) {
             saveImportRaport("OK", null, listOfSaveProducts.size(), productToUpdate.size(), ImportTypeEnu.PRODUCT);
