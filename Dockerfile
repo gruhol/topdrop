@@ -3,7 +3,10 @@ RUN mkdir -p /app/data
 WORKDIR /app
 COPY target/droptop-0.0.1-SNAPSHOT.jar /app/app.jar
 EXPOSE 8080
-CMD ["sh", "-c", "java -jar \
+CMD ["sh", "-c", "java \
+  -XX:MaxRAMPercentage=75.0 \
+  -XX:InitialRAMPercentage=50.0 \
+  -jar \
   -DBASELINKER_TOKEN=$BASELINKER_TOKEN \
   -DDATABASE_IP=$DATABASE_IP \
   -DDATABASE_NAME=$DATABASE_NAME \
