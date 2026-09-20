@@ -54,9 +54,6 @@ public class AllegroFeeService extends AllegroWebClientService {
                 .orElseThrow(() -> new RuntimeException(
                         "Błąd pobrania prowizji Allegro dla kategorii: " + categoryId + ", odpowiedź: " + rawBody));
 
-        commissions.forEach(fee -> log.info("Opłata Allegro [{}] {}: {} {}",
-                fee.type(), fee.name(), fee.fee().amount(), fee.fee().currency()));
-
         return commissions.stream()
                 .map(fee -> fee.fee().amount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
