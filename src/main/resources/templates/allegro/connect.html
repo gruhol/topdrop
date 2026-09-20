@@ -93,42 +93,44 @@
         </div>
         <div class="card-body">
 
-            <div th:if="${connected}" class="d-flex align-items-center gap-3">
+            <div th:if="${pending == null and connected}" class="d-flex align-items-center gap-3 flex-wrap">
                 <span class="badge bg-success fs-6"><i class="bi bi-check-lg me-1"></i>Połączono</span>
-                <span class="text-muted">Token jest automatycznie odświeżany w tle. Ponowne logowanie potrzebne tylko, jeśli integracja nie była używana przez dłuższy czas (&gt; 3 miesiące).</span>
+                <span class="text-muted">Token jest automatycznie odświeżany w tle. Ponowne logowanie potrzebne tylko, jeśli integracja nie była używana przez dłuższy czas (&gt; 3 miesiące) albo Allegro odrzuci zapisany token.</span>
+                <form th:action="@{/admin/allegro/connect/start}" method="post">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Połącz ponownie
+                    </button>
+                </form>
             </div>
 
-            <div th:unless="${connected}">
+            <div th:if="${pending == null and !connected}">
                 <span class="badge bg-secondary fs-6 mb-3"><i class="bi bi-x-lg me-1"></i>Nie połączono</span>
+                <p class="text-muted">Aby korzystać z funkcji Allegro wymagających konta sprzedawcy (np. wyszukiwanie kategorii po EAN), trzeba raz zalogować się i zatwierdzić dostęp aplikacji.</p>
+                <form th:action="@{/admin/allegro/connect/start}" method="post">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Rozpocznij łączenie
+                    </button>
+                </form>
+            </div>
 
-                <div th:if="${pending == null}">
-                    <p class="text-muted">Aby korzystać z funkcji Allegro wymagających konta sprzedawcy (np. wyszukiwanie kategorii po EAN), trzeba raz zalogować się i zatwierdzić dostęp aplikacji.</p>
-                    <form th:action="@{/admin/allegro/connect/start}" method="post">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Rozpocznij łączenie
-                        </button>
-                    </form>
-                </div>
-
-                <div th:if="${pending != null}">
-                    <p class="mb-2">1. Otwórz poniższy link (na dowolnym urządzeniu z przeglądarką) i zaloguj się na Allegro:</p>
-                    <p>
-                        <a th:href="${pending.verificationUriComplete}" th:text="${pending.verificationUri}" target="_blank" rel="noopener"></a>
-                    </p>
-                    <p class="mb-2">2. Jeśli link nie wpisał kodu automatycznie, wpisz ręcznie:</p>
-                    <p><span class="user-code" th:text="${pending.userCode}"></span></p>
-                    <p class="mt-3 mb-2">3. Po zatwierdzeniu w Allegro kliknij poniżej:</p>
-                    <form th:action="@{/admin/allegro/connect/poll}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-arrow-repeat me-1"></i>Sprawdź, czy zatwierdzono
-                        </button>
-                    </form>
-                    <form th:action="@{/admin/allegro/connect/start}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-clockwise me-1"></i>Wygeneruj nowy kod
-                        </button>
-                    </form>
-                </div>
+            <div th:if="${pending != null}">
+                <p class="mb-2">1. Otwórz poniższy link (na dowolnym urządzeniu z przeglądarką) i zaloguj się na Allegro:</p>
+                <p>
+                    <a th:href="${pending.verificationUriComplete}" th:text="${pending.verificationUri}" target="_blank" rel="noopener"></a>
+                </p>
+                <p class="mb-2">2. Jeśli link nie wpisał kodu automatycznie, wpisz ręcznie:</p>
+                <p><span class="user-code" th:text="${pending.userCode}"></span></p>
+                <p class="mt-3 mb-2">3. Po zatwierdzeniu w Allegro kliknij poniżej:</p>
+                <form th:action="@{/admin/allegro/connect/poll}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-arrow-repeat me-1"></i>Sprawdź, czy zatwierdzono
+                    </button>
+                </form>
+                <form th:action="@{/admin/allegro/connect/start}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Wygeneruj nowy kod
+                    </button>
+                </form>
             </div>
 
         </div>
