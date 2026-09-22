@@ -19,6 +19,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findAllByTitleContaining(String keyword, Pageable pageable);
 
+    @Query("SELECT p FROM Product p " +
+            "WHERE (:status IS NULL OR p.status = :status) " +
+            "AND (:syncStatus IS NULL OR p.syncStatus = :syncStatus)")
+    Page<Product> findAllByStatusAndSyncStatus(@Param("status") String status,
+                                                @Param("syncStatus") SyncStatus syncStatus,
+                                                Pageable pageable);
+
+    @Query("SELECT DISTINCT p.status FROM Product p WHERE p.status IS NOT NULL ORDER BY p.status")
+    List<String> findDistinctStatuses();
+
     Optional<Product> findByEan(String ean);
 
     List<Product> findByEanIn(List<String> eans);

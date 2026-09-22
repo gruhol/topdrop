@@ -165,6 +165,48 @@
 
     <div class="section-card">
         <div class="card-header">
+            <i class="bi bi-funnel"></i> Filtry
+        </div>
+        <div class="p-3">
+            <form th:action="@{/admin/products}" method="get" class="row gy-2 gx-3 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-1 small text-muted">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">Wszystkie</option>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s}"
+                                th:text="${s}"
+                                th:selected="${s == selectedStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-1 small text-muted">Sync status</label>
+                    <select name="syncStatus" class="form-select form-select-sm">
+                        <option value="">Wszystkie</option>
+                        <option th:each="s : ${syncStatuses}"
+                                th:value="${s}"
+                                th:text="${s}"
+                                th:selected="${s == selectedSyncStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <input type="hidden" name="size" th:value="${pageSize}">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-funnel me-1"></i>Filtruj
+                    </button>
+                    <a th:href="@{/admin/products(size=${pageSize})}" class="btn btn-outline-secondary btn-sm">Wyczyść</a>
+                </div>
+            </form>
+            <div th:if="${selectedStatus != null or selectedSyncStatus != null}"
+                 class="alert alert-info mt-3 mb-0 py-2 px-3 small">
+                <i class="bi bi-info-circle me-1"></i>
+                Znaleziono <strong th:text="${products.totalElements}"></strong> produktów.
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="card-header">
             <i class="bi bi-table"></i> Lista produktów
         </div>
         <div class="table-responsive">
@@ -176,6 +218,7 @@
                     <th>EAN</th>
                     <th>Tytuł</th>
                     <th>Status</th>
+                    <th>Sync status</th>
                     <th>Wydawnictwo</th>
                     <th>Typ</th>
                     <th class="text-end">Cena</th>
@@ -202,6 +245,10 @@
                         <span class="badge-status bg-light text-secondary border"
                               th:text="${product.status}"></span>
                     </td>
+                    <td>
+                        <span class="badge-status bg-light text-secondary border"
+                              th:text="${product.syncStatus}"></span>
+                    </td>
                     <td th:text="${product.publisher}"></td>
                     <td><small th:text="${product.type}"></small></td>
                     <td class="text-end fw-semibold" th:text="${product.price}"></td>
@@ -225,13 +272,13 @@
         <ul class="pagination justify-content-center flex-wrap gap-1">
 
             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/products(pageNumber=${currentPage > 0 ? currentPage - 1 : 0}, size=${pageSize})}">
+                <a class="page-link" th:href="@{/admin/products(pageNumber=${currentPage > 0 ? currentPage - 1 : 0}, size=${pageSize}, status=${selectedStatus}, syncStatus=${selectedSyncStatus})}">
                     <i class="bi bi-chevron-left"></i>
                 </a>
             </li>
 
             <li class="page-item" th:classappend="${currentPage == 0} ? 'active'">
-                <a class="page-link" th:href="@{/admin/products(pageNumber=0, size=${pageSize})}">1</a>
+                <a class="page-link" th:href="@{/admin/products(pageNumber=0, size=${pageSize}, status=${selectedStatus}, syncStatus=${selectedSyncStatus})}">1</a>
             </li>
 
             <li th:each="i : ${#numbers.sequence(1, totalPages - 2)}"
@@ -239,19 +286,19 @@
                 class="page-item"
                 th:classappend="${i == currentPage} ? 'active'">
                 <a class="page-link"
-                   th:href="@{/admin/products(pageNumber=${i}, size=${pageSize})}"
+                   th:href="@{/admin/products(pageNumber=${i}, size=${pageSize}, status=${selectedStatus}, syncStatus=${selectedSyncStatus})}"
                    th:text="${i + 1}"></a>
             </li>
 
             <li class="page-item" th:if="${totalPages > 1}"
                 th:classappend="${currentPage == totalPages - 1} ? 'active'">
                 <a class="page-link"
-                   th:href="@{/admin/products(pageNumber=${totalPages - 1}, size=${pageSize})}"
+                   th:href="@{/admin/products(pageNumber=${totalPages - 1}, size=${pageSize}, status=${selectedStatus}, syncStatus=${selectedSyncStatus})}"
                    th:text="${totalPages}"></a>
             </li>
 
             <li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/admin/products(pageNumber=${currentPage + 1 < totalPages ? currentPage + 1 : totalPages - 1}, size=${pageSize})}">
+                <a class="page-link" th:href="@{/admin/products(pageNumber=${currentPage + 1 < totalPages ? currentPage + 1 : totalPages - 1}, size=${pageSize}, status=${selectedStatus}, syncStatus=${selectedSyncStatus})}">
                     <i class="bi bi-chevron-right"></i>
                 </a>
             </li>
