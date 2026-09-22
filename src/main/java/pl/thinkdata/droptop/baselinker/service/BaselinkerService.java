@@ -2,6 +2,7 @@ package pl.thinkdata.droptop.baselinker.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.component.PriceCalculator;
 import pl.thinkdata.droptop.baselinker.dto.EmptyRequest;
@@ -26,16 +27,13 @@ import pl.thinkdata.droptop.database.repository.OrderRepository;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static org.springframework.data.rest.webmvc.PersistentEntityResource.build;
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_STOCK_UPDATE;
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_UPDATE;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BaselinkerService {
 
@@ -62,17 +60,38 @@ public class BaselinkerService {
                     .counter(0)
                     .build();
         }
-        UpdateInventoryProductsPriceRequest request = new UpdateInventoryProductsPriceRequest();
+
         Inventory inventory = getInventoryService.getDefaultInventory();
         GetPriceGroupsResponse priceGroups = getPriceGroupsBaselinkerService.sendRequest(new EmptyRequest());
-        request.setProducts(toSyncProducts.stream()
+
+        List<Product> validProducts = new ArrayList<>();
+        List<ProductPriceUpdate> productPriceUpdates = new ArrayList<>();
+        for (Product product : toSyncProducts) {
+            try {
+                productPriceUpdates.add(mapToProductPriceUpdate(product, priceGroups));
+                validProducts.add(product);
+            } catch (Exception e) {
+                log.error("Exception while calculating price for product id={}, ean={} -> {}",
+                        product.getId(), product.getEan(), e.getMessage(), e);
+                product.setSyncStatus(SyncStatus.ERROR);
+                productRepository.save(product);
+            }
+        }
+
+        if (validProducts.isEmpty()) {
+            return UpdateInventoryProductsStockAndPriceResponse.builder()
+                    .status("EMPTY")
+                    .counter(0)
+                    .build();
+        }
+
+        UpdateInventoryProductsPriceRequest request = new UpdateInventoryProductsPriceRequest();
+        request.setProducts(validProducts.stream()
                 .map(Product::getEan)
                 .toList());
         request.setRequest(UpdateInventoryProductsPrice.builder()
                 .inventoryId(inventory.getInventoryId())
-                .productPriceUpdate(toSyncProducts.stream()
-                        .map(product -> mapToProductPriceUpdate(product, priceGroups))
-                        .toList())
+                .productPriceUpdate(productPriceUpdates)
                 .build());
         return updateInventoryProductsPricesBaselinkerService.sendRequest(request);
     }

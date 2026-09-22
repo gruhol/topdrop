@@ -72,14 +72,7 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
             throw new NotFoundFileToExportException("Nie ma takich produktów");
 
         Set<AddProductResponse> productsSend = productsToSend.stream()
-                .map(product -> new RequestWithProduct(
-                        AddProductRequest.builder()
-                                .productDto(productMapper.map(product, inventory, priceGroups.getPriceGroups()))
-                                .product(product)
-                                .build(),
-                        product
-                ))
-                .map(pair -> sendAndChangeStatus(pair.request(), pair.product()))
+                .map(product -> mapAndSend(product, inventory, priceGroups))
                 .collect(Collectors.toSet());
 
         if (!productsSend.isEmpty()) {
@@ -90,6 +83,26 @@ public class AddInventoryProductBaselinkerService extends BaselinkerWebClientSer
         return AddProductResponse.builder()
                 .status("ERROR")
                 .build();
+    }
+
+    private AddProductResponse mapAndSend(Product product, Inventory inventory, GetPriceGroupsResponse priceGroups) {
+        try {
+            AddProductRequest request = AddProductRequest.builder()
+                    .productDto(productMapper.map(product, inventory, priceGroups.getPriceGroups()))
+                    .product(product)
+                    .build();
+            return sendAndChangeStatus(request, product);
+        } catch (Exception e) {
+            log.error("Exception while mapping product id={}, ean={} -> {}",
+                    product.getId(), product.getEan(), e.getMessage(), e);
+
+            product.setSyncStatus(SyncStatus.ERROR);
+            productRepository.save(product);
+
+            return AddProductResponse.builder()
+                    .status("ERROR")
+                    .build();
+        }
     }
 
     private AddProductResponse sendAndChangeStatus(AddProductRequest request, Product product) {
