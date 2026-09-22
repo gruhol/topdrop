@@ -32,6 +32,7 @@ public class AllegroPriceCalculator {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             commission = feeService.getCommission(categoryId, finalPrice);
             BigDecimal newPrice = base.add(commission).setScale(2, RoundingMode.HALF_UP);
+            log.info("Iteracja {} dla {}: cena={}, prowizja={}, nowa cena={}", i, ean, finalPrice, commission, newPrice);
             if (newPrice.compareTo(finalPrice) == 0) {
                 break;
             }

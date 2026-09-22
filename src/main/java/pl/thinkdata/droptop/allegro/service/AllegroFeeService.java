@@ -41,6 +41,8 @@ public class AllegroFeeService extends AllegroWebClientService {
             throw new RuntimeException("Allegro API error " + e.getStatusCode() + ": " + e.getResponseBodyAsString(), e);
         }
 
+        log.info("Allegro fee-preview dla kategorii {} i ceny {}: {}", categoryId, price, rawBody);
+
         FeePreviewResponse response;
         try {
             response = new ObjectMapper().readValue(rawBody, FeePreviewResponse.class);
