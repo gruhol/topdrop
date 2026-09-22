@@ -3,6 +3,7 @@ package pl.thinkdata.droptop.baselinker.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.thinkdata.droptop.baselinker.component.PriceCalculator;
 import pl.thinkdata.droptop.baselinker.dto.EmptyRequest;
 import pl.thinkdata.droptop.baselinker.dto.GetPriceGroupsResponse;
 import pl.thinkdata.droptop.baselinker.dto.Inventory;
@@ -23,12 +24,14 @@ import pl.thinkdata.droptop.database.model.product.Product;
 import pl.thinkdata.droptop.database.model.product.SyncStatus;
 import pl.thinkdata.droptop.database.repository.OrderRepository;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.data.rest.webmvc.PersistentEntityResource.build;
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_STOCK_UPDATE;
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_UPDATE;
 
@@ -47,6 +50,7 @@ public class BaselinkerService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final CreatePackageManualBaselinkerService createPackageManualBaselinkerService;
+    private final PriceCalculator priceCalculator;
 
 
     public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
@@ -139,6 +143,11 @@ public class BaselinkerService {
     }
 
     private ProductPriceUpdate mapToProductPriceUpdate(Product product, GetPriceGroupsResponse priceGroups) {
+        BigDecimal finalPrice = priceCalculator.calculateWholesalesPrice(
+                product.getEan(),
+                product.getLatestOffer().getWholesaleNetPrice(),
+                product.getLatestOffer().getWholesaleGrossPrice());
+
         return ProductPriceUpdate.builder()
                 .productId(product.getExportLog().getBaselinkerId())
                 .price(List.of(PriceGroup.builder()
@@ -146,7 +155,7 @@ public class BaselinkerService {
                                 .filter(name -> name.getName().equals(HURTOWA))
                                 .map(PriceGroupBaseLinker::getPriceGroupId)
                                 .findFirst().orElse(0L))
-                        .price(product.getLatestOffer().getWholesaleGrossPrice())
+                        .price(finalPrice.doubleValue())
                         .build()))
                 .build();
     }
