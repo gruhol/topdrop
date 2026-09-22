@@ -115,8 +115,7 @@ public class BaselinkerExportScheduled {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendPriceUpdate();
             if("SUCCESS".equals(result.getStatus())) {
                 log.info("Zaktualizowane ceny: {} Data: {}", result.getCounter(), getCorrentDate());
-            }
-            if("EMPTY".equals(result.getStatus())) {
+            } else if("EMPTY".equals(result.getStatus())) {
                 log.info("Brak produktów do aktualizacji ceny. Data: {}", getCorrentDate());
             }
             else log.warn("Błąd aktualizacji cen: status={} Data: {}", result.getStatus(), getCorrentDate());

@@ -3,6 +3,7 @@ package pl.thinkdata.droptop.common.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import pl.thinkdata.droptop.database.model.product.Product;
@@ -43,4 +44,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.ean IN :eans")
     List<Product> findByEanIn(@Param("eans") Set<String> eans);
+
+    @Modifying
+    @Query("UPDATE Product p SET p.syncStatus = :newStatus " +
+            "WHERE p.syncStatus = :currentStatus " +
+            "AND p.id IN (SELECT e.product.id FROM BaselinkerExportLog e)")
+    int markExportedForPriceUpdate(@Param("currentStatus") SyncStatus currentStatus,
+                                   @Param("newStatus") SyncStatus newStatus);
 }

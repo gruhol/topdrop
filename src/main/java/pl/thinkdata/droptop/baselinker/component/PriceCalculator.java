@@ -1,6 +1,5 @@
 package pl.thinkdata.droptop.baselinker.component;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,18 +17,12 @@ public class PriceCalculator {
     private final SystemSettingService systemSettingService;
     private final AllegroPriceCalculator allegroPriceCalculator;
 
-    private BigDecimal packingCost;
-    private BigDecimal baselinkerOrderCost;
-    private BigDecimal global_margin;
-
-    @PostConstruct
-    void init() {
-        packingCost = BigDecimal.valueOf(systemSettingService.getValue("packing_cost", Double.class));
-        baselinkerOrderCost = BigDecimal.valueOf(systemSettingService.getValue("baselinker_markup_per_order", Double.class));
-        global_margin = BigDecimal.valueOf(systemSettingService.getValue("global_margin", Double.class));
-    }
-
     public BigDecimal calculateWholesalesPrice(String ean, double nettPrice, double grossPrice) {
+        // ustawienia czytane przy każdym wyliczeniu, żeby zmiana w panelu działała bez restartu
+        BigDecimal packingCost = getSetting(SystemSettingService.PACKING_COST);
+        BigDecimal baselinkerOrderCost = getSetting(SystemSettingService.BASELINKER_MARKUP_PER_ORDER);
+        BigDecimal globalMargin = getSetting(SystemSettingService.GLOBAL_MARGIN);
+
         BigDecimal nett = BigDecimal.valueOf(nettPrice);
 
         // stawka VAT wyliczona z pary nett/gross, więc działa dla 23%, 8%, 5%...
@@ -38,7 +31,7 @@ public class PriceCalculator {
 
         // baza netto = cena × (1 + marża) + koszt zamówienia + pakowanie
         BigDecimal baseNett = nett
-                .multiply(BigDecimal.ONE.add(global_margin))
+                .multiply(BigDecimal.ONE.add(globalMargin))
                 .add(baselinkerOrderCost)
                 .add(packingCost);
 
@@ -46,5 +39,9 @@ public class PriceCalculator {
 
         return allegroPriceCalculator.calculatePriceWithCommission(ean, baseGross)
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal getSetting(String key) {
+        return BigDecimal.valueOf(systemSettingService.getValue(key, Double.class));
     }
 }
