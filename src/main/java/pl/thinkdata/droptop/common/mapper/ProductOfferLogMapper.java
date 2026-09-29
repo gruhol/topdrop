@@ -14,20 +14,31 @@ public class ProductOfferLogMapper {
                 .wholesaleNetPrice(record.getNetPrice())
                 .wholesaleGrossPrice(record.getGrossPrice())
                 .discountPercent(record.getDiscount())
-                .stock(convertToStock(record.getQuantity2()))
+                .stock(convertToStock(record.getQuantity2() != null ? record.getQuantity2() : record.getQuantity()))
                 .fetchedAt(LocalDateTime.now())
                 .build();
     }
 
     private static Integer convertToStock(String quantity) {
-        return switch (quantity) {
+        if (quantity == null || quantity.isBlank()) {
+            return 0;
+        }
+        return switch (quantity.trim()) {
             case "201-250" -> 201;
             case "251-300" -> 251;
             case "301-500" -> 301;
             case "501-1000" -> 501;
             case ">1000" -> 1001;
-            default -> Integer.parseInt(quantity);
+            default -> parseStock(quantity.trim());
         };
+    }
+
+    private static Integer parseStock(String quantity) {
+        try {
+            return Integer.parseInt(quantity);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
 

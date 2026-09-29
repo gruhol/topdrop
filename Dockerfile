@@ -6,6 +6,7 @@ EXPOSE 8080
 CMD ["sh", "-c", "java \
   -XX:MaxRAMPercentage=75.0 \
   -XX:InitialRAMPercentage=50.0 \
+  -XX:-OmitStackTraceInFastThrow \
   -jar \
   -DBASELINKER_TOKEN=$BASELINKER_TOKEN \
   -DDATABASE_IP=$DATABASE_IP \

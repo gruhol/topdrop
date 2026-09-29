@@ -83,8 +83,12 @@ public class BaselinkerExportScheduled {
     @Scheduled(cron = "0 0 */3 * * *", zone = "Europe/Warsaw")
     public void platonAutoImportProducts() {
         if (sync_enabled) {
-            UpdateProductInfo info = platonApiController.getProductsFromApi(10000);
-            log.info("Inport produktów z Platon: nowe produty {}, zaaktualizowane: {}", info.getNewprod() ,info.getUpdate());
+            try {
+                UpdateProductInfo info = platonApiController.getProductsFromApi(10000);
+                log.info("Inport produktów z Platon: nowe produty {}, zaaktualizowane: {}", info.getNewprod() ,info.getUpdate());
+            } catch (Exception e) {
+                log.error("Błąd importu produktów z Platon. Data: {}", getCorrentDate(), e);
+            }
         } else {
             log.info("Import produktów wyłączony. Data: {}", getCorrentDate());
         }
@@ -93,8 +97,12 @@ public class BaselinkerExportScheduled {
     @Scheduled(cron = "0 0 * * * *", zone = "Europe/Warsaw")
     public void platonAutoImportStock() {
         if (sync_enabled) {
-            int stockUpdateCount = platonApiController.getStockFromApi(10000);
-            log.info("Inport stanów z Platon: {} nowych rekordów.", stockUpdateCount);
+            try {
+                int stockUpdateCount = platonApiController.getStockFromApi(10000);
+                log.info("Inport stanów z Platon: {} nowych rekordów.", stockUpdateCount);
+            } catch (Exception e) {
+                log.error("Błąd importu stanów z Platon. Data: {}", getCorrentDate(), e);
+            }
         } else {
             log.info("Import stanów wyłączony. Data: {}", getCorrentDate());
         }

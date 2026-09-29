@@ -83,6 +83,7 @@ public class PlatonApiController {
         int downloadCount = 0;
         int total = 0;
         int totalStockSave = 0;
+        boolean failed = false;
         do {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
@@ -93,10 +94,17 @@ public class PlatonApiController {
             this.data = getStockService.get(getStocksDto);
             if (!isNull(data.getMessage())) {
                 saveImportRaport("Error", data.getMessage(), 0, 0, ImportTypeEnu.STOCK);
+                failed = true;
+                break;
+            }
+            if (isNull(data.getStock())) {
+                saveImportRaport("Error", "Brak danych o stanach w odpowiedzi Platon", 0, 0, ImportTypeEnu.STOCK);
+                failed = true;
                 break;
             }
             if (data.getStock().getRecords() != null && !data.getStock().getRecords().isEmpty()) {
                 List<ProductOfferLog> stockToSave = data.getStock().getRecords().stream()
+                        .filter(record -> nonNull(record.getEan()))
                         .map(record -> map(record, "platon"))
                         .toList();
                 List<ProductOfferLog> productOfferLogs = productOfferLogRepository.saveAll(stockToSave);
@@ -132,7 +140,7 @@ public class PlatonApiController {
             pageNumber++;
         } while (total > downloadCount);
 
-        if (isNull(this.data.getMessage())) {
+        if (!failed) {
             saveImportRaport("OK", null, totalStockSave, 0, ImportTypeEnu.STOCK);
         }
         return totalStockSave;
@@ -255,9 +263,10 @@ public class PlatonApiController {
 
     private void changeStatus(Product p) {
         if (nonNull(p.getExportLog())) {
-            if (p.getOffers() != null && p.getOffers().size() > 2) {
+            if (p.getOffers() != null && p.getOffers().size() >= 2) {
                 List<ProductOfferLog> sorted = p.getOffers().stream()
-                        .sorted(Comparator.comparing(ProductOfferLog::getFetchedAt).reversed())
+                        .sorted(Comparator.comparing(ProductOfferLog::getFetchedAt,
+                                Comparator.nullsFirst(Comparator.<LocalDateTime>naturalOrder())).reversed())
                         .toList();
                 ProductOfferLog now = sorted.get(0);
                 ProductOfferLog old = sorted.get(1);
@@ -281,11 +290,11 @@ public class PlatonApiController {
     }
 
     private boolean productChangePrice(ProductOfferLog now, ProductOfferLog old) {
-        return !now.getWholesaleNetPrice().equals(old.getWholesaleNetPrice());
+        return !Objects.equals(now.getWholesaleNetPrice(), old.getWholesaleNetPrice());
     }
 
     private boolean productChangeStock(ProductOfferLog now, ProductOfferLog old) {
-        return !now.getStock().equals(old.getStock());
+        return !Objects.equals(now.getStock(), old.getStock());
     }
 
     private boolean productChangePriceAndStock(ProductOfferLog now, ProductOfferLog old) {

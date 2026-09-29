@@ -10,10 +10,14 @@ import java.util.Set;
 
 public interface ProductOfferLogRepository extends JpaRepository<ProductOfferLog, Long> {
 
-    @Query("""
-    SELECT o FROM ProductOfferLog o 
-    WHERE o.productEan IN :eans 
-    ORDER BY o.fetchedAt DESC
-    """)
+    // 2 najnowsze oferty dla każdego EAN (nazwa metody nie nakłada limitu przy @Query)
+    @Query(value = """
+    SELECT * FROM (
+        SELECT o.*, ROW_NUMBER() OVER (PARTITION BY o.product_ean ORDER BY o.fetched_at DESC, o.id DESC) AS rn
+        FROM product_offer_log o
+        WHERE o.product_ean IN (:eans)
+    ) ranked
+    WHERE ranked.rn <= 2
+    """, nativeQuery = true)
     List<ProductOfferLog> findTop2OffersByEans(@Param("eans") Set<String> eans);
 }
