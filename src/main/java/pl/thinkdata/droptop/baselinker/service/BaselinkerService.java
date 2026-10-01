@@ -22,15 +22,13 @@ import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.mapper.OrderMapper;
 import pl.thinkdata.droptop.database.model.order.Order;
 import pl.thinkdata.droptop.database.model.product.Product;
-import pl.thinkdata.droptop.database.model.product.SyncStatus;
 import pl.thinkdata.droptop.database.repository.OrderRepository;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 
-import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_STOCK_UPDATE;
-import static pl.thinkdata.droptop.database.model.product.SyncStatus.PRICE_UPDATE;
+import static pl.thinkdata.droptop.database.model.product.SyncStatus.*;
 
 @Service
 @Slf4j
@@ -52,8 +50,8 @@ public class BaselinkerService {
 
 
     public UpdateInventoryProductsStockAndPriceResponse sendPriceUpdate() {
-        //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
-        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(144L, List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
+        //List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(144L, List.of(PRICE_UPDATE, PRICE_STOCK_UPDATE));
         if (toSyncProducts.isEmpty()) {
             return UpdateInventoryProductsStockAndPriceResponse.builder()
                     .status("EMPTY")
@@ -73,7 +71,7 @@ public class BaselinkerService {
             } catch (Exception e) {
                 log.error("Exception while calculating price for product id={}, ean={} -> {}",
                         product.getId(), product.getEan(), e.getMessage(), e);
-                product.setSyncStatus(SyncStatus.ERROR);
+                product.setSyncStatus(ERROR);
                 productRepository.save(product);
             }
         }
@@ -97,8 +95,8 @@ public class BaselinkerService {
     }
 
     public UpdateInventoryProductsStockAndPriceResponse sendStockUpdate() {
-        //List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(SyncStatus.STOCK_UPDATE));
-        List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(144L, List.of(SyncStatus.STOCK_UPDATE));
+        List<Product> toSyncProducts = productRepository.findTop1000ByExportLogIsNotNullAndSyncStatusIn(List.of(STOCK_UPDATE));
+        //List<Product> toSyncProducts = productRepository.findTop1000ByCategory_IdAndExportLogIsNotNullAndSyncStatusIn(144L, List.of(SyncStatus.STOCK_UPDATE));
         if (toSyncProducts.isEmpty()) {
             return UpdateInventoryProductsStockAndPriceResponse.builder()
                     .status("EMPTY")
