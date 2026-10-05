@@ -18,8 +18,10 @@ import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.ProductP
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPrice;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsStock.*;
+import pl.thinkdata.droptop.common.repository.ProductOfferLogRepository;
 import pl.thinkdata.droptop.common.repository.ProductRepository;
 import pl.thinkdata.droptop.database.mapper.OrderMapper;
+import pl.thinkdata.droptop.database.model.ProductOfferLog;
 import pl.thinkdata.droptop.database.model.order.Order;
 import pl.thinkdata.droptop.database.model.product.Product;
 import pl.thinkdata.droptop.database.repository.OrderRepository;
@@ -27,6 +29,9 @@ import pl.thinkdata.droptop.database.repository.OrderRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static pl.thinkdata.droptop.database.model.product.SyncStatus.*;
 
@@ -40,6 +45,7 @@ public class BaselinkerService {
     private final GetInventoryBaselinkerService getInventoryService;
     private final GetPriceGroupsBaselinkerService getPriceGroupsBaselinkerService;
     private final ProductRepository productRepository;
+    private final ProductOfferLogRepository productOfferLogRepository;
     private final UpdateInventoryProductsPricesBaselinkerService updateInventoryProductsPricesBaselinkerService;
     private final UpdateInventoryProductsStockBaselinkerService updateInventoryProductsStockBaselinkerService;
     private final GetOrdersBaselinkerService getOrdersBaselinkerService;
@@ -61,12 +67,13 @@ public class BaselinkerService {
 
         Inventory inventory = getInventoryService.getDefaultInventory();
         GetPriceGroupsResponse priceGroups = getPriceGroupsBaselinkerService.sendRequest(new EmptyRequest());
+        Map<String, ProductOfferLog> latestOffers = getLatestOffersByEan(toSyncProducts);
 
         List<Product> validProducts = new ArrayList<>();
         List<ProductPriceUpdate> productPriceUpdates = new ArrayList<>();
         for (Product product : toSyncProducts) {
             try {
-                productPriceUpdates.add(mapToProductPriceUpdate(product, priceGroups));
+                productPriceUpdates.add(mapToProductPriceUpdate(product, getOffer(product, latestOffers), priceGroups));
                 validProducts.add(product);
             } catch (Exception e) {
                 log.error("Exception while calculating price for product id={}, ean={} -> {}",
@@ -103,16 +110,37 @@ public class BaselinkerService {
                     .counter(0)
                     .build();
         }
-        UpdateInventoryProductsStockRequest request = new UpdateInventoryProductsStockRequest();
         Inventory inventory = getInventoryService.getDefaultInventory();
-        request.setProducts(toSyncProducts.stream()
+        Map<String, ProductOfferLog> latestOffers = getLatestOffersByEan(toSyncProducts);
+
+        List<Product> validProducts = new ArrayList<>();
+        List<ProductStockUpdate> productStockUpdates = new ArrayList<>();
+        for (Product product : toSyncProducts) {
+            try {
+                productStockUpdates.add(mapToProductStockUpdate(product, getOffer(product, latestOffers), inventory));
+                validProducts.add(product);
+            } catch (Exception e) {
+                log.error("Exception while preparing stock for product id={}, ean={} -> {}",
+                        product.getId(), product.getEan(), e.getMessage(), e);
+                product.setSyncStatus(ERROR);
+                productRepository.save(product);
+            }
+        }
+
+        if (validProducts.isEmpty()) {
+            return UpdateInventoryProductsStockAndPriceResponse.builder()
+                    .status("EMPTY")
+                    .counter(0)
+                    .build();
+        }
+
+        UpdateInventoryProductsStockRequest request = new UpdateInventoryProductsStockRequest();
+        request.setProducts(validProducts.stream()
                 .map(Product::getEan)
                 .toList());
         request.setRequest(UpdateInventoryProductsStock.builder()
                 .inventoryId(inventory.getInventoryId())
-                .productStockUpdate(toSyncProducts.stream()
-                        .map(product -> mapToProductStockUpdate(product, inventory))
-                        .toList())
+                .productStockUpdate(productStockUpdates)
                 .build());
         return updateInventoryProductsStockBaselinkerService.sendRequest(request);
     }
@@ -159,11 +187,30 @@ public class BaselinkerService {
         }
     }
 
-    private ProductPriceUpdate mapToProductPriceUpdate(Product product, GetPriceGroupsResponse priceGroups) {
+    // oferty pobierane osobnym zapytaniem, bo Product.offers jest LAZY, a metody wołane są ze schedulera bez sesji
+    private Map<String, ProductOfferLog> getLatestOffersByEan(List<Product> products) {
+        Set<String> eans = products.stream()
+                .map(Product::getEan)
+                .collect(Collectors.toSet());
+        return productOfferLogRepository.findTop2OffersByEans(eans).stream()
+                .collect(Collectors.toMap(ProductOfferLog::getProductEan, Function.identity(),
+                        BinaryOperator.maxBy(Comparator.comparing(ProductOfferLog::getFetchedAt,
+                                Comparator.nullsFirst(Comparator.naturalOrder())))));
+    }
+
+    private ProductOfferLog getOffer(Product product, Map<String, ProductOfferLog> latestOffers) {
+        ProductOfferLog offer = latestOffers.get(product.getEan());
+        if (offer == null) {
+            throw new IllegalStateException("No offer found for ean=" + product.getEan());
+        }
+        return offer;
+    }
+
+    private ProductPriceUpdate mapToProductPriceUpdate(Product product, ProductOfferLog offer, GetPriceGroupsResponse priceGroups) {
         BigDecimal finalPrice = priceCalculator.calculateWholesalesPrice(
                 product.getEan(),
-                product.getLatestOffer().getWholesaleNetPrice(),
-                product.getLatestOffer().getWholesaleGrossPrice());
+                offer.getWholesaleNetPrice(),
+                offer.getWholesaleGrossPrice());
 
         return ProductPriceUpdate.builder()
                 .productId(product.getExportLog().getBaselinkerId())
@@ -177,12 +224,12 @@ public class BaselinkerService {
                 .build();
     }
 
-    private ProductStockUpdate mapToProductStockUpdate(Product product, Inventory inventory) {
+    private ProductStockUpdate mapToProductStockUpdate(Product product, ProductOfferLog offer, Inventory inventory) {
         return ProductStockUpdate.builder()
                 .productId(product.getExportLog().getBaselinkerId())
                 .stocks(List.of(WarehouseStock.builder()
                         .warehouseId(inventory.getDefaultWarehouse())
-                        .stock(product.getLatestOffer().getStock())
+                        .stock(offer.getStock())
                         .build()))
                 .build();
     }
