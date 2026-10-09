@@ -112,7 +112,11 @@ public class BaselinkerExportScheduled {
     public void baselinkerEsportStock() {
         if (sync_enabled) {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendStockUpdate();
-            if("SUCCESS".equals(result.getStatus())) log.info("Zaktualizowane stany: {} Data: {}", result.getCounter(), getCorrentDate());
+            if("SUCCESS".equals(result.getStatus())) {
+                log.info("Zaktualizowane stany: {} Data: {}", result.getCounter(), getCorrentDate());
+            } else if("EMPTY".equals(result.getStatus())) {
+                log.info("Brak produktów do aktualizacji stanów. Data: {}", getCorrentDate());
+            }
             else log.warn("Błąd aktualizacji stanów: status={} Data: {}", result.getStatus(), getCorrentDate());
         }
     }
