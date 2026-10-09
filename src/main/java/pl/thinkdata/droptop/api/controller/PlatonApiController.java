@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import pl.thinkdata.droptop.api.dto.GetPublicationsDto;
 import pl.thinkdata.droptop.api.dto.GetStocksDto;
 import pl.thinkdata.droptop.api.dto.PlatonResponse;
@@ -64,21 +65,26 @@ public class PlatonApiController {
     PlatonResponse data;
 
     @GetMapping("/getstocks")
-    public String getStockFromApi(Model model) {
-        int stockCount = getStockFromApi(10000);
+    public String getStockFromApi(@RequestParam(defaultValue = "0") int full, Model model) {
+        int stockCount = getStockFromApi(10000, full == 1);
         model.addAttribute("updated", stockCount);
         return "api/get_stocks";
     }
 
     @GetMapping("/getproducts")
-    public String getProductsFromApi(Model model) {
-        UpdateProductInfo productsFromApi = getProductsFromApi(10000);
+    public String getProductsFromApi(@RequestParam(defaultValue = "0") int full, Model model) {
+        UpdateProductInfo productsFromApi = getProductsFromApi(10000, full == 1);
         model.addAttribute("newprod", productsFromApi.getNewprod());
         model.addAttribute("update", productsFromApi.getUpdate());
         return "api/get_products";
     }
 
     public int getStockFromApi(int pageSize) {
+        return getStockFromApi(pageSize, false);
+    }
+
+    public int getStockFromApi(int pageSize, boolean fullImport) {
+        LocalDateTime lastChangeDate = fullImport ? null : getLastUpdate(ImportTypeEnu.STOCK);
         int pageNumber = 1;
         int downloadCount = 0;
         int total = 0;
@@ -88,7 +94,7 @@ public class PlatonApiController {
             GetStocksDto getStocksDto = GetStocksDto.builder()
                     .pageNo(pageNumber)
                     .pageSize(pageSize)
-                    .lastChangeDate(getLastUpdate(ImportTypeEnu.STOCK))
+                    .lastChangeDate(lastChangeDate)
                     .transactionNumber(1)
                     .build();
             this.data = getStockService.get(getStocksDto);
@@ -147,6 +153,11 @@ public class PlatonApiController {
     }
 
     public UpdateProductInfo getProductsFromApi(int pageSize) {
+        return getProductsFromApi(pageSize, false);
+    }
+
+    public UpdateProductInfo getProductsFromApi(int pageSize, boolean fullImport) {
+        LocalDateTime lastChangeDate = fullImport ? null : getLastUpdate(ImportTypeEnu.PRODUCT);
         int pageNumber = 1;
         int downloadCount = 0;
         int total;
@@ -154,7 +165,7 @@ public class PlatonApiController {
         int totalUpdated = 0;
 
         do {
-            this.data = getPublictionService.get(getRequestDto(pageSize, pageNumber));
+            this.data = getPublictionService.get(getRequestDto(pageSize, pageNumber, lastChangeDate));
 
             String covertUrl = Optional.ofNullable(this.data.getCatalog())
                     .map(Catalog::getRc)
@@ -252,11 +263,11 @@ public class PlatonApiController {
                 .build();
     }
 
-    private GetPublicationsDto getRequestDto(int pageSize, int pageNumber) {
+    private GetPublicationsDto getRequestDto(int pageSize, int pageNumber, LocalDateTime lastChangeDate) {
         return GetPublicationsDto.builder()
                 .pageNo(pageNumber)
                 .pageSize(pageSize)
-                .lastChangeDate(getLastUpdate(ImportTypeEnu.PRODUCT))
+                .lastChangeDate(lastChangeDate)
                 .transactionNumber(1)
                 .build();
     }
