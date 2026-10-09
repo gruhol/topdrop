@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice.UpdateInventoryProductsPriceRequest;
@@ -13,9 +14,13 @@ import pl.thinkdata.droptop.database.model.product.Product;
 import pl.thinkdata.droptop.database.model.product.SyncStatus;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UpdateInventoryProductsPricesBaselinkerService
         extends BaselinkerWebClientService
@@ -38,10 +43,8 @@ public class UpdateInventoryProductsPricesBaselinkerService
             return Optional.ofNullable(response)
                     .map(res -> {
                         UpdateInventoryProductsStockAndPriceResponse updateInventoryPrice = mapToResponse(res, UpdateInventoryProductsStockAndPriceResponse.class);
-                        if(updateInventoryPrice.getCounter() == request.getProducts().size()) {
-                            List<Product> products = productRepository.findByEanIn(request.getProducts());
-                            products.forEach(prod -> prod.setSyncStatus(getSyncStatus(prod)));
-                            productRepository.saveAll(products);
+                        if ("SUCCESS".equals(updateInventoryPrice.getStatus())) {
+                            updateStatuses(request.getProducts(), updateInventoryPrice.getWarnings());
                         }
                         return updateInventoryPrice;
                     })
@@ -56,5 +59,32 @@ public class UpdateInventoryProductsPricesBaselinkerService
             return SyncStatus.STOCK_UPDATE;
         }
         return SyncStatus.SYNCED;
+    }
+
+    // produkty odrzucone przez Baselinker (warnings) dostają ERROR, reszta partii jest oznaczana jako wysłana,
+    // żeby jeden błędny produkt nie blokował całej partii w kolejce
+    private void updateStatuses(List<String> eans, Map<String, Object> warnings) {
+        Set<String> rejectedIds = Optional.ofNullable(warnings)
+                .map(Map::keySet)
+                .orElse(Set.of())
+                .stream()
+                .map(key -> key.split(":")[0])
+                .collect(Collectors.toSet());
+        if (!rejectedIds.isEmpty()) {
+            log.warn("Baselinker warnings: {}", warnings);
+        }
+
+        List<Product> products = productRepository.findByEanIn(eans);
+        products.forEach(prod -> {
+            String baselinkerId = String.valueOf(prod.getExportLog().getBaselinkerId());
+            if (rejectedIds.contains(baselinkerId)) {
+                log.warn("Baselinker rejected price update for product id={}, ean={}, baselinkerId={}: {}",
+                        prod.getId(), prod.getEan(), baselinkerId, warnings.get(baselinkerId));
+                prod.setSyncStatus(SyncStatus.ERROR);
+            } else {
+                prod.setSyncStatus(getSyncStatus(prod));
+            }
+        });
+        productRepository.saveAll(products);
     }
 }

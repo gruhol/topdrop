@@ -108,7 +108,7 @@ public class BaselinkerExportScheduled {
         }
     }
 
-    @Scheduled(cron = "0 10/10 * * * *", zone = "Europe/Warsaw")
+    @Scheduled(cron = "0 0/5 * * * *", zone = "Europe/Warsaw")
     public void baselinkerEsportStock() {
         if (sync_enabled) {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendStockUpdate();
@@ -117,7 +117,7 @@ public class BaselinkerExportScheduled {
         }
     }
 
-    @Scheduled(cron = "0 5/10 * * * *", zone = "Europe/Warsaw")
+    @Scheduled(cron = "0 2/5 * * * *", zone = "Europe/Warsaw")
     public void baselinkerEsportPrice() {
         if (sync_enabled) {
             UpdateInventoryProductsStockAndPriceResponse result = baselinkerService.sendPriceUpdate();
