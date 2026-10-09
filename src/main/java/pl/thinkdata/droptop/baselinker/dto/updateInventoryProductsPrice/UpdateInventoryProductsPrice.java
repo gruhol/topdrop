@@ -1,6 +1,7 @@
 package pl.thinkdata.droptop.baselinker.dto.updateInventoryProductsPrice;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 @AllArgsConstructor
+@JsonSerialize(using = UpdateInventoryProductsPriceSerializer.class)
 public class UpdateInventoryProductsPrice {
 
     @JsonProperty("inventory_id")

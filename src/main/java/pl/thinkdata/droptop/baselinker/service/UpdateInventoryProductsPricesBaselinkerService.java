@@ -75,6 +75,14 @@ public class UpdateInventoryProductsPricesBaselinkerService
         }
 
         List<Product> products = productRepository.findByEanIn(eans);
+        Set<String> sentIds = products.stream()
+                .map(prod -> String.valueOf(prod.getExportLog().getBaselinkerId()))
+                .collect(Collectors.toSet());
+        if (!sentIds.containsAll(rejectedIds)) {
+            // ostrzeżenia dotyczą ID, których nie wysłaliśmy – nie wiadomo, które produkty przeszły, więc statusy zostają bez zmian
+            log.error("Baselinker warnings do not match sent product ids, statuses not changed");
+            return;
+        }
         products.forEach(prod -> {
             String baselinkerId = String.valueOf(prod.getExportLog().getBaselinkerId());
             if (rejectedIds.contains(baselinkerId)) {
