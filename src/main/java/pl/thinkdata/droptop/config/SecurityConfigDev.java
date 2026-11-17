@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -20,7 +21,8 @@ public class SecurityConfigDev {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/csv/**", "/login").permitAll()
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.ASYNC).permitAll()
+                        .requestMatchers("/", "/csv/**", "/login", "/error").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().hasRole("ADMIN")
                 )
