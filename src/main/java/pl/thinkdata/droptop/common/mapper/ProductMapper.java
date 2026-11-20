@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.common.mapper;
 
+import pl.thinkdata.droptop.common.utils.EanNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class ProductMapper {
 
 
         return Product.builder()
-                .ean(product.getEan())
+                .ean(EanNormalizer.normalize(product.getEan()))
                 .isbn(product.getIsbn())
                 .title(product.getTitle())
                 .releaseDate(product.getReleaseDate())

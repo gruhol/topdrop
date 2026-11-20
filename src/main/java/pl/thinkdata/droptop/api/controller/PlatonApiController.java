@@ -1,5 +1,6 @@
 package pl.thinkdata.droptop.api.controller;
 
+import pl.thinkdata.droptop.common.utils.EanNormalizer;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -181,6 +182,9 @@ public class PlatonApiController {
                 .mapToObj(i -> dowloadEans.subList(i * 1000, Math.min((i + 1) * 1000, dowloadEans.size())))
                 .flatMap(batch -> productRepository.findByEanIn(batch).stream())
                 .map(Product::getEan)
+                .filter(Objects::nonNull)
+                // w bazie mogą być EAN-y z twardą spacją itp. - porównujemy znormalizowane
+                .map(EanNormalizer::normalize)
                 .collect(Collectors.toSet());
 
         for (Product prod : dowloadProducts) {
