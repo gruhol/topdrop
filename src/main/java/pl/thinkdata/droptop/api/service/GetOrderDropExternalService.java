@@ -11,7 +11,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 
-import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
 import static pl.thinkdata.droptop.common.utils.PlatonXMLGenerator.*;
 
 @Service
@@ -34,22 +33,10 @@ public class GetOrderDropExternalService extends BaseExternalService implements 
             ResponseEntity<String> response = getDataFromWebClient(request);
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
-                String responseBody = response.getBody();
-                String result = null;
-                String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
+                String result = decodePlatonResult(response.getBody());
 
                 JAXBContext context = JAXBContext.newInstance(DocumentOrderResponse.class);
                 Unmarshaller unmarshaller = context.createUnmarshaller();
-
-                if (innerBase64 != null) {
-                    String secondLevelDecoded = decodeBase64(innerBase64);
-                    String hashresult = extractXMLByTag(secondLevelDecoded, RESULT);
-                    result = decodeBase64(hashresult);
-                    StringReader reader = new StringReader(result);
-                    return PlatonResponse.builder()
-                            .documentOrderResponse((DocumentOrderResponse) unmarshaller.unmarshal(reader))
-                            .build();
-                }
                 StringReader reader = new StringReader(result);
                 return PlatonResponse.builder()
                         .documentOrderResponse((DocumentOrderResponse) unmarshaller.unmarshal(reader))

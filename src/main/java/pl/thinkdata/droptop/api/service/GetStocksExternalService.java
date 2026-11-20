@@ -12,7 +12,6 @@ import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 
 import static java.util.Objects.isNull;
-import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
 import static pl.thinkdata.droptop.common.utils.PlatonXMLGenerator.*;
 
 @Service
@@ -38,22 +37,10 @@ public class GetStocksExternalService extends BaseExternalService implements Ext
             ResponseEntity<String> response = getDataFromWebClient(request);
 
             if (response != null && response.getStatusCode().is2xxSuccessful()) {
-                String responseBody = response.getBody();
-                String result = null;
-                String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
+                String result = decodePlatonResult(response.getBody());
 
                 JAXBContext context = JAXBContext.newInstance(Stock.class);
                 Unmarshaller unmarshaller = context.createUnmarshaller();
-
-                if (innerBase64 != null) {
-                    String secondLevelDecoded = decodeBase64(innerBase64);
-                    String hashresult = extractXMLByTag(secondLevelDecoded, RESULT);
-                    result = decodeBase64(hashresult);
-                    StringReader reader = new StringReader(result);
-                    return PlatonResponse.builder()
-                            .stock((Stock) unmarshaller.unmarshal(reader))
-                            .build();
-                }
                 StringReader reader = new StringReader(result);
                 return PlatonResponse.builder()
                         .stock((Stock) unmarshaller.unmarshal(reader))

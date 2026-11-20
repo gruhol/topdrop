@@ -15,6 +15,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 
+import static pl.thinkdata.droptop.common.utils.Base64Coder.decodeBase64;
+
 public class BaseExternalService {
     public static final String EXTERNAL_OPERATION_INVOKE_RESULT = "ExternalOperationInvokeResult";
     public static final String RESULT = "Result";
@@ -58,7 +60,40 @@ public class BaseExternalService {
                 .build();
     }
 
+    /**
+     * Rozpakowuje odpowiedź SOAP Platonu: ExternalOperationInvokeResult (base64) -> XML z tagiem Result (base64) -> wynik.
+     * Rzuca PlatonResultException z treścią odpowiedzi, gdy któregoś poziomu brakuje (np. Platon zwrócił błąd).
+     */
+    static String decodePlatonResult(String responseBody) {
+        String innerBase64 = extractXMLByTag(responseBody, EXTERNAL_OPERATION_INVOKE_RESULT);
+        if (innerBase64 == null) {
+            throw new PlatonResultException("Brak tagu " + EXTERNAL_OPERATION_INVOKE_RESULT + " w odpowiedzi:\n" + responseBody);
+        }
+        String secondLevelDecoded = decodeBase64(innerBase64);
+        if (secondLevelDecoded == null) {
+            throw new PlatonResultException("Niepoprawny base64 w " + EXTERNAL_OPERATION_INVOKE_RESULT + ":\n" + innerBase64);
+        }
+        String hashResult = extractXMLByTag(secondLevelDecoded, RESULT);
+        if (hashResult == null || hashResult.isEmpty()) {
+            throw new PlatonResultException("Brak tagu " + RESULT + " w odpowiedzi Platon:\n" + secondLevelDecoded);
+        }
+        String result = decodeBase64(hashResult);
+        if (result == null) {
+            throw new PlatonResultException("Niepoprawny base64 w tagu " + RESULT + ":\n" + secondLevelDecoded);
+        }
+        return result;
+    }
+
+    static class PlatonResultException extends RuntimeException {
+        PlatonResultException(String message) {
+            super(message);
+        }
+    }
+
     static PlatonResponse getPlatonExceptionResponse(Exception e) {
+        if (e instanceof PlatonResultException) {
+            return createPlatonResponse("Platon response error: " + e.getMessage());
+        }
         if (e instanceof WebClientResponseException webClientException) {
             String responseBody = webClientException.getResponseBodyAsString();
             String soapMessage = extractXMLByTag(responseBody, "Message");
